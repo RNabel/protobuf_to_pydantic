@@ -15,7 +15,7 @@ from protobuf_to_pydantic.customer_con_type.v2 import (
     contimedelta,
     contimestamp,
 )
-from protobuf_to_pydantic.customer_validator import validate_validator_dict
+from protobuf_to_pydantic.customer_validator.v2 import validate_validator_dict
 from protobuf_to_pydantic.field_info_rule.protobuf_option_to_field_info.types import (
     rule_name_pydantic_type_dict,
 )

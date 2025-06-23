@@ -14,7 +14,7 @@ from typing_extensions import Annotated, get_origin
 
 from protobuf_to_pydantic import _pydantic_adapter, constant
 from protobuf_to_pydantic.constant import protobuf_common_type_dict
-from protobuf_to_pydantic.customer_validator import check_one_of
+from protobuf_to_pydantic.customer_validator.v2 import check_one_of
 from protobuf_to_pydantic.exceptions import WaitingToCompleteException
 from protobuf_to_pydantic.field_info_rule.field_info_param import (
     FieldInfoParamModel,

@@ -3,9 +3,11 @@ from datetime import datetime, timedelta
 import pytest
 from pydantic import BaseModel, ValidationError
 
-from protobuf_to_pydantic import _pydantic_adapter
-from protobuf_to_pydantic.customer_con_type import contimedelta, contimestamp
-from protobuf_to_pydantic.customer_validator.rule import _now_default_factory, set_now_default_factory
+from protobuf_to_pydantic.customer_con_type.v2 import contimedelta, contimestamp
+from protobuf_to_pydantic.customer_validator.rule import (
+    _now_default_factory,
+    set_now_default_factory,
+)
 
 _diff_utc_second: float = datetime.now().astimezone().utcoffset().total_seconds()  # type: ignore
 
@@ -70,7 +72,9 @@ class TestCustomerConTimedelta:
 
     def test_contimedelta_not_in(self) -> None:
         class Demo(BaseModel):
-            demo: contimedelta(duration_not_in=[timedelta(days=2), timedelta(minutes=1)])  # type: ignore
+            demo: contimedelta(
+                duration_not_in=[timedelta(days=2), timedelta(minutes=1)]
+            )  # type: ignore
 
         Demo(demo=timedelta(days=1))
         with pytest.raises(ValidationError):
@@ -82,7 +86,6 @@ class TestCustomerConTimedelta:
 
 class TestCustomerConTimestamp:
     def test_contimestamp_const(self) -> None:
-
         class Demo(BaseModel):
             demo: contimestamp(timestamp_const=1600000000, ignore_tz=True)  # type: ignore
 
@@ -97,7 +100,6 @@ class TestCustomerConTimestamp:
             Demo(demo=datetime.fromtimestamp(1600000001).isoformat())
 
     def test_contimestamp_ge(self) -> None:
-
         class Demo(BaseModel):
             demo: contimestamp(timestamp_ge=1600000000, ignore_tz=True)  # type: ignore
 
@@ -114,7 +116,6 @@ class TestCustomerConTimestamp:
             Demo(demo=datetime.fromtimestamp(1500000000).isoformat())
 
     def test_contimestamp_gt(self) -> None:
-
         class Demo(BaseModel):
             demo: contimestamp(timestamp_gt=1600000000, ignore_tz=True)  # type: ignore
 
@@ -130,7 +131,6 @@ class TestCustomerConTimestamp:
             Demo(demo=datetime.fromtimestamp(1600000000).isoformat())
 
     def test_contimestamp_le(self) -> None:
-
         class Demo(BaseModel):
             demo: contimestamp(timestamp_le=1600000000, ignore_tz=True)  # type: ignore
 
@@ -147,7 +147,6 @@ class TestCustomerConTimestamp:
             Demo(demo=datetime.fromtimestamp(1600000001).isoformat())
 
     def test_contimestamp_lt(self) -> None:
-
         class Demo(BaseModel):
             demo: contimestamp(timestamp_lt=1600000000, ignore_tz=True)  # type: ignore
 
@@ -257,4 +256,6 @@ class TestCustomerConTimestamp:
         class Demo(BaseModel):
             demo: contimestamp(ignore_tz=True)  # type: ignore
 
-        assert Demo(demo=datetime.fromtimestamp(1600000000)) == Demo(demo=1600000000 + _diff_utc_second)
+        assert Demo(demo=datetime.fromtimestamp(1600000000)) == Demo(
+            demo=1600000000 + _diff_utc_second
+        )

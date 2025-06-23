@@ -906,7 +906,7 @@ class FileDescriptorProtoToCode(BaseP2C):
             )
 
             self._add_import_code(
-                "protobuf_to_pydantic.customer_validator", "check_one_of"
+                "protobuf_to_pydantic.customer_validator.v2", "check_one_of"
             )
             class_var_str_list.append(
                 f"{' ' * (indent + self.code_indent)}"
