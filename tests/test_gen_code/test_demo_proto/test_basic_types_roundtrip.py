@@ -28,11 +28,7 @@ else:
 
 
 class TestBasicTypesRoundTrip:
-    """Test round-trip conversion between Protobuf messages and Pydantic models for all basic types.
-
-    Note: Contains workarounds for fixed32/fixed64/sfixed32/sfixed64 fields being incorrectly
-    typed as float in generated Pydantic models. See task #14.6 for the proper fix.
-    """
+    """Test round-trip conversion between Protobuf messages and Pydantic models for all basic types."""
 
     @staticmethod
     def _create_pydantic_model(msg_class: Any) -> type[BaseModel]:
@@ -216,18 +212,12 @@ class TestBasicTypesRoundTrip:
             self._test_roundtrip(msg, test_data)
 
     def test_basic_fixed64(self):
-        """Test fixed64 field round-trip.
-
-        Note: fixed64 fields are converted to float in Pydantic models, which limits
-        the range of values that can be accurately round-tripped due to float precision.
-        """
+        """Test fixed64 field round-trip."""
         msg = basic_types_roundtrip_pb2.BasicTypesMessage()
         test_cases = [
             {"fixed64_field": 0},
             {"fixed64_field": 42},
-            {
-                "fixed64_field": 1000000000000000
-            },  # Large value that doesn't lose precision in float
+            {"fixed64_field": 18446744073709551615},  # max fixed64
         ]
 
         for test_data in test_cases:
@@ -248,22 +238,14 @@ class TestBasicTypesRoundTrip:
             self._test_roundtrip(msg, test_data)
 
     def test_basic_sfixed64(self):
-        """Test sfixed64 field round-trip.
-
-        Note: sfixed64 fields are converted to float in Pydantic models, which limits
-        the range of values that can be accurately round-tripped due to float precision.
-        """
+        """Test sfixed64 field round-trip."""
         msg = basic_types_roundtrip_pb2.BasicTypesMessage()
         test_cases = [
             {"sfixed64_field": 0},
             {"sfixed64_field": 42},
             {"sfixed64_field": -42},
-            {
-                "sfixed64_field": 1000000000000000
-            },  # Large value that doesn't lose precision in float
-            {
-                "sfixed64_field": -1000000000000000
-            },  # Large negative value that doesn't lose precision
+            {"sfixed64_field": 9223372036854775807},  # max sfixed64
+            {"sfixed64_field": -9223372036854775808},  # min sfixed64
         ]
 
         for test_data in test_cases:
