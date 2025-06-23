@@ -10,6 +10,7 @@ class MyBaseSchema(BaseModel):
             serialization_alias=to_camel,
         ),
         populate_by_name=True,
+        ser_json_inf_nan="strings",  # Serialize inf/-inf/nan as "Infinity"/"-Infinity"/"NaN"
     )
 
 
