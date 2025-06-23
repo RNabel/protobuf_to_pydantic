@@ -4,6 +4,7 @@ from expecttest import assert_expected_inline
 from google.protobuf import __version__
 
 from protobuf_to_pydantic._pydantic_adapter import is_v1
+from tests.test_gen_code.test_helper import P2CNoHeader
 
 if __version__ > "4.0.0":
     if is_v1:
@@ -38,7 +39,8 @@ class TestSimpleTest:
         # Make sure that the cache pool is clean before each build
         clear_create_model_cache()
         return pydantic_model_to_py_code(
-            msg_to_pydantic_model(msg, parse_msg_desc_method="ignore")
+            msg_to_pydantic_model(msg, parse_msg_desc_method="ignore"),
+            p2c_class=P2CNoHeader,
         )
 
     def test_empty_message(self) -> None:
@@ -62,13 +64,6 @@ class EmptyMessage(BaseModel):
             assert_expected_inline(
                 output,
                 """\
-# This is an automatically generated file, please do not change
-# gen by protobuf_to_pydantic[v0.3.3](https://github.com/so1n/protobuf_to_pydantic)
-# Protobuf Version: 6.31.1
-# Pydantic Version: 2.11.7
-from pydantic import BaseModel
-
-
 class EmptyMessage(BaseModel):
     pass
 """,
@@ -133,15 +128,6 @@ class UserMessage(BaseModel):
             assert_expected_inline(
                 output,
                 """\
-# This is an automatically generated file, please do not change
-# gen by protobuf_to_pydantic[v0.3.3](https://github.com/so1n/protobuf_to_pydantic)
-# Protobuf Version: 6.31.1
-# Pydantic Version: 2.11.7
-from enum import IntEnum
-
-from pydantic import BaseModel, ConfigDict, Field
-
-
 class SexType(IntEnum):
     man = 0
     women = 1
@@ -211,17 +197,6 @@ class OtherMessage(BaseModel):
             assert_expected_inline(
                 output,
                 """\
-# This is an automatically generated file, please do not change
-# gen by protobuf_to_pydantic[v0.3.3](https://github.com/so1n/protobuf_to_pydantic)
-# Protobuf Version: 6.31.1
-# Pydantic Version: 2.11.7
-import typing
-
-from google.protobuf.field_mask_pb2 import FieldMask  # type: ignore
-from google.protobuf.wrappers_pb2 import DoubleValue  # type: ignore
-from pydantic import BaseModel, ConfigDict, Field
-
-
 class OtherMessage(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
@@ -295,16 +270,6 @@ class MapMessage(BaseModel):
             assert_expected_inline(
                 output,
                 """\
-# This is an automatically generated file, please do not change
-# gen by protobuf_to_pydantic[v0.3.3](https://github.com/so1n/protobuf_to_pydantic)
-# Protobuf Version: 6.31.1
-# Pydantic Version: 2.11.7
-import typing
-from enum import IntEnum
-
-from pydantic import BaseModel, ConfigDict, Field
-
-
 class SexType(IntEnum):
     man = 0
     women = 1
@@ -414,16 +379,6 @@ class RepeatedMessage(BaseModel):
             assert_expected_inline(
                 output,
                 """\
-# This is an automatically generated file, please do not change
-# gen by protobuf_to_pydantic[v0.3.3](https://github.com/so1n/protobuf_to_pydantic)
-# Protobuf Version: 6.31.1
-# Pydantic Version: 2.11.7
-import typing
-from enum import IntEnum
-
-from pydantic import BaseModel, ConfigDict, Field
-
-
 class SexType(IntEnum):
     man = 0
     women = 1
@@ -477,17 +432,6 @@ class RepeatedMessage(BaseModel):
             assert_expected_inline(
                 output,
                 """\
-# This is an automatically generated file, please do not change
-# gen by protobuf_to_pydantic[v0.3.3](https://github.com/so1n/protobuf_to_pydantic)
-# Protobuf Version: 6.31.1
-# Pydantic Version: 2.11.7
-import typing
-from datetime import datetime
-from enum import IntEnum
-
-from pydantic import BaseModel, ConfigDict, Field
-
-
 class SexType(IntEnum):
     man = 0
     women = 1
@@ -573,15 +517,6 @@ class NestedMessage(BaseModel):
             assert_expected_inline(
                 output,
                 """\
-# This is an automatically generated file, please do not change
-# gen by protobuf_to_pydantic[v0.3.3](https://github.com/so1n/protobuf_to_pydantic)
-# Protobuf Version: 6.31.1
-# Pydantic Version: 2.11.7
-import typing
-
-from pydantic import BaseModel, Field
-
-
 class InvoiceItem(BaseModel):
     name: str = Field(default="")
     amount: int = Field(default=0)
@@ -598,17 +533,6 @@ class InvoiceItem(BaseModel):
             assert_expected_inline(
                 output,
                 """\
-# This is an automatically generated file, please do not change
-# gen by protobuf_to_pydantic[v0.3.3](https://github.com/so1n/protobuf_to_pydantic)
-# Protobuf Version: 6.31.1
-# Pydantic Version: 2.11.7
-import typing
-
-from pydantic import BaseModel, Field, model_validator
-
-from protobuf_to_pydantic.customer_validator.v2 import check_one_of
-
-
 class InvoiceItem(BaseModel):
     name: str = Field(default="")
     amount: int = Field(default=0)
@@ -640,15 +564,6 @@ class OptionalMessage(BaseModel):
             assert_expected_inline(
                 output,
                 """\
-# This is an automatically generated file, please do not change
-# gen by protobuf_to_pydantic[v0.3.3](https://github.com/so1n/protobuf_to_pydantic)
-# Protobuf Version: 6.31.1
-# Pydantic Version: 2.11.7
-import typing
-
-from pydantic import BaseModel, Field
-
-
 class Invoice3(BaseModel):
     name: str = Field(default="")
     amount: int = Field(default=0)
@@ -673,13 +588,6 @@ class InvoiceItem2(BaseModel):
             assert_expected_inline(
                 output,
                 """\
-# This is an automatically generated file, please do not change
-# gen by protobuf_to_pydantic[v0.3.3](https://github.com/so1n/protobuf_to_pydantic)
-# Protobuf Version: 6.31.1
-# Pydantic Version: 2.11.7
-from pydantic import BaseModel, Field
-
-
 class AnOtherMessage(BaseModel):
     class SubMessage(BaseModel):
         text: str = Field(default="")
@@ -702,15 +610,6 @@ class RootMessage(BaseModel):
             assert_expected_inline(
                 output,
                 """\
-# This is an automatically generated file, please do not change
-# gen by protobuf_to_pydantic[v0.3.3](https://github.com/so1n/protobuf_to_pydantic)
-# Protobuf Version: 6.31.1
-# Pydantic Version: 2.11.7
-import typing
-
-from pydantic import BaseModel, Field
-
-
 class TestSameName0(BaseModel):
     class Body(BaseModel):
         input_model: str = Field(default="")
@@ -727,15 +626,6 @@ class TestSameName0(BaseModel):
             assert_expected_inline(
                 output,
                 """\
-# This is an automatically generated file, please do not change
-# gen by protobuf_to_pydantic[v0.3.3](https://github.com/so1n/protobuf_to_pydantic)
-# Protobuf Version: 6.31.1
-# Pydantic Version: 2.11.7
-import typing
-
-from pydantic import BaseModel, Field
-
-
 class TestSameName1(BaseModel):
     class Body(BaseModel):
         output_model: str = Field(default="")
@@ -753,15 +643,6 @@ class TestSameName1(BaseModel):
             assert_expected_inline(
                 output,
                 """\
-# This is an automatically generated file, please do not change
-# gen by protobuf_to_pydantic[v0.3.3](https://github.com/so1n/protobuf_to_pydantic)
-# Protobuf Version: 6.31.1
-# Pydantic Version: 2.11.7
-import typing
-
-from pydantic import BaseModel, Field
-
-
 class ExampleExampleProtoDemoDiffPkgRefer1Demo1(BaseModel):
     \"\"\"Note: The current class does not belong to the package
     ExampleExampleProtoDemoDiffPkgRefer1Demo1 protobuf path:example/example_proto/demo/diff_pkg_refer_1.proto\"\"\"
@@ -780,16 +661,6 @@ class Demo2(BaseModel):
             assert_expected_inline(
                 output,
                 """\
-# This is an automatically generated file, please do not change
-# gen by protobuf_to_pydantic[v0.3.3](https://github.com/so1n/protobuf_to_pydantic)
-# Protobuf Version: 6.31.1
-# Pydantic Version: 2.11.7
-import typing
-from enum import IntEnum
-
-from pydantic import BaseModel, ConfigDict, Field
-
-
 class OptionalEnum(IntEnum):
     FOO = 0
     BAR = 1

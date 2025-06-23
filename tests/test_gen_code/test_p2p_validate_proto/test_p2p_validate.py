@@ -6,6 +6,7 @@ from expecttest import assert_expected_inline
 from google.protobuf import __version__
 
 from protobuf_to_pydantic._pydantic_adapter import is_v1
+from tests.test_gen_code.test_helper import P2CNoHeader
 
 if __version__ > "4.0.0":
     if is_v1:
@@ -14,11 +15,21 @@ if __version__ > "4.0.0":
         from example.proto_pydanticv2.example.example_proto.p2p_validate import demo_pb2
 else:
     if is_v1:
-        from example.proto_3_20_pydanticv1.example.example_proto.p2p_validate import demo_pb2  # type: ignore[no-redef]
+        from example.proto_3_20_pydanticv1.example.example_proto.p2p_validate import (
+            demo_pb2,
+        )  # type: ignore[no-redef]
     else:
-        from example.proto_3_20_pydanticv2.example.example_proto.p2p_validate import demo_pb2  # type: ignore[no-redef]
+        from example.proto_3_20_pydanticv2.example.example_proto.p2p_validate import (
+            demo_pb2,
+        )  # type: ignore[no-redef]
 
-from example.gen_p2p_code import CustomCommentTemplate, CustomerField, confloat, conint, customer_any
+from example.gen_p2p_code import (
+    CustomCommentTemplate,
+    CustomerField,
+    confloat,
+    conint,
+    customer_any,
+)
 from protobuf_to_pydantic import msg_to_pydantic_model, pydantic_model_to_py_code
 
 
@@ -35,8 +46,12 @@ class TestP2pValidate:
             "conint": conint,
             "customer_any": customer_any,
         }
-        return pydantic_model_to_py_code(msg_to_pydantic_model(msg, local_dict=local_dict, template=CustomCommentTemplate))
-
+        return pydantic_model_to_py_code(
+            msg_to_pydantic_model(
+                msg, local_dict=local_dict, template=CustomCommentTemplate
+            ),
+            p2c_class=P2CNoHeader,
+        )
 
     def test_any(self) -> None:
         output = self._model_output(demo_pb2.AnyTest)
@@ -44,17 +59,6 @@ class TestP2pValidate:
             assert_expected_inline(
                 output,
                 """\
-# This is an automatically generated file, please do not change
-# gen by protobuf_to_pydantic[v0.3.3](https://github.com/so1n/protobuf_to_pydantic)
-# Protobuf Version: 6.31.1
-# Pydantic Version: 2.11.7
-from google.protobuf.any_pb2 import Any  # type: ignore
-from pydantic import BaseModel, ConfigDict, Field, field_validator
-
-from example.gen_p2p_code import CustomerField, customer_any
-from protobuf_to_pydantic.customer_validator.v2 import any_in_validator, any_not_in_validator
-
-
 class AnyTest(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
@@ -136,17 +140,6 @@ class AnyTest(BaseModel):
             assert_expected_inline(
                 output,
                 """\
-# This is an automatically generated file, please do not change
-# gen by protobuf_to_pydantic[v0.3.3](https://github.com/so1n/protobuf_to_pydantic)
-# Protobuf Version: 6.31.1
-# Pydantic Version: 2.11.7
-import typing
-
-from pydantic import BaseModel, Field
-
-from example.gen_p2p_code import CustomerField
-
-
 class BoolTest(BaseModel):
     bool_1_test: typing.Literal[True] = Field(default=False)
     bool_2_test: typing.Literal[False] = Field(default=False)
@@ -191,24 +184,6 @@ class BoolTest(BaseModel):
             assert_expected_inline(
                 output,
                 """\
-# This is an automatically generated file, please do not change
-# gen by protobuf_to_pydantic[v0.3.3](https://github.com/so1n/protobuf_to_pydantic)
-# Protobuf Version: 6.31.1
-# Pydantic Version: 2.11.7
-import typing
-
-from pydantic import BaseModel, Field, field_validator
-
-from example.gen_p2p_code import CustomerField
-from protobuf_to_pydantic.customer_validator.v2 import (
-    contains_validator,
-    in_validator,
-    not_in_validator,
-    prefix_validator,
-    suffix_validator,
-)
-
-
 class BytesTest(BaseModel):
     const_test: typing.Literal[b"demo"] = Field(default=b"")
     range_len_test: bytes = Field(default=b"", min_length=1, max_length=4)
@@ -251,18 +226,6 @@ class BytesTest(BaseModel):
             assert_expected_inline(
                 output,
                 """\
-# This is an automatically generated file, please do not change
-# gen by protobuf_to_pydantic[v0.3.3](https://github.com/so1n/protobuf_to_pydantic)
-# Protobuf Version: 6.31.1
-# Pydantic Version: 2.11.7
-import typing
-
-from pydantic import BaseModel, Field, field_validator
-
-from example.gen_p2p_code import CustomerField
-from protobuf_to_pydantic.customer_validator.v2 import in_validator, not_in_validator
-
-
 class DoubleTest(BaseModel):
     const_test: typing.Literal[1.0] = Field(default=0.0)
     range_e_test: float = Field(default=0.0, ge=1.0, le=10.0)
@@ -300,30 +263,6 @@ class DoubleTest(BaseModel):
             assert_expected_inline(
                 output,
                 """\
-# This is an automatically generated file, please do not change
-# gen by protobuf_to_pydantic[v0.3.3](https://github.com/so1n/protobuf_to_pydantic)
-# Protobuf Version: 6.31.1
-# Pydantic Version: 2.11.7
-from datetime import timedelta
-
-import typing_extensions
-from google.protobuf.duration_pb2 import Duration  # type: ignore
-from pydantic import BaseModel, Field, field_validator
-from pydantic.functional_validators import BeforeValidator
-
-from example.gen_p2p_code import CustomerField
-from protobuf_to_pydantic.customer_validator.v2 import (
-    duration_const_validator,
-    duration_ge_validator,
-    duration_gt_validator,
-    duration_in_validator,
-    duration_le_validator,
-    duration_lt_validator,
-    duration_not_in_validator,
-)
-from protobuf_to_pydantic.util import Timedelta
-
-
 class DurationTest(BaseModel):
     const_test: typing_extensions.Annotated[timedelta, BeforeValidator(func=Timedelta.validate)] = Field(
         default_factory=Timedelta, duration_const=timedelta(seconds=1, microseconds=500000)
@@ -411,19 +350,6 @@ class DurationTest(BaseModel):
             assert_expected_inline(
                 output,
                 """\
-# This is an automatically generated file, please do not change
-# gen by protobuf_to_pydantic[v0.3.3](https://github.com/so1n/protobuf_to_pydantic)
-# Protobuf Version: 6.31.1
-# Pydantic Version: 2.11.7
-import typing
-from enum import IntEnum
-
-from pydantic import BaseModel, ConfigDict, Field, field_validator
-
-from example.gen_p2p_code import CustomerField
-from protobuf_to_pydantic.customer_validator.v2 import in_validator, not_in_validator
-
-
 class State(IntEnum):
     INACTIVE = 0
     PENDING = 1
@@ -463,18 +389,6 @@ class EnumTest(BaseModel):
             assert_expected_inline(
                 output,
                 """\
-# This is an automatically generated file, please do not change
-# gen by protobuf_to_pydantic[v0.3.3](https://github.com/so1n/protobuf_to_pydantic)
-# Protobuf Version: 6.31.1
-# Pydantic Version: 2.11.7
-import typing
-
-from pydantic import BaseModel, Field, field_validator
-
-from example.gen_p2p_code import CustomerField
-from protobuf_to_pydantic.customer_validator.v2 import in_validator, not_in_validator
-
-
 class Fixed32Test(BaseModel):
     const_test: typing.Literal[1] = Field(default=0)
     range_e_test: float = Field(default=0, ge=1, le=10)
@@ -513,18 +427,6 @@ class Fixed32Test(BaseModel):
             assert_expected_inline(
                 output,
                 """\
-# This is an automatically generated file, please do not change
-# gen by protobuf_to_pydantic[v0.3.3](https://github.com/so1n/protobuf_to_pydantic)
-# Protobuf Version: 6.31.1
-# Pydantic Version: 2.11.7
-import typing
-
-from pydantic import BaseModel, Field, field_validator
-
-from example.gen_p2p_code import CustomerField
-from protobuf_to_pydantic.customer_validator.v2 import in_validator, not_in_validator
-
-
 class Fixed64Test(BaseModel):
     const_test: typing.Literal[1] = Field(default=0)
     range_e_test: float = Field(default=0, ge=1, le=10)
@@ -563,18 +465,6 @@ class Fixed64Test(BaseModel):
             assert_expected_inline(
                 output,
                 """\
-# This is an automatically generated file, please do not change
-# gen by protobuf_to_pydantic[v0.3.3](https://github.com/so1n/protobuf_to_pydantic)
-# Protobuf Version: 6.31.1
-# Pydantic Version: 2.11.7
-import typing
-
-from pydantic import BaseModel, Field, field_validator
-
-from example.gen_p2p_code import CustomerField
-from protobuf_to_pydantic.customer_validator.v2 import in_validator, not_in_validator
-
-
 class FloatTest(BaseModel):
     const_test: typing.Literal[1.0] = Field(default=0.0)
     range_e_test: float = Field(default=0.0, ge=1.0, le=10.0)
@@ -613,18 +503,6 @@ class FloatTest(BaseModel):
             assert_expected_inline(
                 output,
                 """\
-# This is an automatically generated file, please do not change
-# gen by protobuf_to_pydantic[v0.3.3](https://github.com/so1n/protobuf_to_pydantic)
-# Protobuf Version: 6.31.1
-# Pydantic Version: 2.11.7
-import typing
-
-from pydantic import BaseModel, Field, field_validator
-
-from example.gen_p2p_code import CustomerField
-from protobuf_to_pydantic.customer_validator.v2 import in_validator, not_in_validator
-
-
 class Int32Test(BaseModel):
     const_test: typing.Literal[1] = Field(default=0)
     range_e_test: int = Field(default=0, ge=1, le=10)
@@ -663,18 +541,6 @@ class Int32Test(BaseModel):
             assert_expected_inline(
                 output,
                 """\
-# This is an automatically generated file, please do not change
-# gen by protobuf_to_pydantic[v0.3.3](https://github.com/so1n/protobuf_to_pydantic)
-# Protobuf Version: 6.31.1
-# Pydantic Version: 2.11.7
-import typing
-
-from pydantic import BaseModel, Field, field_validator
-
-from example.gen_p2p_code import CustomerField
-from protobuf_to_pydantic.customer_validator.v2 import in_validator, not_in_validator
-
-
 class Int64Test(BaseModel):
     const_test: typing.Literal[1] = Field(default=0)
     range_e_test: int = Field(default=0, ge=1, le=10)
@@ -713,21 +579,6 @@ class Int64Test(BaseModel):
             assert_expected_inline(
                 output,
                 """\
-# This is an automatically generated file, please do not change
-# gen by protobuf_to_pydantic[v0.3.3](https://github.com/so1n/protobuf_to_pydantic)
-# Protobuf Version: 6.31.1
-# Pydantic Version: 2.11.7
-import typing
-
-import typing_extensions
-from annotated_types import Ge, Le, MaxLen, MinLen
-from pydantic import BaseModel, Field, field_validator
-
-from example.gen_p2p_code import CustomerField
-from protobuf_to_pydantic.customer_con_type.v2 import DatetimeType, gt_now
-from protobuf_to_pydantic.customer_validator.v2 import map_max_pairs_validator, map_min_pairs_validator
-
-
 class MapTest(BaseModel):
     pair_test: typing.Dict[str, int] = Field(default_factory=dict, map_min_pairs=1, map_max_pairs=5)
     keys_test: typing.Dict[typing_extensions.Annotated[str, MinLen(min_length=1), MaxLen(max_length=5)], int] = Field(
@@ -790,37 +641,6 @@ class MessageTest(BaseModel):
             assert_expected_inline(
                 output,
                 """\
-# This is an automatically generated file, please do not change
-# gen by protobuf_to_pydantic[v0.3.3](https://github.com/so1n/protobuf_to_pydantic)
-# Protobuf Version: 6.31.1
-# Pydantic Version: 2.11.7
-import typing
-from datetime import datetime
-from ipaddress import IPv4Address, IPv6Address
-from uuid import UUID, uuid4
-
-import typing_extensions
-from annotated_types import Ge, Le, MaxLen, MinLen
-from pydantic import BaseModel, Field, field_validator
-from pydantic.networks import AnyUrl, EmailStr, IPvAnyAddress
-
-from example.gen_p2p_code import CustomerField
-from protobuf_to_pydantic.customer_con_type.v2 import DatetimeType, gt_now
-from protobuf_to_pydantic.customer_validator.v2 import (
-    contains_validator,
-    in_validator,
-    len_validator,
-    map_max_pairs_validator,
-    map_min_pairs_validator,
-    not_contains_validator,
-    not_in_validator,
-    prefix_validator,
-    suffix_validator,
-    timestamp_gt_now_validator,
-)
-from protobuf_to_pydantic.field_info_rule.protobuf_option_to_field_info.types import HostNameStr, UriRefStr
-
-
 class StringTest(BaseModel):
     const_test: typing.Literal["aaa"] = Field(default="")
     len_test: str = Field(default="", len=3)
@@ -938,15 +758,6 @@ class NestedMessage(BaseModel):
             assert_expected_inline(
                 output,
                 """\
-# This is an automatically generated file, please do not change
-# gen by protobuf_to_pydantic[v0.3.3](https://github.com/so1n/protobuf_to_pydantic)
-# Protobuf Version: 6.31.1
-# Pydantic Version: 2.11.7
-from pydantic import BaseModel, Field, model_validator
-
-from protobuf_to_pydantic.customer_validator.v2 import check_one_of
-
-
 class OneOfNotTest(BaseModel):
     _one_of_dict = {"p2p_validate_test.OneOfNotTest.id": {"fields": {"x", "y"}, "required": False}}
 
@@ -970,15 +781,6 @@ class OneOfNotTest(BaseModel):
             assert_expected_inline(
                 output,
                 """\
-# This is an automatically generated file, please do not change
-# gen by protobuf_to_pydantic[v0.3.3](https://github.com/so1n/protobuf_to_pydantic)
-# Protobuf Version: 6.31.1
-# Pydantic Version: 2.11.7
-from pydantic import BaseModel, Field, model_validator
-
-from protobuf_to_pydantic.customer_validator.v2 import check_one_of
-
-
 class OneOfTest(BaseModel):
     _one_of_dict = {"p2p_validate_test.OneOfTest.id": {"fields": {"x", "y"}, "required": True}}
 
@@ -1002,17 +804,6 @@ class OneOfTest(BaseModel):
             assert_expected_inline(
                 output,
                 """\
-# This is an automatically generated file, please do not change
-# gen by protobuf_to_pydantic[v0.3.3](https://github.com/so1n/protobuf_to_pydantic)
-# Protobuf Version: 6.31.1
-# Pydantic Version: 2.11.7
-import typing
-
-from pydantic import BaseModel, Field, model_validator
-
-from protobuf_to_pydantic.customer_validator.v2 import check_one_of
-
-
 class OneOfOptionalTest(BaseModel):
     _one_of_dict = {"p2p_validate_test.OneOfOptionalTest.id": {"fields": {"x", "y", "z"}, "required": True}}
 
@@ -1041,21 +832,6 @@ class OneOfOptionalTest(BaseModel):
             assert_expected_inline(
                 output,
                 """\
-# This is an automatically generated file, please do not change
-# gen by protobuf_to_pydantic[v0.3.3](https://github.com/so1n/protobuf_to_pydantic)
-# Protobuf Version: 6.31.1
-# Pydantic Version: 2.11.7
-import typing
-from datetime import timedelta
-
-import typing_extensions
-from annotated_types import Ge, Gt, Le, Lt, MaxLen, MinLen
-from pydantic import BaseModel, Field
-
-from example.gen_p2p_code import CustomerField
-from protobuf_to_pydantic.customer_con_type.v2 import DatetimeType, TimedeltaType, t_gt, t_lt
-
-
 class RepeatedTest(BaseModel):
     range_test: typing.List[str] = Field(default_factory=list, min_length=1, max_length=5)
     unique_test: typing.Set[str] = Field(default_factory=set)
@@ -1102,18 +878,6 @@ class RepeatedTest(BaseModel):
             assert_expected_inline(
                 output,
                 """\
-# This is an automatically generated file, please do not change
-# gen by protobuf_to_pydantic[v0.3.3](https://github.com/so1n/protobuf_to_pydantic)
-# Protobuf Version: 6.31.1
-# Pydantic Version: 2.11.7
-import typing
-
-from pydantic import BaseModel, Field, field_validator
-
-from example.gen_p2p_code import CustomerField
-from protobuf_to_pydantic.customer_validator.v2 import in_validator, not_in_validator
-
-
 class Sfixed32Test(BaseModel):
     const_test: typing.Literal[1] = Field(default=0)
     range_e_test: float = Field(default=0, ge=1, le=10)
@@ -1152,18 +916,6 @@ class Sfixed32Test(BaseModel):
             assert_expected_inline(
                 output,
                 """\
-# This is an automatically generated file, please do not change
-# gen by protobuf_to_pydantic[v0.3.3](https://github.com/so1n/protobuf_to_pydantic)
-# Protobuf Version: 6.31.1
-# Pydantic Version: 2.11.7
-import typing
-
-from pydantic import BaseModel, Field, field_validator
-
-from example.gen_p2p_code import CustomerField
-from protobuf_to_pydantic.customer_validator.v2 import in_validator, not_in_validator
-
-
 class Sfixed64Test(BaseModel):
     const_test: typing.Literal[1] = Field(default=0)
     range_e_test: float = Field(default=0, ge=1, le=10)
@@ -1202,18 +954,6 @@ class Sfixed64Test(BaseModel):
             assert_expected_inline(
                 output,
                 """\
-# This is an automatically generated file, please do not change
-# gen by protobuf_to_pydantic[v0.3.3](https://github.com/so1n/protobuf_to_pydantic)
-# Protobuf Version: 6.31.1
-# Pydantic Version: 2.11.7
-import typing
-
-from pydantic import BaseModel, Field, field_validator
-
-from example.gen_p2p_code import CustomerField
-from protobuf_to_pydantic.customer_validator.v2 import in_validator, not_in_validator
-
-
 class Sint64Test(BaseModel):
     const_test: typing.Literal[1] = Field(default=0)
     range_e_test: int = Field(default=0, ge=1, le=10)
@@ -1252,30 +992,6 @@ class Sint64Test(BaseModel):
             assert_expected_inline(
                 output,
                 """\
-# This is an automatically generated file, please do not change
-# gen by protobuf_to_pydantic[v0.3.3](https://github.com/so1n/protobuf_to_pydantic)
-# Protobuf Version: 6.31.1
-# Pydantic Version: 2.11.7
-import typing
-from ipaddress import IPv4Address, IPv6Address
-from uuid import UUID, uuid4
-
-from pydantic import BaseModel, Field, field_validator
-from pydantic.networks import AnyUrl, EmailStr, IPvAnyAddress
-
-from example.gen_p2p_code import CustomerField
-from protobuf_to_pydantic.customer_validator.v2 import (
-    contains_validator,
-    in_validator,
-    len_validator,
-    not_contains_validator,
-    not_in_validator,
-    prefix_validator,
-    suffix_validator,
-)
-from protobuf_to_pydantic.field_info_rule.protobuf_option_to_field_info.types import HostNameStr, UriRefStr
-
-
 class StringTest(BaseModel):
     const_test: typing.Literal["aaa"] = Field(default="")
     len_test: str = Field(default="", len=3)
@@ -1336,28 +1052,6 @@ class StringTest(BaseModel):
             assert_expected_inline(
                 output,
                 """\
-# This is an automatically generated file, please do not change
-# gen by protobuf_to_pydantic[v0.3.3](https://github.com/so1n/protobuf_to_pydantic)
-# Protobuf Version: 6.31.1
-# Pydantic Version: 2.11.7
-from datetime import datetime, timedelta
-
-from google.protobuf.timestamp_pb2 import Timestamp  # type: ignore
-from pydantic import BaseModel, Field, field_validator
-
-from example.gen_p2p_code import CustomerField
-from protobuf_to_pydantic.customer_validator.v2 import (
-    timestamp_const_validator,
-    timestamp_ge_validator,
-    timestamp_gt_now_validator,
-    timestamp_gt_validator,
-    timestamp_le_validator,
-    timestamp_lt_now_validator,
-    timestamp_lt_validator,
-    timestamp_within_validator,
-)
-
-
 class TimestampTest(BaseModel):
     const_test: datetime = Field(default_factory=datetime.now, timestamp_const=1600000000.0)
     range_test: datetime = Field(default_factory=datetime.now, timestamp_lt=1600000010.0, timestamp_gt=1600000000.0)
@@ -1426,18 +1120,6 @@ class TimestampTest(BaseModel):
             assert_expected_inline(
                 output,
                 """\
-# This is an automatically generated file, please do not change
-# gen by protobuf_to_pydantic[v0.3.3](https://github.com/so1n/protobuf_to_pydantic)
-# Protobuf Version: 6.31.1
-# Pydantic Version: 2.11.7
-import typing
-
-from pydantic import BaseModel, Field, field_validator
-
-from example.gen_p2p_code import CustomerField
-from protobuf_to_pydantic.customer_validator.v2 import in_validator, not_in_validator
-
-
 class Uint32Test(BaseModel):
     const_test: typing.Literal[1] = Field(default=0)
     range_e_test: int = Field(default=0, ge=1, le=10)
@@ -1476,18 +1158,6 @@ class Uint32Test(BaseModel):
             assert_expected_inline(
                 output,
                 """\
-# This is an automatically generated file, please do not change
-# gen by protobuf_to_pydantic[v0.3.3](https://github.com/so1n/protobuf_to_pydantic)
-# Protobuf Version: 6.31.1
-# Pydantic Version: 2.11.7
-import typing
-
-from pydantic import BaseModel, Field, field_validator
-
-from example.gen_p2p_code import CustomerField
-from protobuf_to_pydantic.customer_validator.v2 import in_validator, not_in_validator
-
-
 class Uint64Test(BaseModel):
     const_test: typing.Literal[1] = Field(default=0)
     range_e_test: int = Field(default=0, ge=1, le=10)
@@ -1525,15 +1195,6 @@ class Uint64Test(BaseModel):
         assert_expected_inline(
             output,
             """\
-# This is an automatically generated file, please do not change
-# gen by protobuf_to_pydantic[v0.3.3](https://github.com/so1n/protobuf_to_pydantic)
-# Protobuf Version: 6.31.1
-# Pydantic Version: 2.11.7
-import typing
-
-from pydantic import BaseModel, Field
-
-
 class MessageIgnoredTest(BaseModel):
     const_test: int = Field(default=0)
     range_e_test: int = Field(default=0)

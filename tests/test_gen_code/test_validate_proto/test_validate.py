@@ -6,6 +6,7 @@ from expecttest import assert_expected_inline
 from google.protobuf import __version__
 
 from protobuf_to_pydantic._pydantic_adapter import is_v1
+from tests.test_gen_code.test_helper import P2CNoHeader
 
 if __version__ > "4.0.0":
     if is_v1:
@@ -14,9 +15,13 @@ if __version__ > "4.0.0":
         from example.proto_pydanticv2.example.example_proto.validate import demo_pb2  # type: ignore[no-redef]
 else:
     if is_v1:
-        from example.proto_3_20_pydanticv1.example.example_proto.validate import demo_pb2  # type: ignore[no-redef]
+        from example.proto_3_20_pydanticv1.example.example_proto.validate import (
+            demo_pb2,
+        )  # type: ignore[no-redef]
     else:
-        from example.proto_3_20_pydanticv2.example.example_proto.validate import demo_pb2  # type: ignore[no-redef]
+        from example.proto_3_20_pydanticv2.example.example_proto.validate import (
+            demo_pb2,
+        )  # type: ignore[no-redef]
 
 from protobuf_to_pydantic import msg_to_pydantic_model, pydantic_model_to_py_code
 
@@ -28,36 +33,17 @@ def exp_time() -> float:
 class TestValidate:
     @staticmethod
     def _model_output(msg: Any) -> str:
-        return pydantic_model_to_py_code(msg_to_pydantic_model(msg, parse_msg_desc_method="PGV"))
-
+        return pydantic_model_to_py_code(
+            msg_to_pydantic_model(msg, parse_msg_desc_method="PGV"),
+            p2c_class=P2CNoHeader,
+        )
 
     def test_string(self) -> None:
         output = self._model_output(demo_pb2.StringTest)
         if not is_v1:
-            assert_expected_inline(output, """\
-# This is an automatically generated file, please do not change
-# gen by protobuf_to_pydantic[v0.3.3](https://github.com/so1n/protobuf_to_pydantic)
-# Protobuf Version: 6.31.1
-# Pydantic Version: 2.11.7
-import typing
-from ipaddress import IPv4Address, IPv6Address
-from uuid import UUID
-
-from pydantic import BaseModel, Field, field_validator
-from pydantic.networks import AnyUrl, EmailStr, IPvAnyAddress
-
-from protobuf_to_pydantic.customer_validator.v2 import (
-    contains_validator,
-    in_validator,
-    len_validator,
-    not_contains_validator,
-    not_in_validator,
-    prefix_validator,
-    suffix_validator,
-)
-from protobuf_to_pydantic.field_info_rule.protobuf_option_to_field_info.types import HostNameStr, UriRefStr
-
-
+            assert_expected_inline(
+                output,
+                """\
 class StringTest(BaseModel):
     const_test: typing.Literal["aaa"] = Field(default="")
     len_test: str = Field(default="", len=3)
@@ -92,9 +78,12 @@ class StringTest(BaseModel):
     )
     in_test_in_validator = field_validator("in_test", mode="after", check_fields=None)(in_validator)
     not_in_test_not_in_validator = field_validator("not_in_test", mode="after", check_fields=None)(not_in_validator)
-""")
+""",
+            )
         else:
-            assert_expected_inline(output, """
+            assert_expected_inline(
+                output,
+                """
 class StringTest(BaseModel):
     const_test: str = Field(default="aaa", const=True)
     len_test: str = Field(default="", len=3)
@@ -125,22 +114,15 @@ class StringTest(BaseModel):
     not_contains_test_not_contains_validator = validator("not_contains_test", allow_reuse=True)(not_contains_validator)
     in_test_in_validator = validator("in_test", allow_reuse=True)(in_validator)
     not_in_test_not_in_validator = validator("not_in_test", allow_reuse=True)(not_in_validator)
-""")
+""",
+            )
 
     def test_any(self) -> None:
         output = self._model_output(demo_pb2.AnyTest)
         if not is_v1:
-            assert_expected_inline(output, """\
-# This is an automatically generated file, please do not change
-# gen by protobuf_to_pydantic[v0.3.3](https://github.com/so1n/protobuf_to_pydantic)
-# Protobuf Version: 6.31.1
-# Pydantic Version: 2.11.7
-from google.protobuf.any_pb2 import Any  # type: ignore
-from pydantic import BaseModel, ConfigDict, Field, field_validator
-
-from protobuf_to_pydantic.customer_validator.v2 import any_in_validator, any_not_in_validator
-
-
+            assert_expected_inline(
+                output,
+                """\
 class AnyTest(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
@@ -158,9 +140,12 @@ class AnyTest(BaseModel):
         any_not_in_validator
     )
     in_test_any_in_validator = field_validator("in_test", mode="after", check_fields=None)(any_in_validator)
-""")
+""",
+            )
         else:
-            assert_expected_inline(output, """
+            assert_expected_inline(
+                output,
+                """
 class AnyTest(BaseModel):
     class Config:
         arbitrary_types_allowed = True
@@ -177,54 +162,36 @@ class AnyTest(BaseModel):
 
     not_in_test_any_not_in_validator = validator("not_in_test", allow_reuse=True)(any_not_in_validator)
     in_test_any_in_validator = validator("in_test", allow_reuse=True)(any_in_validator)
-""")
+""",
+            )
 
     def test_bool(self) -> None:
         output = self._model_output(demo_pb2.BoolTest)
         if not is_v1:
-            assert_expected_inline(output, """\
-# This is an automatically generated file, please do not change
-# gen by protobuf_to_pydantic[v0.3.3](https://github.com/so1n/protobuf_to_pydantic)
-# Protobuf Version: 6.31.1
-# Pydantic Version: 2.11.7
-import typing
-
-from pydantic import BaseModel, Field
-
-
+            assert_expected_inline(
+                output,
+                """\
 class BoolTest(BaseModel):
     bool_1_test: typing.Literal[True] = Field(default=False)
     bool_2_test: typing.Literal[False] = Field(default=False)
-""")
+""",
+            )
         else:
-            assert_expected_inline(output, """
+            assert_expected_inline(
+                output,
+                """
 class BoolTest(BaseModel):
     bool_1_test: bool = Field(default=True, const=True)
     bool_2_test: bool = Field(default=False, const=True)
-""")
+""",
+            )
 
     def test_bytes(self) -> None:
         output = self._model_output(demo_pb2.BytesTest)
         if not is_v1:
-            assert_expected_inline(output, """\
-# This is an automatically generated file, please do not change
-# gen by protobuf_to_pydantic[v0.3.3](https://github.com/so1n/protobuf_to_pydantic)
-# Protobuf Version: 6.31.1
-# Pydantic Version: 2.11.7
-import typing
-
-from pydantic import BaseModel, Field, field_validator
-
-from protobuf_to_pydantic.customer_validator.v2 import (
-    contains_validator,
-    in_validator,
-    len_validator,
-    not_in_validator,
-    prefix_validator,
-    suffix_validator,
-)
-
-
+            assert_expected_inline(
+                output,
+                """\
 class BytesTest(BaseModel):
     const_test: typing.Literal[b"demo"] = Field(default=b"")
     len_test: bytes = Field(default=b"", len=4)
@@ -244,9 +211,12 @@ class BytesTest(BaseModel):
     )
     in_test_in_validator = field_validator("in_test", mode="after", check_fields=None)(in_validator)
     not_in_test_not_in_validator = field_validator("not_in_test", mode="after", check_fields=None)(not_in_validator)
-""")
+""",
+            )
         else:
-            assert_expected_inline(output, """
+            assert_expected_inline(
+                output,
+                """
 class BytesTest(BaseModel):
     const_test: bytes = Field(default=b"demo", const=True)
     len_test: bytes = Field(default=b"", len=4)
@@ -264,23 +234,15 @@ class BytesTest(BaseModel):
     contains_test_contains_validator = validator("contains_test", allow_reuse=True)(contains_validator)
     in_test_in_validator = validator("in_test", allow_reuse=True)(in_validator)
     not_in_test_not_in_validator = validator("not_in_test", allow_reuse=True)(not_in_validator)
-""")
+""",
+            )
 
     def test_double(self) -> None:
         output = self._model_output(demo_pb2.DoubleTest)
         if not is_v1:
-            assert_expected_inline(output, """\
-# This is an automatically generated file, please do not change
-# gen by protobuf_to_pydantic[v0.3.3](https://github.com/so1n/protobuf_to_pydantic)
-# Protobuf Version: 6.31.1
-# Pydantic Version: 2.11.7
-import typing
-
-from pydantic import BaseModel, Field, field_validator
-
-from protobuf_to_pydantic.customer_validator.v2 import in_validator, not_in_validator
-
-
+            assert_expected_inline(
+                output,
+                """\
 class DoubleTest(BaseModel):
     const_test: typing.Literal[1.0] = Field(default=0.0)
     range_e_test: float = Field(default=0.0, ge=1.0, le=10.0)
@@ -291,9 +253,12 @@ class DoubleTest(BaseModel):
 
     in_test_in_validator = field_validator("in_test", mode="after", check_fields=None)(in_validator)
     not_in_test_not_in_validator = field_validator("not_in_test", mode="after", check_fields=None)(not_in_validator)
-""")
+""",
+            )
         else:
-            assert_expected_inline(output, """
+            assert_expected_inline(
+                output,
+                """
 class DoubleTest(BaseModel):
     const_test: float = Field(default=1.0, const=True)
     range_e_test: float = Field(default=0.0, ge=1.0, le=10.0)
@@ -304,34 +269,15 @@ class DoubleTest(BaseModel):
 
     in_test_in_validator = validator("in_test", allow_reuse=True)(in_validator)
     not_in_test_not_in_validator = validator("not_in_test", allow_reuse=True)(not_in_validator)
-""")
+""",
+            )
 
     def test_duration(self) -> None:
         output = self._model_output(demo_pb2.DurationTest)
         if not is_v1:
-            assert_expected_inline(output, """\
-# This is an automatically generated file, please do not change
-# gen by protobuf_to_pydantic[v0.3.3](https://github.com/so1n/protobuf_to_pydantic)
-# Protobuf Version: 6.31.1
-# Pydantic Version: 2.11.7
-from datetime import timedelta
-
-import typing_extensions
-from pydantic import BaseModel, Field, field_validator
-from pydantic.functional_validators import BeforeValidator
-
-from protobuf_to_pydantic.customer_validator.v2 import (
-    duration_const_validator,
-    duration_ge_validator,
-    duration_gt_validator,
-    duration_in_validator,
-    duration_le_validator,
-    duration_lt_validator,
-    duration_not_in_validator,
-)
-from protobuf_to_pydantic.util import Timedelta
-
-
+            assert_expected_inline(
+                output,
+                """\
 class DurationTest(BaseModel):
     required_test: typing_extensions.Annotated[timedelta, BeforeValidator(func=Timedelta.validate)] = Field()
     const_test: typing_extensions.Annotated[timedelta, BeforeValidator(func=Timedelta.validate)] = Field(
@@ -375,9 +321,12 @@ class DurationTest(BaseModel):
     not_in_test_duration_not_in_validator = field_validator("not_in_test", mode="after", check_fields=None)(
         duration_not_in_validator
     )
-""")
+""",
+            )
         else:
-            assert_expected_inline(output, """
+            assert_expected_inline(
+                output,
+                """
 class DurationTest(BaseModel):
     required_test: Timedelta = Field()
     const_test: Timedelta = Field(
@@ -409,24 +358,15 @@ class DurationTest(BaseModel):
     range_e_test_duration_ge_validator = validator("range_e_test", allow_reuse=True)(duration_ge_validator)
     in_test_duration_in_validator = validator("in_test", allow_reuse=True)(duration_in_validator)
     not_in_test_duration_not_in_validator = validator("not_in_test", allow_reuse=True)(duration_not_in_validator)
-""")
+""",
+            )
 
     def test_enum(self) -> None:
         output = self._model_output(demo_pb2.EnumTest)
         if not is_v1:
-            assert_expected_inline(output, """\
-# This is an automatically generated file, please do not change
-# gen by protobuf_to_pydantic[v0.3.3](https://github.com/so1n/protobuf_to_pydantic)
-# Protobuf Version: 6.31.1
-# Pydantic Version: 2.11.7
-import typing
-from enum import IntEnum
-
-from pydantic import BaseModel, ConfigDict, Field, field_validator
-
-from protobuf_to_pydantic.customer_validator.v2 import in_validator, not_in_validator
-
-
+            assert_expected_inline(
+                output,
+                """\
 class State(IntEnum):
     INACTIVE = 0
     PENDING = 1
@@ -443,9 +383,12 @@ class EnumTest(BaseModel):
 
     in_test_in_validator = field_validator("in_test", mode="after", check_fields=None)(in_validator)
     not_in_test_not_in_validator = field_validator("not_in_test", mode="after", check_fields=None)(not_in_validator)
-""")
+""",
+            )
         else:
-            assert_expected_inline(output, """
+            assert_expected_inline(
+                output,
+                """
 class State(IntEnum):
     INACTIVE = 0
     PENDING = 1
@@ -463,22 +406,15 @@ class EnumTest(BaseModel):
 
     in_test_in_validator = validator("in_test", allow_reuse=True)(in_validator)
     not_in_test_not_in_validator = validator("not_in_test", allow_reuse=True)(not_in_validator)
-""")
+""",
+            )
+
     def test_fixed32(self) -> None:
         output = self._model_output(demo_pb2.Fixed32Test)
         if not is_v1:
-            assert_expected_inline(output, """\
-# This is an automatically generated file, please do not change
-# gen by protobuf_to_pydantic[v0.3.3](https://github.com/so1n/protobuf_to_pydantic)
-# Protobuf Version: 6.31.1
-# Pydantic Version: 2.11.7
-import typing
-
-from pydantic import BaseModel, Field, field_validator
-
-from protobuf_to_pydantic.customer_validator.v2 import in_validator, not_in_validator
-
-
+            assert_expected_inline(
+                output,
+                """\
 class Fixed32Test(BaseModel):
     const_test: typing.Literal[1] = Field(default=0)
     range_e_test: float = Field(default=0, ge=1, le=10)
@@ -489,9 +425,12 @@ class Fixed32Test(BaseModel):
 
     in_test_in_validator = field_validator("in_test", mode="after", check_fields=None)(in_validator)
     not_in_test_not_in_validator = field_validator("not_in_test", mode="after", check_fields=None)(not_in_validator)
-""")
+""",
+            )
         else:
-            assert_expected_inline(output, """
+            assert_expected_inline(
+                output,
+                """
 class Fixed32Test(BaseModel):
     const_test: float = Field(default=1, const=True)
     range_e_test: float = Field(default=0, ge=1.0, le=10.0)
@@ -502,23 +441,15 @@ class Fixed32Test(BaseModel):
 
     in_test_in_validator = validator("in_test", allow_reuse=True)(in_validator)
     not_in_test_not_in_validator = validator("not_in_test", allow_reuse=True)(not_in_validator)
-""")
+""",
+            )
 
     def test_fixed64(self) -> None:
         output = self._model_output(demo_pb2.Fixed64Test)
         if not is_v1:
-            assert_expected_inline(output, """\
-# This is an automatically generated file, please do not change
-# gen by protobuf_to_pydantic[v0.3.3](https://github.com/so1n/protobuf_to_pydantic)
-# Protobuf Version: 6.31.1
-# Pydantic Version: 2.11.7
-import typing
-
-from pydantic import BaseModel, Field, field_validator
-
-from protobuf_to_pydantic.customer_validator.v2 import in_validator, not_in_validator
-
-
+            assert_expected_inline(
+                output,
+                """\
 class Fixed64Test(BaseModel):
     const_test: typing.Literal[1] = Field(default=0)
     range_e_test: float = Field(default=0, ge=1, le=10)
@@ -529,9 +460,12 @@ class Fixed64Test(BaseModel):
 
     in_test_in_validator = field_validator("in_test", mode="after", check_fields=None)(in_validator)
     not_in_test_not_in_validator = field_validator("not_in_test", mode="after", check_fields=None)(not_in_validator)
-""")
+""",
+            )
         else:
-            assert_expected_inline(output, """
+            assert_expected_inline(
+                output,
+                """
 class Fixed64Test(BaseModel):
     const_test: float = Field(default=1, const=True)
     range_e_test: float = Field(default=0, ge=1.0, le=10.0)
@@ -542,23 +476,15 @@ class Fixed64Test(BaseModel):
 
     in_test_in_validator = validator("in_test", allow_reuse=True)(in_validator)
     not_in_test_not_in_validator = validator("not_in_test", allow_reuse=True)(not_in_validator)
-""")
+""",
+            )
 
     def test_float(self) -> None:
         output = self._model_output(demo_pb2.FloatTest)
         if not is_v1:
-            assert_expected_inline(output, """\
-# This is an automatically generated file, please do not change
-# gen by protobuf_to_pydantic[v0.3.3](https://github.com/so1n/protobuf_to_pydantic)
-# Protobuf Version: 6.31.1
-# Pydantic Version: 2.11.7
-import typing
-
-from pydantic import BaseModel, Field, field_validator
-
-from protobuf_to_pydantic.customer_validator.v2 import in_validator, not_in_validator
-
-
+            assert_expected_inline(
+                output,
+                """\
 class FloatTest(BaseModel):
     const_test: typing.Literal[1.0] = Field(default=0.0)
     range_e_test: float = Field(default=0.0, ge=1.0, le=10.0)
@@ -569,9 +495,12 @@ class FloatTest(BaseModel):
 
     in_test_in_validator = field_validator("in_test", mode="after", check_fields=None)(in_validator)
     not_in_test_not_in_validator = field_validator("not_in_test", mode="after", check_fields=None)(not_in_validator)
-""")
+""",
+            )
         else:
-            assert_expected_inline(output, """
+            assert_expected_inline(
+                output,
+                """
 class FloatTest(BaseModel):
     const_test: float = Field(default=1.0, const=True)
     range_e_test: float = Field(default=0.0, ge=1.0, le=10.0)
@@ -582,23 +511,15 @@ class FloatTest(BaseModel):
 
     in_test_in_validator = validator("in_test", allow_reuse=True)(in_validator)
     not_in_test_not_in_validator = validator("not_in_test", allow_reuse=True)(not_in_validator)
-""")
+""",
+            )
 
     def test_int32(self) -> None:
         output = self._model_output(demo_pb2.Int32Test)
         if not is_v1:
-            assert_expected_inline(output, """\
-# This is an automatically generated file, please do not change
-# gen by protobuf_to_pydantic[v0.3.3](https://github.com/so1n/protobuf_to_pydantic)
-# Protobuf Version: 6.31.1
-# Pydantic Version: 2.11.7
-import typing
-
-from pydantic import BaseModel, Field, field_validator
-
-from protobuf_to_pydantic.customer_validator.v2 import in_validator, not_in_validator
-
-
+            assert_expected_inline(
+                output,
+                """\
 class Int32Test(BaseModel):
     const_test: typing.Literal[1] = Field(default=0)
     range_e_test: int = Field(default=0, ge=1, le=10)
@@ -609,9 +530,12 @@ class Int32Test(BaseModel):
 
     in_test_in_validator = field_validator("in_test", mode="after", check_fields=None)(in_validator)
     not_in_test_not_in_validator = field_validator("not_in_test", mode="after", check_fields=None)(not_in_validator)
-""")
+""",
+            )
         else:
-            assert_expected_inline(output, """
+            assert_expected_inline(
+                output,
+                """
 class Int32Test(BaseModel):
     const_test: int = Field(default=1, const=True)
     range_e_test: int = Field(default=0, ge=1.0, le=10.0)
@@ -622,23 +546,15 @@ class Int32Test(BaseModel):
 
     in_test_in_validator = validator("in_test", allow_reuse=True)(in_validator)
     not_in_test_not_in_validator = validator("not_in_test", allow_reuse=True)(not_in_validator)
-""")
+""",
+            )
 
     def test_int64(self) -> None:
         output = self._model_output(demo_pb2.Int64Test)
         if not is_v1:
-            assert_expected_inline(output, """\
-# This is an automatically generated file, please do not change
-# gen by protobuf_to_pydantic[v0.3.3](https://github.com/so1n/protobuf_to_pydantic)
-# Protobuf Version: 6.31.1
-# Pydantic Version: 2.11.7
-import typing
-
-from pydantic import BaseModel, Field, field_validator
-
-from protobuf_to_pydantic.customer_validator.v2 import in_validator, not_in_validator
-
-
+            assert_expected_inline(
+                output,
+                """\
 class Int64Test(BaseModel):
     const_test: typing.Literal[1] = Field(default=0)
     range_e_test: int = Field(default=0, ge=1, le=10)
@@ -649,9 +565,12 @@ class Int64Test(BaseModel):
 
     in_test_in_validator = field_validator("in_test", mode="after", check_fields=None)(in_validator)
     not_in_test_not_in_validator = field_validator("not_in_test", mode="after", check_fields=None)(not_in_validator)
-""")
+""",
+            )
         else:
-            assert_expected_inline(output, """
+            assert_expected_inline(
+                output,
+                """
 class Int64Test(BaseModel):
     const_test: int = Field(default=1, const=True)
     range_e_test: int = Field(default=0, ge=1.0, le=10.0)
@@ -662,26 +581,15 @@ class Int64Test(BaseModel):
 
     in_test_in_validator = validator("in_test", allow_reuse=True)(in_validator)
     not_in_test_not_in_validator = validator("not_in_test", allow_reuse=True)(not_in_validator)
-""")
+""",
+            )
 
     def test_map(self) -> None:
         output = self._model_output(demo_pb2.MapTest)
         if not is_v1:
-            assert_expected_inline(output, """\
-# This is an automatically generated file, please do not change
-# gen by protobuf_to_pydantic[v0.3.3](https://github.com/so1n/protobuf_to_pydantic)
-# Protobuf Version: 6.31.1
-# Pydantic Version: 2.11.7
-import typing
-
-import typing_extensions
-from annotated_types import Ge, Le, MaxLen, MinLen
-from pydantic import BaseModel, Field, field_validator
-
-from protobuf_to_pydantic.customer_con_type.v2 import DatetimeType, gt_now
-from protobuf_to_pydantic.customer_validator.v2 import map_max_pairs_validator, map_min_pairs_validator
-
-
+            assert_expected_inline(
+                output,
+                """\
 class MapTest(BaseModel):
     pair_test: typing.Dict[str, int] = Field(default_factory=dict, map_min_pairs=1, map_max_pairs=5)
     no_parse_test: typing.Dict[str, int] = Field(default_factory=dict)
@@ -701,9 +609,12 @@ class MapTest(BaseModel):
     pair_test_map_max_pairs_validator = field_validator("pair_test", mode="after", check_fields=None)(
         map_max_pairs_validator
     )
-""")
+""",
+            )
         else:
-            assert_expected_inline(output, """
+            assert_expected_inline(
+                output,
+                """
 class MapTest(BaseModel):
     pair_test: typing.Dict[str, int] = Field(default_factory=dict, map_min_pairs=1, map_max_pairs=5)
     no_parse_test: typing.Dict[str, int] = Field(default_factory=dict)
@@ -716,89 +627,50 @@ class MapTest(BaseModel):
 
     pair_test_map_min_pairs_validator = validator("pair_test", allow_reuse=True)(map_min_pairs_validator)
     pair_test_map_max_pairs_validator = validator("pair_test", allow_reuse=True)(map_max_pairs_validator)
-""")
+""",
+            )
 
     def test_message_disable(self) -> None:
         output = self._model_output(demo_pb2.MessageDisabledTest)
-        assert_expected_inline(output, """\
-# This is an automatically generated file, please do not change
-# gen by protobuf_to_pydantic[v0.3.3](https://github.com/so1n/protobuf_to_pydantic)
-# Protobuf Version: 6.31.1
-# Pydantic Version: 2.11.7
-from pydantic import BaseModel, Field
-
-
+        assert_expected_inline(
+            output,
+            """\
 class MessageDisabledTest(BaseModel):
     const_test: int = Field(default=0)
     range_e_test: int = Field(default=0)
     range_test: int = Field(default=0)
-""")
+""",
+        )
 
     def test_message_ignored(self) -> None:
         output = self._model_output(demo_pb2.MessageIgnoredTest)
-        assert_expected_inline(output, """\
-# This is an automatically generated file, please do not change
-# gen by protobuf_to_pydantic[v0.3.3](https://github.com/so1n/protobuf_to_pydantic)
-# Protobuf Version: 6.31.1
-# Pydantic Version: 2.11.7
-from pydantic import BaseModel, Field
-
-
+        assert_expected_inline(
+            output,
+            """\
 class MessageIgnoredTest(BaseModel):
     const_test: int = Field(default=0)
     range_e_test: int = Field(default=0)
     range_test: int = Field(default=0)
-""")
+""",
+        )
 
     def test_message(self) -> None:
         output = self._model_output(demo_pb2.MessageTest)
-        assert_expected_inline(output, """\
-# This is an automatically generated file, please do not change
-# gen by protobuf_to_pydantic[v0.3.3](https://github.com/so1n/protobuf_to_pydantic)
-# Protobuf Version: 6.31.1
-# Pydantic Version: 2.11.7
-from pydantic import BaseModel, Field
-
-
+        assert_expected_inline(
+            output,
+            """\
 class MessageTest(BaseModel):
     skip_test: str = Field(default="")
     required_test: str = Field()
-""")
+""",
+        )
 
     def test_nested(self) -> None:
         output = self._model_output(demo_pb2.NestedMessage)
         if not is_v1:
-            assert_expected_inline(output, """\
-# This is an automatically generated file, please do not change
-# gen by protobuf_to_pydantic[v0.3.3](https://github.com/so1n/protobuf_to_pydantic)
-# Protobuf Version: 6.31.1
-# Pydantic Version: 2.11.7
-import typing
-from datetime import datetime
-from ipaddress import IPv4Address, IPv6Address
-from uuid import UUID
-
-import typing_extensions
-from annotated_types import Ge, Le, MaxLen, MinLen
-from pydantic import BaseModel, Field, field_validator
-from pydantic.networks import AnyUrl, EmailStr, IPvAnyAddress
-
-from protobuf_to_pydantic.customer_con_type.v2 import DatetimeType, gt_now
-from protobuf_to_pydantic.customer_validator.v2 import (
-    contains_validator,
-    in_validator,
-    len_validator,
-    map_max_pairs_validator,
-    map_min_pairs_validator,
-    not_contains_validator,
-    not_in_validator,
-    prefix_validator,
-    suffix_validator,
-    timestamp_gt_now_validator,
-)
-from protobuf_to_pydantic.field_info_rule.protobuf_option_to_field_info.types import HostNameStr, UriRefStr
-
-
+            assert_expected_inline(
+                output,
+                """\
 class StringTest(BaseModel):
     const_test: typing.Literal["aaa"] = Field(default="")
     len_test: str = Field(default="", len=3)
@@ -882,9 +754,12 @@ class NestedMessage(BaseModel):
     not_enable_user_pay: NotEnableUserPayMessage = Field(default_factory=NotEnableUserPayMessage)
     empty: typing.Any = Field()
     after_refer: AfterReferMessage = Field(default_factory=AfterReferMessage)
-""")
+""",
+            )
         else:
-            assert_expected_inline(output, """
+            assert_expected_inline(
+                output,
+                """
 class StringTest(BaseModel):
     const_test: str = Field(default="aaa", const=True)
     len_test: str = Field(default="", len=3)
@@ -955,23 +830,15 @@ class NestedMessage(BaseModel):
     not_enable_user_pay: NotEnableUserPayMessage = Field(default_factory=NotEnableUserPayMessage)
     empty: typing.Any = Field()
     after_refer: AfterReferMessage = Field(default_factory=AfterReferMessage)
-""")
-
-
+""",
+            )
 
     def test_one_of_not(self) -> None:
         output = self._model_output(demo_pb2.OneOfNotTest)
         if not is_v1:
-            assert_expected_inline(output, """\
-# This is an automatically generated file, please do not change
-# gen by protobuf_to_pydantic[v0.3.3](https://github.com/so1n/protobuf_to_pydantic)
-# Protobuf Version: 6.31.1
-# Pydantic Version: 2.11.7
-from pydantic import BaseModel, Field, model_validator
-
-from protobuf_to_pydantic.customer_validator.v2 import check_one_of
-
-
+            assert_expected_inline(
+                output,
+                """\
 class OneOfNotTest(BaseModel):
     _one_of_dict = {"validate_test.OneOfNotTest.id": {"fields": {"x", "y"}, "required": False}}
 
@@ -980,9 +847,12 @@ class OneOfNotTest(BaseModel):
     y: int = Field(default=0)
 
     one_of_validator = model_validator(mode="before")(check_one_of)
-""")
+""",
+            )
         else:
-            assert_expected_inline(output, """
+            assert_expected_inline(
+                output,
+                """
 class OneOfNotTest(BaseModel):
     _one_of_dict = {"validate_test.OneOfNotTest.id": {"fields": {"x", "y"}, "required": False}}
 
@@ -991,21 +861,15 @@ class OneOfNotTest(BaseModel):
     y: int = Field(default=0)
 
     one_of_validator = root_validator(pre=True, allow_reuse=True)(check_one_of)
-""")
+""",
+            )
 
     def test_one_of(self) -> None:
         output = self._model_output(demo_pb2.OneOfTest)
         if not is_v1:
-            assert_expected_inline(output, """\
-# This is an automatically generated file, please do not change
-# gen by protobuf_to_pydantic[v0.3.3](https://github.com/so1n/protobuf_to_pydantic)
-# Protobuf Version: 6.31.1
-# Pydantic Version: 2.11.7
-from pydantic import BaseModel, Field, model_validator
-
-from protobuf_to_pydantic.customer_validator.v2 import check_one_of
-
-
+            assert_expected_inline(
+                output,
+                """\
 class OneOfTest(BaseModel):
     _one_of_dict = {"validate_test.OneOfTest.id": {"fields": {"x", "y"}, "required": True}}
 
@@ -1014,9 +878,12 @@ class OneOfTest(BaseModel):
     y: int = Field(default=0)
 
     one_of_validator = model_validator(mode="before")(check_one_of)
-""")
+""",
+            )
         else:
-            assert_expected_inline(output, """
+            assert_expected_inline(
+                output,
+                """
 class OneOfTest(BaseModel):
     _one_of_dict = {"validate_test.OneOfTest.id": {"fields": {"x", "y"}, "required": True}}
 
@@ -1025,26 +892,15 @@ class OneOfTest(BaseModel):
     y: int = Field(default=0)
 
     one_of_validator = root_validator(pre=True, allow_reuse=True)(check_one_of)
-""")
+""",
+            )
 
     def test_repeated(self) -> None:
         output = self._model_output(demo_pb2.RepeatedTest)
         if not is_v1:
-            assert_expected_inline(output, """\
-# This is an automatically generated file, please do not change
-# gen by protobuf_to_pydantic[v0.3.3](https://github.com/so1n/protobuf_to_pydantic)
-# Protobuf Version: 6.31.1
-# Pydantic Version: 2.11.7
-import typing
-from datetime import timedelta
-
-import typing_extensions
-from annotated_types import Gt, Lt, MaxLen, MinLen
-from pydantic import BaseModel, Field
-
-from protobuf_to_pydantic.customer_con_type.v2 import DatetimeType, TimedeltaType, t_gt, t_lt
-
-
+            assert_expected_inline(
+                output,
+                """\
 class RepeatedTest(BaseModel):
     range_test: typing.List[str] = Field(default_factory=list, min_length=1, max_length=5)
     unique_test: typing.Set[str] = Field(default_factory=set)
@@ -1067,9 +923,12 @@ class RepeatedTest(BaseModel):
         Field(default_factory=list, min_length=1, max_length=5)
     )
     ignore_test: typing.List[str] = Field(default_factory=list)
-""")
+""",
+            )
         else:
-            assert_expected_inline(output, """
+            assert_expected_inline(
+                output,
+                """
 class RepeatedTest(BaseModel):
     range_test: typing.List[str] = Field(default_factory=list, min_items=1, max_items=5)
     unique_test: typing.List[str] = Field(default_factory=list, unique_items=True)
@@ -1092,23 +951,15 @@ class RepeatedTest(BaseModel):
         default_factory=list
     )
     ignore_test: typing.List[str] = Field(default_factory=list)
-""")
+""",
+            )
 
     def test_sfixed32(self) -> None:
         output = self._model_output(demo_pb2.Sfixed32Test)
         if not is_v1:
-            assert_expected_inline(output, """\
-# This is an automatically generated file, please do not change
-# gen by protobuf_to_pydantic[v0.3.3](https://github.com/so1n/protobuf_to_pydantic)
-# Protobuf Version: 6.31.1
-# Pydantic Version: 2.11.7
-import typing
-
-from pydantic import BaseModel, Field, field_validator
-
-from protobuf_to_pydantic.customer_validator.v2 import in_validator, not_in_validator
-
-
+            assert_expected_inline(
+                output,
+                """\
 class Sfixed32Test(BaseModel):
     const_test: typing.Literal[1] = Field(default=0)
     range_e_test: float = Field(default=0, ge=1, le=10)
@@ -1119,9 +970,12 @@ class Sfixed32Test(BaseModel):
 
     in_test_in_validator = field_validator("in_test", mode="after", check_fields=None)(in_validator)
     not_in_test_not_in_validator = field_validator("not_in_test", mode="after", check_fields=None)(not_in_validator)
-""")
+""",
+            )
         else:
-            assert_expected_inline(output, """
+            assert_expected_inline(
+                output,
+                """
 class Sfixed32Test(BaseModel):
     const_test: float = Field(default=1, const=True)
     range_e_test: float = Field(default=0, ge=1.0, le=10.0)
@@ -1132,23 +986,15 @@ class Sfixed32Test(BaseModel):
 
     in_test_in_validator = validator("in_test", allow_reuse=True)(in_validator)
     not_in_test_not_in_validator = validator("not_in_test", allow_reuse=True)(not_in_validator)
-""")
+""",
+            )
 
     def test_sfixed64(self) -> None:
         output = self._model_output(demo_pb2.Sfixed64Test)
         if not is_v1:
-            assert_expected_inline(output, """\
-# This is an automatically generated file, please do not change
-# gen by protobuf_to_pydantic[v0.3.3](https://github.com/so1n/protobuf_to_pydantic)
-# Protobuf Version: 6.31.1
-# Pydantic Version: 2.11.7
-import typing
-
-from pydantic import BaseModel, Field, field_validator
-
-from protobuf_to_pydantic.customer_validator.v2 import in_validator, not_in_validator
-
-
+            assert_expected_inline(
+                output,
+                """\
 class Sfixed64Test(BaseModel):
     const_test: typing.Literal[1] = Field(default=0)
     range_e_test: float = Field(default=0, ge=1, le=10)
@@ -1159,9 +1005,12 @@ class Sfixed64Test(BaseModel):
 
     in_test_in_validator = field_validator("in_test", mode="after", check_fields=None)(in_validator)
     not_in_test_not_in_validator = field_validator("not_in_test", mode="after", check_fields=None)(not_in_validator)
-""")
+""",
+            )
         else:
-            assert_expected_inline(output, """
+            assert_expected_inline(
+                output,
+                """
 class Sfixed64Test(BaseModel):
     const_test: float = Field(default=1, const=True)
     range_e_test: float = Field(default=0, ge=1.0, le=10.0)
@@ -1172,23 +1021,15 @@ class Sfixed64Test(BaseModel):
 
     in_test_in_validator = validator("in_test", allow_reuse=True)(in_validator)
     not_in_test_not_in_validator = validator("not_in_test", allow_reuse=True)(not_in_validator)
-""")
+""",
+            )
 
     def test_sint64(self) -> None:
         output = self._model_output(demo_pb2.Sint64Test)
         if not is_v1:
-            assert_expected_inline(output, """\
-# This is an automatically generated file, please do not change
-# gen by protobuf_to_pydantic[v0.3.3](https://github.com/so1n/protobuf_to_pydantic)
-# Protobuf Version: 6.31.1
-# Pydantic Version: 2.11.7
-import typing
-
-from pydantic import BaseModel, Field, field_validator
-
-from protobuf_to_pydantic.customer_validator.v2 import in_validator, not_in_validator
-
-
+            assert_expected_inline(
+                output,
+                """\
 class Sint64Test(BaseModel):
     const_test: typing.Literal[1] = Field(default=0)
     range_e_test: int = Field(default=0, ge=1, le=10)
@@ -1199,9 +1040,12 @@ class Sint64Test(BaseModel):
 
     in_test_in_validator = field_validator("in_test", mode="after", check_fields=None)(in_validator)
     not_in_test_not_in_validator = field_validator("not_in_test", mode="after", check_fields=None)(not_in_validator)
-""")
+""",
+            )
         else:
-            assert_expected_inline(output, """
+            assert_expected_inline(
+                output,
+                """
 class Sint64Test(BaseModel):
     const_test: int = Field(default=1, const=True)
     range_e_test: int = Field(default=0, ge=1.0, le=10.0)
@@ -1212,32 +1056,15 @@ class Sint64Test(BaseModel):
 
     in_test_in_validator = validator("in_test", allow_reuse=True)(in_validator)
     not_in_test_not_in_validator = validator("not_in_test", allow_reuse=True)(not_in_validator)
-""")
+""",
+            )
 
     def test_timestamp(self) -> None:
         output = self._model_output(demo_pb2.TimestampTest)
         if not is_v1:
-            assert_expected_inline(output, """\
-# This is an automatically generated file, please do not change
-# gen by protobuf_to_pydantic[v0.3.3](https://github.com/so1n/protobuf_to_pydantic)
-# Protobuf Version: 6.31.1
-# Pydantic Version: 2.11.7
-from datetime import datetime, timedelta
-
-from pydantic import BaseModel, Field, field_validator
-
-from protobuf_to_pydantic.customer_validator.v2 import (
-    timestamp_const_validator,
-    timestamp_ge_validator,
-    timestamp_gt_now_validator,
-    timestamp_gt_validator,
-    timestamp_le_validator,
-    timestamp_lt_now_validator,
-    timestamp_lt_validator,
-    timestamp_within_validator,
-)
-
-
+            assert_expected_inline(
+                output,
+                """\
 class TimestampTest(BaseModel):
     required_test: datetime = Field()
     const_test: datetime = Field(default_factory=datetime.now, timestamp_const=1600000000.0)
@@ -1280,9 +1107,12 @@ class TimestampTest(BaseModel):
     within_and_gt_now_test_timestamp_within_validator = field_validator(
         "within_and_gt_now_test", mode="after", check_fields=None
     )(timestamp_within_validator)
-""")
+""",
+            )
         else:
-            assert_expected_inline(output, """
+            assert_expected_inline(
+                output,
+                """
 class TimestampTest(BaseModel):
     required_test: datetime = Field()
     const_test: datetime = Field(default_factory=datetime.now, timestamp_const=1600000000.0)
@@ -1311,22 +1141,15 @@ class TimestampTest(BaseModel):
     within_and_gt_now_test_timestamp_within_validator = validator("within_and_gt_now_test", allow_reuse=True)(
         timestamp_within_validator
     )
-""")
+""",
+            )
+
     def test_unit32(self) -> None:
         output = self._model_output(demo_pb2.Uint32Test)
         if not is_v1:
-            assert_expected_inline(output, """\
-# This is an automatically generated file, please do not change
-# gen by protobuf_to_pydantic[v0.3.3](https://github.com/so1n/protobuf_to_pydantic)
-# Protobuf Version: 6.31.1
-# Pydantic Version: 2.11.7
-import typing
-
-from pydantic import BaseModel, Field, field_validator
-
-from protobuf_to_pydantic.customer_validator.v2 import in_validator, not_in_validator
-
-
+            assert_expected_inline(
+                output,
+                """\
 class Uint32Test(BaseModel):
     const_test: typing.Literal[1] = Field(default=0)
     range_e_test: int = Field(default=0, ge=1, le=10)
@@ -1337,9 +1160,12 @@ class Uint32Test(BaseModel):
 
     in_test_in_validator = field_validator("in_test", mode="after", check_fields=None)(in_validator)
     not_in_test_not_in_validator = field_validator("not_in_test", mode="after", check_fields=None)(not_in_validator)
-""")
+""",
+            )
         else:
-            assert_expected_inline(output, """
+            assert_expected_inline(
+                output,
+                """
 class Uint32Test(BaseModel):
     const_test: int = Field(default=1, const=True)
     range_e_test: int = Field(default=0, ge=1.0, le=10.0)
@@ -1350,23 +1176,15 @@ class Uint32Test(BaseModel):
 
     in_test_in_validator = validator("in_test", allow_reuse=True)(in_validator)
     not_in_test_not_in_validator = validator("not_in_test", allow_reuse=True)(not_in_validator)
-""")
+""",
+            )
 
     def test_unit64(self) -> None:
         output = self._model_output(demo_pb2.Uint64Test)
         if not is_v1:
-            assert_expected_inline(output, """\
-# This is an automatically generated file, please do not change
-# gen by protobuf_to_pydantic[v0.3.3](https://github.com/so1n/protobuf_to_pydantic)
-# Protobuf Version: 6.31.1
-# Pydantic Version: 2.11.7
-import typing
-
-from pydantic import BaseModel, Field, field_validator
-
-from protobuf_to_pydantic.customer_validator.v2 import in_validator, not_in_validator
-
-
+            assert_expected_inline(
+                output,
+                """\
 class Uint64Test(BaseModel):
     const_test: typing.Literal[1] = Field(default=0)
     range_e_test: int = Field(default=0, ge=1, le=10)
@@ -1377,9 +1195,12 @@ class Uint64Test(BaseModel):
 
     in_test_in_validator = field_validator("in_test", mode="after", check_fields=None)(in_validator)
     not_in_test_not_in_validator = field_validator("not_in_test", mode="after", check_fields=None)(not_in_validator)
-""")
+""",
+            )
         else:
-            assert_expected_inline(output, """
+            assert_expected_inline(
+                output,
+                """
 class Uint64Test(BaseModel):
     const_test: int = Field(default=1, const=True)
     range_e_test: int = Field(default=0, ge=1.0, le=10.0)
@@ -1390,4 +1211,5 @@ class Uint64Test(BaseModel):
 
     in_test_in_validator = validator("in_test", allow_reuse=True)(in_validator)
     not_in_test_not_in_validator = validator("not_in_test", allow_reuse=True)(not_in_validator)
-""")
+""",
+            )
