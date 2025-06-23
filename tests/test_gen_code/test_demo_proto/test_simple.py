@@ -1,5 +1,6 @@
 from typing import Any
 
+from expecttest import assert_expected_inline
 from google.protobuf import __version__
 
 from protobuf_to_pydantic._pydantic_adapter import is_v1
@@ -38,10 +39,11 @@ class TestSimpleTest:
         return pydantic_model_to_py_code(msg_to_pydantic_model(msg, parse_msg_desc_method="ignore"), p2c_class=P2CNoHeader)
 
     def test_empty_message(self) -> None:
-        assert format_content("""
+        output = self._model_output(demo_pb2.EmptyMessage)  # type: ignore
+        assert_expected_inline(output, """\
 class EmptyMessage(BaseModel):
     pass
-""")in self._model_output(demo_pb2.EmptyMessage)  # type: ignore
+""")
 
     def test_user_message(self) -> None:
         content = """
