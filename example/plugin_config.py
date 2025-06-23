@@ -62,7 +62,6 @@ pkg_config: Dict[str, SubConfigModel] = {
     "all_field_set_optional": SubConfigModel(
         module=all_field_set_option_config, use_root_config=True
     ),
-    "alias_demo": SubConfigModel(module=populate_by_name_plugin_config),
     "single_config": SubConfigModel(module=single_config_pkg_plugin_config),
     "custom_comment_handler": SubConfigModel(
         module=custom_comment_handler_pkg_plugin_config, use_root_config=True
