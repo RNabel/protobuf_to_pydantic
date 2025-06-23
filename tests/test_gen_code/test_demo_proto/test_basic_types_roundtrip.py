@@ -1,4 +1,5 @@
 import json
+import math
 from typing import Any, Dict
 
 from google.protobuf import json_format, __version__
@@ -851,11 +852,11 @@ class TestBasicTypesRoundTrip:
 
         assert math.isnan(pb_msg2.nan_float)
 
-    def test_pydantic_special_float_values_limitation(self):
-        """Document the known limitation with special float values in Pydantic JSON serialization.
+    def test_pydantic_special_float_values_roundtrip(self):
+        """Test that special float values are properly preserved through Pydantic JSON serialization.
 
-        This test demonstrates that special float values (inf, -inf, nan) are not properly
-        preserved through Pydantic JSON serialization. This is tracked in subtask 14.7.
+        With the ser_json_inf_nan='constants' configuration, Pydantic now correctly serializes
+        inf/-inf/nan as "Infinity"/"-Infinity"/"NaN" strings, matching protobuf's behavior.
         """
         pb_msg = basic_types_roundtrip_pb2.EdgeCasesMessage()
 
@@ -871,30 +872,68 @@ class TestBasicTypesRoundTrip:
         assert json_dict["negativeInfinityFloat"] == "-Infinity"
         assert json_dict["nanFloat"] == "NaN"
 
-        # Create Pydantic model and parse the JSON
-        model_class = self._create_pydantic_model(type(pb_msg))
-        pydantic_model = self._json_to_pydantic(proto_json, model_class)
+        # Use the pre-generated static model which inherits from MyBaseSchema
+        pydantic_model = basic_types_roundtrip_p2p.EdgeCasesMessage.model_validate_json(
+            proto_json
+        )
 
         # Check that Pydantic correctly parses the special string values
         assert pydantic_model.infinity_float == float("inf")
         assert pydantic_model.negative_infinity_float == float("-inf")
-        import math
-
         assert math.isnan(pydantic_model.nan_float)
 
         # Now convert back to JSON from Pydantic
         pydantic_json = self._pydantic_to_json(pydantic_model)
         pydantic_json_dict = json.loads(pydantic_json)
 
-        # Document the limitation: Pydantic serializes special floats as None
-        assert pydantic_json_dict["infinityFloat"] is None
-        assert pydantic_json_dict["negativeInfinityFloat"] is None
-        assert pydantic_json_dict["nanFloat"] is None
+        # With ser_json_inf_nan='strings', Pydantic outputs these as quoted strings
+        assert pydantic_json_dict["infinityFloat"] == "Infinity"
+        assert pydantic_json_dict["negativeInfinityFloat"] == "-Infinity"
+        assert pydantic_json_dict["nanFloat"] == "NaN"
 
-        # When converted back to protobuf, these become 0.0
+        # When converted back to protobuf, the values should be preserved
         pb_msg2 = self._json_to_protobuf(pydantic_json, type(pb_msg))
-        assert pb_msg2.infinity_float == 0.0
-        assert pb_msg2.negative_infinity_float == 0.0
-        assert pb_msg2.nan_float == 0.0
+        assert pb_msg2.infinity_float == float("inf")
+        assert pb_msg2.negative_infinity_float == float("-inf")
+        assert math.isnan(pb_msg2.nan_float)
 
-        # This is a known limitation that needs to be fixed (subtask 14.7)
+    def test_special_double_values_roundtrip(self):
+        """Test round-trip conversion of special double values (inf, -inf, nan)."""
+        pb_msg = basic_types_roundtrip_pb2.EdgeCasesMessage()
+
+        # Set special double values
+        pb_msg.infinity_double = float("inf")
+        pb_msg.negative_infinity_double = float("-inf")
+        pb_msg.nan_double = float("nan")
+
+        # Convert to JSON
+        proto_json = self._protobuf_to_json(pb_msg)
+        json_dict = json.loads(proto_json)
+        assert json_dict["infinityDouble"] == "Infinity"
+        assert json_dict["negativeInfinityDouble"] == "-Infinity"
+        assert json_dict["nanDouble"] == "NaN"
+
+        # Use the pre-generated static model which inherits from MyBaseSchema
+        pydantic_model = basic_types_roundtrip_p2p.EdgeCasesMessage.model_validate_json(
+            proto_json
+        )
+
+        # Verify Pydantic correctly parses the special values
+        assert pydantic_model.infinity_double == float("inf")
+        assert pydantic_model.negative_infinity_double == float("-inf")
+        assert math.isnan(pydantic_model.nan_double)
+
+        # Convert back to JSON from Pydantic
+        pydantic_json = self._pydantic_to_json(pydantic_model)
+        pydantic_json_dict = json.loads(pydantic_json)
+
+        # Verify Pydantic correctly serializes special doubles as strings
+        assert pydantic_json_dict["infinityDouble"] == "Infinity"
+        assert pydantic_json_dict["negativeInfinityDouble"] == "-Infinity"
+        assert pydantic_json_dict["nanDouble"] == "NaN"
+
+        # Convert back to protobuf and verify values are preserved
+        pb_msg2 = self._json_to_protobuf(pydantic_json, type(pb_msg))
+        assert pb_msg2.infinity_double == float("inf")
+        assert pb_msg2.negative_infinity_double == float("-inf")
+        assert math.isnan(pb_msg2.nan_double)
