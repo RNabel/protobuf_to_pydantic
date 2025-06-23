@@ -31,7 +31,7 @@ from typing_extensions import Annotated, get_args, get_origin
 
 from protobuf_to_pydantic import _pydantic_adapter, customer_validator, gen_model
 from protobuf_to_pydantic.__version__ import __version__
-from protobuf_to_pydantic.customer_con_type import get_origin_code, pydantic_con_dict
+from protobuf_to_pydantic.customer_con_type.v2 import get_origin_code, pydantic_con_dict
 from protobuf_to_pydantic.gen_model import CodeRefModel
 from protobuf_to_pydantic.grpc_types import (
     RepeatedCompositeContainer,

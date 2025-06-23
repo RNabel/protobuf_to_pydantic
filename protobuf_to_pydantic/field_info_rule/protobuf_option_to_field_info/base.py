@@ -6,7 +6,7 @@ from google.protobuf.descriptor import FieldDescriptor
 
 from protobuf_to_pydantic import _pydantic_adapter
 from protobuf_to_pydantic.constant import protobuf_common_type_dict
-from protobuf_to_pydantic.customer_con_type import (
+from protobuf_to_pydantic.customer_con_type.v2 import (
     conbytes,
     confloat,
     conint,
@@ -16,7 +16,9 @@ from protobuf_to_pydantic.customer_con_type import (
     contimestamp,
 )
 from protobuf_to_pydantic.customer_validator import validate_validator_dict
-from protobuf_to_pydantic.field_info_rule.protobuf_option_to_field_info.types import rule_name_pydantic_type_dict
+from protobuf_to_pydantic.field_info_rule.protobuf_option_to_field_info.types import (
+    rule_name_pydantic_type_dict,
+)
 from protobuf_to_pydantic.field_info_rule.types import FieldInfoTypedDict
 
 logger: logging.Logger = logging.getLogger(__name__)
@@ -78,10 +80,14 @@ class BaseProtobufOptionToFieldInfo(object):
     def sub_type_name_handler(self, rule_value: Any) -> str:
         raise NotImplementedError
 
-    def rule_value_to_field_value_handler(self, field_type_name: str, rule_name: str, rule_value: Any) -> Any:
+    def rule_value_to_field_value_handler(
+        self, field_type_name: str, rule_name: str, rule_value: Any
+    ) -> Any:
         raise NotImplementedError
 
-    def value_type_conversion_handler(self, field_type_name: str, rule_name: str, rule_value: Any) -> Tuple[bool, Any]:
+    def value_type_conversion_handler(
+        self, field_type_name: str, rule_name: str, rule_value: Any
+    ) -> Tuple[bool, Any]:
         return False, rule_value
 
     def _core_handler(
@@ -99,7 +105,9 @@ class BaseProtobufOptionToFieldInfo(object):
         """
         field_info_type_dict: FieldInfoTypedDict = {"extra": {}, "skip": False}
         for rule_name, rule_value in rule_dict.items():
-            if rule_name in type_not_support_dict.get(field_type, type_not_support_dict["Any"]):
+            if rule_name in type_not_support_dict.get(
+                field_type, type_not_support_dict["Any"]
+            ):
                 # Exclude unsupported fields
                 if field_type in protobuf_common_type_dict:
                     rule_name = f"{protobuf_common_type_dict[field_type]}.{rule_name}"
@@ -111,7 +119,9 @@ class BaseProtobufOptionToFieldInfo(object):
                     msg = msg + f"(field:{full_name})"
                 logger.warning(msg)
                 continue
-            is_change, new_rule_value = self.value_type_conversion_handler(type_name, rule_name, rule_value)
+            is_change, new_rule_value = self.value_type_conversion_handler(
+                type_name, rule_name, rule_value
+            )
             if is_change:
                 rule_value = new_rule_value
 
@@ -119,7 +129,10 @@ class BaseProtobufOptionToFieldInfo(object):
                 # Field Conversion
                 rule_name = pgv_column_to_pydantic_dict[rule_name]
 
-            if type_name in ("duration", "any", "timestamp", "map") and rule_name in special_type_rule_name_set:
+            if (
+                type_name in ("duration", "any", "timestamp", "map")
+                and rule_name in special_type_rule_name_set
+            ):
                 # The verification of these parameters is handed over to the validator,
                 # see protobuf_to_pydantic/customer_validator for details
 
@@ -130,14 +143,26 @@ class BaseProtobufOptionToFieldInfo(object):
                 _rule_name: str = f"{type_name}_{rule_name}"
                 validator_name = f"{field_name}_{_rule_name}_validator"
 
-                field_info_type_dict["extra"][_rule_name] = self.rule_value_to_field_value_handler(
-                    type_name, rule_name, rule_value
+                field_info_type_dict["extra"][_rule_name] = (
+                    self.rule_value_to_field_value_handler(
+                        type_name, rule_name, rule_value
+                    )
                 )
-                field_info_type_dict["validator"][validator_name] = _pydantic_adapter.field_validator(
-                    field_name, allow_reuse=True
-                )(validate_validator_dict[f"{_rule_name}_validator"])
+                field_info_type_dict["validator"][validator_name] = (
+                    _pydantic_adapter.field_validator(field_name, allow_reuse=True)(
+                        validate_validator_dict[f"{_rule_name}_validator"]
+                    )
+                )
                 continue
-            elif rule_name in ("in", "not_in", "len", "prefix", "suffix", "contains", "not_contains"):
+            elif rule_name in (
+                "in",
+                "not_in",
+                "len",
+                "prefix",
+                "suffix",
+                "contains",
+                "not_contains",
+            ):
                 # The verification of these parameters is handed over to the validator,
                 # see protobuf_to_pydantic/customer_validator for details
 
@@ -147,12 +172,16 @@ class BaseProtobufOptionToFieldInfo(object):
                 validator_name = f"{field_name}_{rule_name}_validator"
                 # dict key not use python keyword
                 _rule_name = rule_name + "_" if rule_name in ("in",) else rule_name
-                field_info_type_dict["extra"][_rule_name] = self.rule_value_to_field_value_handler(
-                    type_name, rule_name, rule_value
+                field_info_type_dict["extra"][_rule_name] = (
+                    self.rule_value_to_field_value_handler(
+                        type_name, rule_name, rule_value
+                    )
                 )
-                field_info_type_dict["validator"][validator_name] = _pydantic_adapter.field_validator(
-                    field_name, allow_reuse=True
-                )(validate_validator_dict[f"{rule_name}_validator"])
+                field_info_type_dict["validator"][validator_name] = (
+                    _pydantic_adapter.field_validator(field_name, allow_reuse=True)(
+                        validate_validator_dict[f"{rule_name}_validator"]
+                    )
+                )
                 continue
             elif rule_name in rule_name_pydantic_type_dict:
                 # Support some built-in type judgments of PGV
@@ -166,7 +195,9 @@ class BaseProtobufOptionToFieldInfo(object):
                 con_type = get_con_type_func_from_type_name(type_name)
                 if not con_type:
                     # TODO nested message
-                    logger.warning(f"{__name__} not support sub type `{type_name}`, please reset {full_name}")
+                    logger.warning(
+                        f"{__name__} not support sub type `{type_name}`, please reset {full_name}"
+                    )
                     continue
                 if "map_type" not in field_info_type_dict:
                     field_info_type_dict["map_type"] = {}
@@ -187,7 +218,9 @@ class BaseProtobufOptionToFieldInfo(object):
                         if sub_dict["extra"].get(_key, None) is not None:
                             con_type_param_dict[_key] = sub_dict["extra"][_key]
 
-                field_info_type_dict["map_type"][rule_name] = con_type(**con_type_param_dict)
+                field_info_type_dict["map_type"][rule_name] = con_type(
+                    **con_type_param_dict
+                )
             elif rule_name == "items":
                 # Process array data
                 type_name = self.sub_type_name_handler(rule_value)
@@ -195,7 +228,9 @@ class BaseProtobufOptionToFieldInfo(object):
                 con_type = get_con_type_func_from_type_name(type_name)
                 if not con_type:
                     # TODO nested message
-                    logger.warning(f"{__name__} not support sub type `{type_name}`, please reset {full_name}")
+                    logger.warning(
+                        f"{__name__} not support sub type `{type_name}`, please reset {full_name}"
+                    )
                     field_info_type_dict["type"] = List
                     continue
                 sub_dict = self._core_handler(
@@ -217,6 +252,11 @@ class BaseProtobufOptionToFieldInfo(object):
 
 type_not_support_dict: Dict[Any, Set[str]] = {
     FieldDescriptor.TYPE_BYTES: {"pattern"},
-    FieldDescriptor.TYPE_STRING: {"min_bytes", "max_bytes", "well_known_regex", "strict"},
+    FieldDescriptor.TYPE_STRING: {
+        "min_bytes",
+        "max_bytes",
+        "well_known_regex",
+        "strict",
+    },
     "Any": {"ignore_empty", "defined_only", "no_sparse"},
 }
