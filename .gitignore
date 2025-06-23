@@ -46,6 +46,8 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 
+*.py.bak # for expecttest
+
 # Translations
 *.mo
 *.pot
