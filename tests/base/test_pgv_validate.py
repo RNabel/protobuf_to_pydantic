@@ -7,7 +7,6 @@ import pytest
 from google.protobuf.any_pb2 import Any as AnyMessage  # type: ignore
 from pydantic import ValidationError
 
-from protobuf_to_pydantic._pydantic_adapter import is_v1
 
 
 class BaseTestPgvModelValidator:
@@ -144,7 +143,7 @@ class BaseTestPgvModelValidator:
             # But when their parameter timestamp, the generated datetime is with the time zone
             # So Gt(16000000000) can only be compared with 1600000000,
             # GT(datetime.fromtimestamp(1600000000)) can only be compared with datetime.fromtimestamp(16000000000).
-            "items_timestamp_test": [datetime.fromtimestamp(1600000001) if is_v1 else 1600000001],
+            "items_timestamp_test": [1600000001],
             "items_duration_test": [timedelta(seconds=15)],
             "items_bytes_test": [b"a", b"b"],
             "ignore_test": ["a", "b"]
@@ -158,9 +157,6 @@ class BaseTestPgvModelValidator:
             "items_duration_test": [timedelta(seconds=25)],
             "items_bytes_test": [b"a", b"b", b"c", b"d", b"e", b"f"],
         }
-        if is_v1:
-            # In pydantic v2, unique_test will not raise error when the repeated field is not unique
-            error_map_dict["unique_test"] = ["a", "b", "c", "c"]
         self._check_message_validate(model_class, normal_dict, error_map_dict)
 
     def _test_any(self, model_class: Any) -> None:

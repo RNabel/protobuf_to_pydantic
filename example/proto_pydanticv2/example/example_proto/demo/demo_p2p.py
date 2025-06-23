@@ -14,7 +14,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 from pydantic.types import PaymentCardNumber
 
 from example.plugin_config import exp_time
-from protobuf_to_pydantic.customer_validator import check_one_of
+from protobuf_to_pydantic.customer_validator.v2 import check_one_of
 
 from ..common.single_p2p import DemoEnum, DemoMessage
 

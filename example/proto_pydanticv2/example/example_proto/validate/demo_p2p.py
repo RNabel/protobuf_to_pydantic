@@ -17,10 +17,10 @@ from pydantic.networks import AnyUrl, EmailStr, IPvAnyAddress
 from typing_extensions import Annotated
 
 from protobuf_to_pydantic.customer_con_type.v2 import DatetimeType, TimedeltaType, gt_now, t_gt, t_lt
-from protobuf_to_pydantic.customer_validator import check_one_of
 from protobuf_to_pydantic.customer_validator.v2 import (
     any_in_validator,
     any_not_in_validator,
+    check_one_of,
     contains_validator,
     duration_const_validator,
     duration_ge_validator,

@@ -1,20 +1,11 @@
 from typing import Callable
 
 from google.protobuf import __version__
-from google.protobuf.any_pb2 import Any as AnyMessage  # type: ignore
-
-from protobuf_to_pydantic._pydantic_adapter import is_v1
 
 if __version__ > "4.0.0":
-    if is_v1:
-        from example.proto_pydanticv1.example.example_proto.validate import demo_pb2
-    else:
-        from example.proto_pydanticv2.example.example_proto.validate import demo_pb2
+    from example.proto_pydanticv2.example.example_proto.validate import demo_pb2
 else:
-    if is_v1:
-        from example.proto_3_20_pydanticv1.example.example_proto.validate import demo_pb2
-    else:
-        from example.proto_3_20_pydanticv2.example.example_proto.validate import demo_pb2
+    from example.proto_3_20_pydanticv2.example.example_proto.validate import demo_pb2
 
 from protobuf_to_pydantic import msg_to_pydantic_model
 from tests.base.test_pgv_validate import BaseTestPgvModelValidator
@@ -22,9 +13,17 @@ from tests.base.test_pgv_validate import BaseTestPgvModelValidator
 
 class TestPgvModelValidator(BaseTestPgvModelValidator):
     number_model_class_list: list = [
-        demo_pb2.FloatTest, demo_pb2.DoubleTest, demo_pb2.Int32Test, demo_pb2.Uint32Test, demo_pb2.Sfixed32Test,
-        demo_pb2.Int64Test, demo_pb2.Sint64Test, demo_pb2.Uint64Test, demo_pb2.Sfixed64Test, demo_pb2.Fixed32Test,
-        demo_pb2.Fixed64Test
+        demo_pb2.FloatTest,
+        demo_pb2.DoubleTest,
+        demo_pb2.Int32Test,
+        demo_pb2.Uint32Test,
+        demo_pb2.Sfixed32Test,
+        demo_pb2.Int64Test,
+        demo_pb2.Sint64Test,
+        demo_pb2.Uint64Test,
+        demo_pb2.Sfixed64Test,
+        demo_pb2.Fixed32Test,
+        demo_pb2.Fixed64Test,
     ]
     replace_message_fn: Callable = staticmethod(msg_to_pydantic_model)  # type: ignore
 

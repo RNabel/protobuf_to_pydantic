@@ -9,7 +9,7 @@ from google.protobuf.message import Message  # type: ignore
 from pydantic import Field, model_validator
 
 from example.populate_by_name_plugin_config import MyBaseSchema
-from protobuf_to_pydantic.customer_validator import check_one_of
+from protobuf_to_pydantic.customer_validator.v2 import check_one_of
 
 
 class GeoLocation(MyBaseSchema):

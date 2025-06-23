@@ -4,7 +4,8 @@ from typing import Any, Dict, Type
 from google.protobuf.any_pb2 import Any as AnyMessage
 from google.protobuf.descriptor import FieldDescriptor
 
-from protobuf_to_pydantic import _pydantic_adapter
+from pydantic import BeforeValidator
+from typing_extensions import Annotated
 from protobuf_to_pydantic.util import Timedelta
 
 message_name_default_factory_dict: Dict[str, Any] = {
@@ -30,13 +31,10 @@ message_name_type_dict: Dict[str, Any] = {
     "Value": Any,
 }
 
-if not _pydantic_adapter.is_v1:
-    from pydantic import BeforeValidator
-    from typing_extensions import Annotated
 
-    message_name_type_dict["Duration"] = Annotated[
-        datetime.timedelta, BeforeValidator(Timedelta.validate)
-    ]
+message_name_type_dict["Duration"] = Annotated[
+    datetime.timedelta, BeforeValidator(Timedelta.validate)
+]
 python_type_default_value_dict: Dict[type, Any] = {
     float: 0.0,
     int: 0,

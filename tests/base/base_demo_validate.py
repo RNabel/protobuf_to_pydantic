@@ -3,26 +3,23 @@ from typing import Callable, Type
 import pytest
 from pydantic import ValidationError
 
-from protobuf_to_pydantic import _pydantic_adapter
-
 
 class BaseTestAliasDemoValidator:
     replace_message_fn: Callable = staticmethod(lambda x:x)  # type: ignore[assignment]
 
     def _test_alias_demo(self, model_class: Type) -> None:
         model_class = self.replace_message_fn(model_class)
-        if not _pydantic_adapter.is_v1:
-            model_class(
-                **{
-                "sourceId": "123",
-                "data": {
-                    "locationValue": {
-                        "latitude": 10.01,
-                        "longitude": -10.01,
-                        "altitudeMeters":10.01
-                    }
+        model_class(
+            **{
+            "sourceId": "123",
+            "data": {
+                "locationValue": {
+                    "latitude": 10.01,
+                    "longitude": -10.01,
+                    "altitudeMeters":10.01
                 }
-            })
+            }
+        })
         model_class(
             **{
                 "source_id": "123",

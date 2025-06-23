@@ -1,12 +1,26 @@
 import copy
 from collections import deque
-from typing import Any, Callable, Deque, Dict, List, Optional, Set, Tuple, Type, TypeVar
+from typing import (
+    Any,
+    Callable,
+    Deque,
+    Dict,
+    List,
+    Optional,
+    Self,
+    Set,
+    Tuple,
+    Type,
+    TypeVar,
+)
 from warnings import warn
 
 from pydantic import BaseModel, Field
 
 from protobuf_to_pydantic import _pydantic_adapter
-from protobuf_to_pydantic.plugin.field_desc_proto_to_code import FileDescriptorProtoToCode
+from protobuf_to_pydantic.plugin.field_desc_proto_to_code import (
+    FileDescriptorProtoToCode,
+)
 from protobuf_to_pydantic.template import Template
 from protobuf_to_pydantic.util import get_dict_from_comment
 
@@ -24,7 +38,9 @@ class ProtobufTypeConfigModel(BaseModel):
 
 class SubConfigModel(BaseModel):
     module: Any
-    use_root_config: bool = Field(default=False, description="If True, the root configuration will be inherited")
+    use_root_config: bool = Field(
+        default=False, description="If True, the root configuration will be inherited"
+    )
 
 
 def default_comment_handler(
@@ -51,8 +67,12 @@ def default_comment_handler(
 
 class ConfigModel(BaseModel):
     # output code config
-    customer_import_set: Set[str] = Field(default_factory=set, description="customer import code set")
-    customer_deque: Deque = Field(default_factory=deque, description="customer file content")
+    customer_import_set: Set[str] = Field(
+        default_factory=set, description="customer import code set"
+    )
+    customer_deque: Deque = Field(
+        default_factory=deque, description="customer file content"
+    )
     code_indent: int = Field(default=4, description="Code indent")
     module_path: str = Field(default="", description="protobuf project path")
     pyproject_file_path: str = Field(
@@ -68,9 +88,15 @@ class ConfigModel(BaseModel):
     )
 
     # gen message config
-    local_dict: dict = Field(default_factory=dict, description="Dict for local variables")
-    template: Type[Template] = Field(default=Template, description="Support more templates by customizing 'Template'")
-    comment_handler: Optional[Callable[[str, str, "ConfigModel"], Tuple[dict, str, str]]] = Field(
+    local_dict: dict = Field(
+        default_factory=dict, description="Dict for local variables"
+    )
+    template: Type[Template] = Field(
+        default=Template, description="Support more templates by customizing 'Template'"
+    )
+    comment_handler: Optional[
+        Callable[[str, str, "ConfigModel"], Tuple[dict, str, str]]
+    ] = Field(
         default=default_comment_handler,
         description="Customize the comment parsing function. if None, not parse the comment",
     )
@@ -80,9 +106,12 @@ class ConfigModel(BaseModel):
         description="If true, the annotation is parsed and the validation rule data is extracted from the annotation",
     )
     ignore_pkg_list: List[str] = Field(
-        default_factory=lambda: ["validate", "p2p_validate"], description="Ignore the specified pkg file"
+        default_factory=lambda: ["validate", "p2p_validate"],
+        description="Ignore the specified pkg file",
     )
-    base_model_class: Type[BaseModel] = Field(default=BaseModel, description="Inherited base pydantic model")
+    base_model_class: Type[BaseModel] = Field(
+        default=BaseModel, description="Inherited base pydantic model"
+    )
     all_field_set_optional: bool = Field(
         default=False,
         description="If true, all fields become optional, see: https://github.com/so1n/protobuf_to_pydantic/issues/60",
@@ -124,7 +153,8 @@ class ConfigModel(BaseModel):
         """,
     )
     pkg_config: Dict[str, "ConfigModel"] = Field(
-        default_factory=dict, description="Customize the configuration of different pkgs"
+        default_factory=dict,
+        description="Customize the configuration of different pkgs",
     )
     template_instance: Template = Field(
         default_factory=lambda: Template({}, ""),
@@ -135,14 +165,10 @@ class ConfigModel(BaseModel):
         arbitrary_types_allowed = True
 
     @_pydantic_adapter.model_validator(mode="after")
-    def after_init(cls, values: Any) -> Any:
-        if _pydantic_adapter.is_v1:
-            # values: Dict[str, Any]
-            values["template_instance"] = values["template"](values["local_dict"], values["comment_prefix"])
-            return values
-        else:
-            # values: "ConfigModel"
-            values.template_instance = values.template(values.local_dict, values.comment_prefix)
+    def after_init(cls, values: Self) -> Self:
+        values.template_instance = values.template(
+            values.local_dict, values.comment_prefix
+        )
         return values
 
     @_pydantic_adapter.model_validator(mode="before")
@@ -157,7 +183,9 @@ class ConfigModel(BaseModel):
             return get_config_by_module(_values.module, ConfigModel, root_dict).dict()
 
         if "pkg_config" in values:
-            values["pkg_config"] = {k: _validator(v) for k, v in values.get("pkg_config", {}).items()}
+            values["pkg_config"] = {
+                k: _validator(v) for k, v in values.get("pkg_config", {}).items()
+            }
         if "parse_comment" in values or "comment_handler" in values:
             warning_msg = (
                 "The 'parse_comment' and 'comment_handler' configuration items are deprecated, "
@@ -167,7 +195,9 @@ class ConfigModel(BaseModel):
         return values
 
 
-def get_config_by_module(module: Any, config_class: Type[ConfigT], root_dict: Optional[dict] = None) -> ConfigT:
+def get_config_by_module(
+    module: Any, config_class: Type[ConfigT], root_dict: Optional[dict] = None
+) -> ConfigT:
     if root_dict:
         param_dict: dict = copy.deepcopy(root_dict)
     else:

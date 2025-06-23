@@ -6,12 +6,10 @@ build-backend = "hatchling.build"
 name = "protobuf_to_pydantic"
 dynamic = ["version"]
 description = "Generate the `pydantic.BaseModel` class (and the corresponding source code) with parameter verification function through the Protobuf file"
-authors = [
-    {name = "So1n", email = "so1n897046026@gmail.com"}
-]
-license = {text = "Apache Software License"}
+authors = [{ name = "So1n", email = "so1n897046026@gmail.com" }]
+license = { text = "Apache Software License" }
 readme = "README.md"
-requires-python = ">=3.7"
+requires-python = ">=3.9"
 classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.7",
@@ -21,10 +19,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
 ]
-dependencies = [
-    "pydantic>=1.9.2,<3.0.0,!=2.5.0,!=2.9.0",
-    "protobuf>=3.20.3",
-]
+dependencies = ["pydantic>=2.6.0,<3.0.0,!=2.9.0", "protobuf>=3.20.3"]
 
 [project.optional-dependencies]
 lark = ["lark>=1.1.2"]
@@ -61,11 +56,7 @@ raw-options = { version_scheme = "no-guess-dev" }
 packages = ["protobuf_to_pydantic"]
 
 [tool.hatch.build.targets.sdist]
-include = [
-    "/protobuf_to_pydantic",
-    "/README.md",
-    "/LICENSE",
-]
+include = ["/protobuf_to_pydantic", "/README.md", "/LICENSE"]
 
 [tool.protobuf-to-pydantic.format]
 black = true

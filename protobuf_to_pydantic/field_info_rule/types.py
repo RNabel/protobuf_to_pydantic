@@ -1,10 +1,10 @@
 import json
-from typing import Any, Callable, Dict, Generator, Optional, Set, Type, Union
+from typing import Any, Callable, Dict, Optional, Set, Type, Union
 
+from pydantic import BeforeValidator
 from pydantic.fields import FieldInfo
-from typing_extensions import NotRequired, TypedDict
+from typing_extensions import Annotated, NotRequired, TypedDict
 
-from protobuf_to_pydantic._pydantic_adapter import is_v1
 
 Number = Union[int, float]
 
@@ -72,20 +72,4 @@ def json_to_dict(v: Union[str, dict]) -> dict:
     return v  # type: ignore[return-value]
 
 
-if is_v1:
-
-    class JsonAndDict(dict):
-        # v1 support
-        @classmethod
-        def __get_validators__(cls) -> Generator[Callable, None, None]:
-            yield cls.validate
-
-        @classmethod
-        def validate(cls, v: Union[str, dict]) -> dict:
-            return json_to_dict(v)
-
-else:
-    from pydantic import BeforeValidator
-    from typing_extensions import Annotated
-
-    JsonAndDict = Annotated[dict, BeforeValidator(json_to_dict)]  # type: ignore[misc, assignment]
+JsonAndDict = Annotated[dict, BeforeValidator(json_to_dict)]  # type: ignore[misc, assignment]
