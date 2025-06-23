@@ -153,48 +153,48 @@ class Sint64Test(BaseModel):
 
 
 class Fixed32Test(BaseModel):
-    const_test: typing.Literal[1] = Field(default=0.0)
-    range_e_test: float = Field(default=0.0, ge=1, le=10)
-    range_test: float = Field(default=0.0, gt=1, lt=10)
-    in_test: float = Field(default=0.0, in_=[1, 2, 3])
-    not_in_test: float = Field(default=0.0, not_in=[1, 2, 3])
-    ignore_test: float = Field(default=0.0)
+    const_test: typing.Literal[1] = Field(default=0)
+    range_e_test: int = Field(default=0, ge=1, le=10)
+    range_test: int = Field(default=0, gt=1, lt=10)
+    in_test: int = Field(default=0, in_=[1, 2, 3])
+    not_in_test: int = Field(default=0, not_in=[1, 2, 3])
+    ignore_test: int = Field(default=0)
 
     in_test_in_validator = field_validator("in_test", mode="after", check_fields=None)(in_validator)
     not_in_test_not_in_validator = field_validator("not_in_test", mode="after", check_fields=None)(not_in_validator)
 
 
 class Fixed64Test(BaseModel):
-    const_test: typing.Literal[1] = Field(default=0.0)
-    range_e_test: float = Field(default=0.0, ge=1, le=10)
-    range_test: float = Field(default=0.0, gt=1, lt=10)
-    in_test: float = Field(default=0.0, in_=[1, 2, 3])
-    not_in_test: float = Field(default=0.0, not_in=[1, 2, 3])
-    ignore_test: float = Field(default=0.0)
+    const_test: typing.Literal[1] = Field(default=0)
+    range_e_test: int = Field(default=0, ge=1, le=10)
+    range_test: int = Field(default=0, gt=1, lt=10)
+    in_test: int = Field(default=0, in_=[1, 2, 3])
+    not_in_test: int = Field(default=0, not_in=[1, 2, 3])
+    ignore_test: int = Field(default=0)
 
     in_test_in_validator = field_validator("in_test", mode="after", check_fields=None)(in_validator)
     not_in_test_not_in_validator = field_validator("not_in_test", mode="after", check_fields=None)(not_in_validator)
 
 
 class Sfixed32Test(BaseModel):
-    const_test: typing.Literal[1] = Field(default=0.0)
-    range_e_test: float = Field(default=0.0, ge=1, le=10)
-    range_test: float = Field(default=0.0, gt=1, lt=10)
-    in_test: float = Field(default=0.0, in_=[1, 2, 3])
-    not_in_test: float = Field(default=0.0, not_in=[1, 2, 3])
-    ignore_test: float = Field(default=0.0)
+    const_test: typing.Literal[1] = Field(default=0)
+    range_e_test: int = Field(default=0, ge=1, le=10)
+    range_test: int = Field(default=0, gt=1, lt=10)
+    in_test: int = Field(default=0, in_=[1, 2, 3])
+    not_in_test: int = Field(default=0, not_in=[1, 2, 3])
+    ignore_test: int = Field(default=0)
 
     in_test_in_validator = field_validator("in_test", mode="after", check_fields=None)(in_validator)
     not_in_test_not_in_validator = field_validator("not_in_test", mode="after", check_fields=None)(not_in_validator)
 
 
 class Sfixed64Test(BaseModel):
-    const_test: typing.Literal[1] = Field(default=0.0)
-    range_e_test: float = Field(default=0.0, ge=1, le=10)
-    range_test: float = Field(default=0.0, gt=1, lt=10)
-    in_test: float = Field(default=0.0, in_=[1, 2, 3])
-    not_in_test: float = Field(default=0.0, not_in=[1, 2, 3])
-    ignore_test: float = Field(default=0.0)
+    const_test: typing.Literal[1] = Field(default=0)
+    range_e_test: int = Field(default=0, ge=1, le=10)
+    range_test: int = Field(default=0, gt=1, lt=10)
+    in_test: int = Field(default=0, in_=[1, 2, 3])
+    not_in_test: int = Field(default=0, not_in=[1, 2, 3])
+    ignore_test: int = Field(default=0)
 
     in_test_in_validator = field_validator("in_test", mode="after", check_fields=None)(in_validator)
     not_in_test_not_in_validator = field_validator("not_in_test", mode="after", check_fields=None)(not_in_validator)

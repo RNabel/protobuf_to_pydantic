@@ -642,72 +642,72 @@ class Fixed32Test(BaseModel):
     const_test: typing.Literal[1] = Field(
         default=0, alias_priority=1, validation_alias="constTest", serialization_alias="constTest"
     )
-    range_e_test: float = Field(
+    range_e_test: int = Field(
         default=0, alias_priority=1, validation_alias="rangeETest", serialization_alias="rangeETest", ge=1, le=10
     )
-    range_test: float = Field(
+    range_test: int = Field(
         default=0, alias_priority=1, validation_alias="rangeTest", serialization_alias="rangeTest", gt=1, lt=10
     )
-    in_test: float = Field(
+    in_test: int = Field(
         default=0, alias_priority=1, validation_alias="inTest", serialization_alias="inTest", in_=[1, 2, 3]
     )
-    not_in_test: float = Field(
+    not_in_test: int = Field(
         default=0, alias_priority=1, validation_alias="notInTest", serialization_alias="notInTest", not_in=[1, 2, 3]
     )
-    default_test: float = Field(
+    default_test: int = Field(
         default=1.0, alias_priority=1, validation_alias="defaultTest", serialization_alias="defaultTest"
     )
-    default_template_test: float = Field(
+    default_template_test: int = Field(
         default=1600000000,
         alias_priority=1,
         validation_alias="defaultTemplateTest",
         serialization_alias="defaultTemplateTest",
     )
-    default_factory_test: float = Field(
+    default_factory_test: int = Field(
         default_factory=float,
         alias_priority=1,
         validation_alias="defaultFactoryTest",
         serialization_alias="defaultFactoryTest",
     )
-    miss_default_test: float = Field(
+    miss_default_test: int = Field(
         alias_priority=1, validation_alias="missDefaultTest", serialization_alias="missDefaultTest"
     )
-    required_test: float = Field(alias_priority=1, validation_alias="requiredTest", serialization_alias="requiredTest")
-    alias_test: float = Field(
+    required_test: int = Field(alias_priority=1, validation_alias="requiredTest", serialization_alias="requiredTest")
+    alias_test: int = Field(
         default=0, alias="alias", alias_priority=2, validation_alias="aliasTest", serialization_alias="aliasTest"
     )
-    desc_test: float = Field(
+    desc_test: int = Field(
         default=0,
         alias_priority=1,
         validation_alias="descTest",
         serialization_alias="descTest",
         description="test desc",
     )
-    multiple_of_test: float = Field(
+    multiple_of_test: int = Field(
         default=0,
         alias_priority=1,
         validation_alias="multipleOfTest",
         serialization_alias="multipleOfTest",
         multiple_of=3,
     )
-    example_test: float = Field(
+    example_test: int = Field(
         default=0, alias_priority=1, validation_alias="exampleTest", serialization_alias="exampleTest", example=1.0
     )
-    example_factory: float = Field(
+    example_factory: int = Field(
         default=0,
         alias_priority=1,
         validation_alias="exampleFactory",
         serialization_alias="exampleFactory",
         example=float,
     )
-    field_test: float = CustomerField(
+    field_test: int = CustomerField(
         default=0, alias_priority=1, validation_alias="fieldTest", serialization_alias="fieldTest"
     )
     type_test: float = Field(default=0, alias_priority=1, validation_alias="typeTest", serialization_alias="typeTest")
-    title_test: float = Field(
+    title_test: int = Field(
         default=0, alias_priority=1, validation_alias="titleTest", serialization_alias="titleTest", title="title_test"
     )
-    extra_test: float = Field(
+    extra_test: int = Field(
         default=0,
         alias_priority=1,
         validation_alias="extraTest",
@@ -732,72 +732,72 @@ class Fixed64Test(BaseModel):
     const_test: typing.Literal[1] = Field(
         default=0, alias_priority=1, validation_alias="constTest", serialization_alias="constTest"
     )
-    range_e_test: float = Field(
+    range_e_test: int = Field(
         default=0, alias_priority=1, validation_alias="rangeETest", serialization_alias="rangeETest", ge=1, le=10
     )
-    range_test: float = Field(
+    range_test: int = Field(
         default=0, alias_priority=1, validation_alias="rangeTest", serialization_alias="rangeTest", gt=1, lt=10
     )
-    in_test: float = Field(
+    in_test: int = Field(
         default=0, alias_priority=1, validation_alias="inTest", serialization_alias="inTest", in_=[1, 2, 3]
     )
-    not_in_test: float = Field(
+    not_in_test: int = Field(
         default=0, alias_priority=1, validation_alias="notInTest", serialization_alias="notInTest", not_in=[1, 2, 3]
     )
-    default_test: float = Field(
+    default_test: int = Field(
         default=1.0, alias_priority=1, validation_alias="defaultTest", serialization_alias="defaultTest"
     )
-    default_template_test: float = Field(
+    default_template_test: int = Field(
         default=1600000000,
         alias_priority=1,
         validation_alias="defaultTemplateTest",
         serialization_alias="defaultTemplateTest",
     )
-    default_factory_test: float = Field(
+    default_factory_test: int = Field(
         default_factory=float,
         alias_priority=1,
         validation_alias="defaultFactoryTest",
         serialization_alias="defaultFactoryTest",
     )
-    miss_default_test: float = Field(
+    miss_default_test: int = Field(
         alias_priority=1, validation_alias="missDefaultTest", serialization_alias="missDefaultTest"
     )
-    required_test: float = Field(alias_priority=1, validation_alias="requiredTest", serialization_alias="requiredTest")
-    alias_test: float = Field(
+    required_test: int = Field(alias_priority=1, validation_alias="requiredTest", serialization_alias="requiredTest")
+    alias_test: int = Field(
         default=0, alias="alias", alias_priority=2, validation_alias="aliasTest", serialization_alias="aliasTest"
     )
-    desc_test: float = Field(
+    desc_test: int = Field(
         default=0,
         alias_priority=1,
         validation_alias="descTest",
         serialization_alias="descTest",
         description="test desc",
     )
-    multiple_of_test: float = Field(
+    multiple_of_test: int = Field(
         default=0,
         alias_priority=1,
         validation_alias="multipleOfTest",
         serialization_alias="multipleOfTest",
         multiple_of=3,
     )
-    example_test: float = Field(
+    example_test: int = Field(
         default=0, alias_priority=1, validation_alias="exampleTest", serialization_alias="exampleTest", example=1.0
     )
-    example_factory: float = Field(
+    example_factory: int = Field(
         default=0,
         alias_priority=1,
         validation_alias="exampleFactory",
         serialization_alias="exampleFactory",
         example=float,
     )
-    field_test: float = CustomerField(
+    field_test: int = CustomerField(
         default=0, alias_priority=1, validation_alias="fieldTest", serialization_alias="fieldTest"
     )
     type_test: float = Field(default=0, alias_priority=1, validation_alias="typeTest", serialization_alias="typeTest")
-    title_test: float = Field(
+    title_test: int = Field(
         default=0, alias_priority=1, validation_alias="titleTest", serialization_alias="titleTest", title="title_test"
     )
-    extra_test: float = Field(
+    extra_test: int = Field(
         default=0,
         alias_priority=1,
         validation_alias="extraTest",
@@ -1685,72 +1685,72 @@ class Sfixed32Test(BaseModel):
     const_test: typing.Literal[1] = Field(
         default=0, alias_priority=1, validation_alias="constTest", serialization_alias="constTest"
     )
-    range_e_test: float = Field(
+    range_e_test: int = Field(
         default=0, alias_priority=1, validation_alias="rangeETest", serialization_alias="rangeETest", ge=1, le=10
     )
-    range_test: float = Field(
+    range_test: int = Field(
         default=0, alias_priority=1, validation_alias="rangeTest", serialization_alias="rangeTest", gt=1, lt=10
     )
-    in_test: float = Field(
+    in_test: int = Field(
         default=0, alias_priority=1, validation_alias="inTest", serialization_alias="inTest", in_=[1, 2, 3]
     )
-    not_in_test: float = Field(
+    not_in_test: int = Field(
         default=0, alias_priority=1, validation_alias="notInTest", serialization_alias="notInTest", not_in=[1, 2, 3]
     )
-    default_test: float = Field(
+    default_test: int = Field(
         default=1.0, alias_priority=1, validation_alias="defaultTest", serialization_alias="defaultTest"
     )
-    default_template_test: float = Field(
+    default_template_test: int = Field(
         default=1600000000,
         alias_priority=1,
         validation_alias="defaultTemplateTest",
         serialization_alias="defaultTemplateTest",
     )
-    default_factory_test: float = Field(
+    default_factory_test: int = Field(
         default_factory=float,
         alias_priority=1,
         validation_alias="defaultFactoryTest",
         serialization_alias="defaultFactoryTest",
     )
-    miss_default_test: float = Field(
+    miss_default_test: int = Field(
         alias_priority=1, validation_alias="missDefaultTest", serialization_alias="missDefaultTest"
     )
-    required_test: float = Field(alias_priority=1, validation_alias="requiredTest", serialization_alias="requiredTest")
-    alias_test: float = Field(
+    required_test: int = Field(alias_priority=1, validation_alias="requiredTest", serialization_alias="requiredTest")
+    alias_test: int = Field(
         default=0, alias="alias", alias_priority=2, validation_alias="aliasTest", serialization_alias="aliasTest"
     )
-    desc_test: float = Field(
+    desc_test: int = Field(
         default=0,
         alias_priority=1,
         validation_alias="descTest",
         serialization_alias="descTest",
         description="test desc",
     )
-    multiple_of_test: float = Field(
+    multiple_of_test: int = Field(
         default=0,
         alias_priority=1,
         validation_alias="multipleOfTest",
         serialization_alias="multipleOfTest",
         multiple_of=3,
     )
-    example_test: float = Field(
+    example_test: int = Field(
         default=0, alias_priority=1, validation_alias="exampleTest", serialization_alias="exampleTest", example=1.0
     )
-    example_factory: float = Field(
+    example_factory: int = Field(
         default=0,
         alias_priority=1,
         validation_alias="exampleFactory",
         serialization_alias="exampleFactory",
         example=float,
     )
-    field_test: float = CustomerField(
+    field_test: int = CustomerField(
         default=0, alias_priority=1, validation_alias="fieldTest", serialization_alias="fieldTest"
     )
     type_test: float = Field(default=0, alias_priority=1, validation_alias="typeTest", serialization_alias="typeTest")
-    title_test: float = Field(
+    title_test: int = Field(
         default=0, alias_priority=1, validation_alias="titleTest", serialization_alias="titleTest", title="title_test"
     )
-    extra_test: float = Field(
+    extra_test: int = Field(
         default=0,
         alias_priority=1,
         validation_alias="extraTest",
@@ -1775,72 +1775,72 @@ class Sfixed64Test(BaseModel):
     const_test: typing.Literal[1] = Field(
         default=0, alias_priority=1, validation_alias="constTest", serialization_alias="constTest"
     )
-    range_e_test: float = Field(
+    range_e_test: int = Field(
         default=0, alias_priority=1, validation_alias="rangeETest", serialization_alias="rangeETest", ge=1, le=10
     )
-    range_test: float = Field(
+    range_test: int = Field(
         default=0, alias_priority=1, validation_alias="rangeTest", serialization_alias="rangeTest", gt=1, lt=10
     )
-    in_test: float = Field(
+    in_test: int = Field(
         default=0, alias_priority=1, validation_alias="inTest", serialization_alias="inTest", in_=[1, 2, 3]
     )
-    not_in_test: float = Field(
+    not_in_test: int = Field(
         default=0, alias_priority=1, validation_alias="notInTest", serialization_alias="notInTest", not_in=[1, 2, 3]
     )
-    default_test: float = Field(
+    default_test: int = Field(
         default=1.0, alias_priority=1, validation_alias="defaultTest", serialization_alias="defaultTest"
     )
-    default_template_test: float = Field(
+    default_template_test: int = Field(
         default=1600000000,
         alias_priority=1,
         validation_alias="defaultTemplateTest",
         serialization_alias="defaultTemplateTest",
     )
-    default_factory_test: float = Field(
+    default_factory_test: int = Field(
         default_factory=float,
         alias_priority=1,
         validation_alias="defaultFactoryTest",
         serialization_alias="defaultFactoryTest",
     )
-    miss_default_test: float = Field(
+    miss_default_test: int = Field(
         alias_priority=1, validation_alias="missDefaultTest", serialization_alias="missDefaultTest"
     )
-    required_test: float = Field(alias_priority=1, validation_alias="requiredTest", serialization_alias="requiredTest")
-    alias_test: float = Field(
+    required_test: int = Field(alias_priority=1, validation_alias="requiredTest", serialization_alias="requiredTest")
+    alias_test: int = Field(
         default=0, alias="alias", alias_priority=2, validation_alias="aliasTest", serialization_alias="aliasTest"
     )
-    desc_test: float = Field(
+    desc_test: int = Field(
         default=0,
         alias_priority=1,
         validation_alias="descTest",
         serialization_alias="descTest",
         description="test desc",
     )
-    multiple_of_test: float = Field(
+    multiple_of_test: int = Field(
         default=0,
         alias_priority=1,
         validation_alias="multipleOfTest",
         serialization_alias="multipleOfTest",
         multiple_of=3,
     )
-    example_test: float = Field(
+    example_test: int = Field(
         default=0, alias_priority=1, validation_alias="exampleTest", serialization_alias="exampleTest", example=1.0
     )
-    example_factory: float = Field(
+    example_factory: int = Field(
         default=0,
         alias_priority=1,
         validation_alias="exampleFactory",
         serialization_alias="exampleFactory",
         example=float,
     )
-    field_test: float = CustomerField(
+    field_test: int = CustomerField(
         default=0, alias_priority=1, validation_alias="fieldTest", serialization_alias="fieldTest"
     )
     type_test: float = Field(default=0, alias_priority=1, validation_alias="typeTest", serialization_alias="typeTest")
-    title_test: float = Field(
+    title_test: int = Field(
         default=0, alias_priority=1, validation_alias="titleTest", serialization_alias="titleTest", title="title_test"
     )
-    extra_test: float = Field(
+    extra_test: int = Field(
         default=0,
         alias_priority=1,
         validation_alias="extraTest",
