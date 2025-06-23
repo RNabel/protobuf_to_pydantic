@@ -110,3 +110,6 @@ venv.bak/
 .idea/
 .vscode/
 poetry.lock
+
+# Claude configuration
+CLAUDE.md

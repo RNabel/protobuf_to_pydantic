@@ -1,0 +1,84 @@
+syntax = "proto3";
+package roundtrip;
+
+// Message to test all basic protobuf types for round-trip conversion
+message BasicTypesMessage {
+  // Numeric types
+  int32 int32_field = 1;
+  int64 int64_field = 2;
+  uint32 uint32_field = 3;
+  uint64 uint64_field = 4;
+  sint32 sint32_field = 5;
+  sint64 sint64_field = 6;
+  fixed32 fixed32_field = 7;
+  fixed64 fixed64_field = 8;
+  sfixed32 sfixed32_field = 9;
+  sfixed64 sfixed64_field = 10;
+  
+  // Floating point types
+  float float_field = 11;
+  double double_field = 12;
+  
+  // Boolean type
+  bool bool_field = 13;
+  
+  // String and bytes types
+  string string_field = 14;
+  bytes bytes_field = 15;
+  
+  // Repeated fields for each type
+  repeated int32 repeated_int32 = 16;
+  repeated int64 repeated_int64 = 17;
+  repeated uint32 repeated_uint32 = 18;
+  repeated uint64 repeated_uint64 = 19;
+  repeated sint32 repeated_sint32 = 20;
+  repeated sint64 repeated_sint64 = 21;
+  repeated fixed32 repeated_fixed32 = 22;
+  repeated fixed64 repeated_fixed64 = 23;
+  repeated sfixed32 repeated_sfixed32 = 24;
+  repeated sfixed64 repeated_sfixed64 = 25;
+  repeated float repeated_float = 26;
+  repeated double repeated_double = 27;
+  repeated bool repeated_bool = 28;
+  repeated string repeated_string = 29;
+  repeated bytes repeated_bytes = 30;
+  
+  // Optional fields for testing null handling
+  optional int32 optional_int32 = 31;
+  optional string optional_string = 32;
+  optional bool optional_bool = 33;
+}
+
+// Message for testing edge cases
+message EdgeCasesMessage {
+  // Min/max values for numeric types
+  int32 min_int32 = 1;
+  int32 max_int32 = 2;
+  int64 min_int64 = 3;
+  int64 max_int64 = 4;
+  uint32 min_uint32 = 5;
+  uint32 max_uint32 = 6;
+  uint64 min_uint64 = 7;
+  uint64 max_uint64 = 8;
+  
+  // Special float/double values
+  float zero_float = 9;
+  float negative_zero_float = 10;
+  float infinity_float = 11;
+  float negative_infinity_float = 12;
+  float nan_float = 13;
+  
+  double zero_double = 14;
+  double negative_zero_double = 15;
+  double infinity_double = 16;
+  double negative_infinity_double = 17;
+  double nan_double = 18;
+  
+  // Empty string and bytes
+  string empty_string = 19;
+  bytes empty_bytes = 20;
+  
+  // Unicode strings
+  string unicode_string = 21;
+  string emoji_string = 22;
+}
