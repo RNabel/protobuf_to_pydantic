@@ -2,6 +2,7 @@ import time
 from typing import Any
 from uuid import uuid4
 
+from expecttest import assert_expected_inline
 from google.protobuf import __version__
 
 from protobuf_to_pydantic._pydantic_adapter import is_v1
@@ -18,7 +19,6 @@ else:
         from example.proto_3_20_pydanticv2.example.example_proto.demo import demo_pb2  # type: ignore[no-redef]
 
 from protobuf_to_pydantic import msg_to_pydantic_model, pydantic_model_to_py_code
-from protobuf_to_pydantic.util import format_content
 from tests.test_gen_code.test_helper import P2CNoHeader
 
 
@@ -40,7 +40,9 @@ class BaseTestTextComment:
         )
 
     def test_user_message(self) -> None:
-        content = """
+        output = self._model_output(demo_pb2.UserMessage)
+        if is_v1:
+            assert_expected_inline(output, """\
 class SexType(IntEnum):
     man = 0
     women = 1
@@ -79,9 +81,9 @@ class UserMessage(BaseModel):
         default_factory=ExampleExampleProtoCommonSingleDemoMessage,
         customer_string="c1", customer_int=1
     )
-"""
-        if not is_v1:
-            content = """
+""")
+        else:
+            assert_expected_inline(output, """\
 class SexType(IntEnum):
     man = 0
     women = 1
@@ -116,36 +118,36 @@ class UserMessage(BaseModel):
     is_adult: bool = Field(default=False)
     user_name: str = Field(default="", description="user name", example="so1n", min_length=1, max_length=10)
     demo_message: ExampleExampleProtoCommonSingleDemoMessage = Field(
-        default_factory=ExampleExampleProtoCommonSingleDemoMessage,
-        customer_string="c1", customer_int=1
+        default_factory=ExampleExampleProtoCommonSingleDemoMessage, customer_string="c1", customer_int=1
     )
-"""
-        assert format_content(content) in self._model_output(demo_pb2.UserMessage)
+""")
 
     def test_other_message(self) -> None:
+        output = self._model_output(demo_pb2.OtherMessage)
         if is_v1:
-            content = """
-        class OtherMessage(BaseModel):
-            class Config:
-                arbitrary_types_allowed = True
+            assert_expected_inline(output, """\
+class OtherMessage(BaseModel):
+    class Config:
+        arbitrary_types_allowed = True
 
-            metadata: typing.Dict[str, typing.Any] = Field(default_factory=dict)
-            double_value: DoubleValue = Field(default_factory=DoubleValue)
-            field_mask: typing.Optional[FieldMask] = Field(default_factory=FieldMask)
-        """
+    metadata: typing.Dict[str, typing.Any] = Field(default_factory=dict)
+    double_value: DoubleValue = Field(default_factory=DoubleValue)
+    field_mask: typing.Optional[FieldMask] = Field(default_factory=FieldMask)
+""")
         else:
-            content = """
+            assert_expected_inline(output, """\
 class OtherMessage(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     metadata: typing.Dict[str, typing.Any] = Field(default_factory=dict)
     double_value: DoubleValue = Field(default_factory=DoubleValue)
     field_mask: typing.Optional[FieldMask] = Field(default_factory=FieldMask)
-"""
-        assert format_content(content) in self._model_output(demo_pb2.OtherMessage)
+""")
 
     def test_map_message(self) -> None:
-        content = """
+        output = self._model_output(demo_pb2.MapMessage)
+        if is_v1:
+            assert_expected_inline(output, """\
 class SexType(IntEnum):
     man = 0
     women = 1
@@ -189,9 +191,9 @@ class UserMessage(BaseModel):
 class MapMessage(BaseModel):
     user_map: typing.Dict[str, UserMessage] = Field(default_factory=dict)
     user_flag: typing.Dict[str, bool] = Field(default_factory=dict)
-"""
-        if not is_v1:
-            content = """
+""")
+        else:
+            assert_expected_inline(output, """\
 class SexType(IntEnum):
     man = 0
     women = 1
@@ -226,19 +228,19 @@ class UserMessage(BaseModel):
     is_adult: bool = Field(default=False)
     user_name: str = Field(default="", description="user name", example="so1n", min_length=1, max_length=10)
     demo_message: ExampleExampleProtoCommonSingleDemoMessage = Field(
-        default_factory=ExampleExampleProtoCommonSingleDemoMessage,
-        customer_string="c1", customer_int=1
+        default_factory=ExampleExampleProtoCommonSingleDemoMessage, customer_string="c1", customer_int=1
     )
 
 
 class MapMessage(BaseModel):
     user_map: typing.Dict[str, UserMessage] = Field(default_factory=dict)
     user_flag: typing.Dict[str, bool] = Field(default_factory=dict)
-"""
-        assert format_content(content) in self._model_output(demo_pb2.MapMessage)
+""")
 
     def test_repeated_message(self) -> None:
-        content = """
+        output = self._model_output(demo_pb2.RepeatedMessage)
+        if is_v1:
+            assert_expected_inline(output, """\
 class SexType(IntEnum):
     man = 0
     women = 1
@@ -283,9 +285,9 @@ class RepeatedMessage(BaseModel):
     str_list: typing.List[str] = Field(default_factory=list, min_items=3, max_items=5)
     int_list: typing.List[int] = Field(default_factory=list, min_items=1, max_items=5, unique_items=True)
     user_list: typing.List[UserMessage] = Field(default_factory=list)
-"""
-        if not is_v1:
-            content = """
+""")
+        else:
+            assert_expected_inline(output, """\
 class SexType(IntEnum):
     man = 0
     women = 1
@@ -320,8 +322,7 @@ class UserMessage(BaseModel):
     is_adult: bool = Field(default=False)
     user_name: str = Field(default="", description="user name", example="so1n", min_length=1, max_length=10)
     demo_message: ExampleExampleProtoCommonSingleDemoMessage = Field(
-        default_factory=ExampleExampleProtoCommonSingleDemoMessage,
-        customer_string="c1", customer_int=1
+        default_factory=ExampleExampleProtoCommonSingleDemoMessage, customer_string="c1", customer_int=1
     )
 
 
@@ -329,12 +330,12 @@ class RepeatedMessage(BaseModel):
     str_list: typing.List[str] = Field(default_factory=list, min_length=3, max_length=5)
     int_list: typing.Set[int] = Field(default_factory=set, min_length=1, max_length=5)
     user_list: typing.List[UserMessage] = Field(default_factory=list)
-
-"""
-        assert format_content(content) in self._model_output(demo_pb2.RepeatedMessage)
+""")
 
     def test_nested_message(self) -> None:
-        content = """
+        output = self._model_output(demo_pb2.NestedMessage)
+        if is_v1:
+            assert_expected_inline(output, """\
 class SexType(IntEnum):
     man = 0
     women = 1
@@ -411,9 +412,9 @@ class NestedMessage(BaseModel):
     include_enum: IncludeEnum = Field(default=0)
     empty: typing.Any = Field()
     after_refer: AfterReferMessage = Field(default_factory=AfterReferMessage)
-"""
-        if not is_v1:
-            content = """
+""")
+        else:
+            assert_expected_inline(output, """\
 class SexType(IntEnum):
     man = 0
     women = 1
@@ -448,8 +449,7 @@ class UserMessage(BaseModel):
     is_adult: bool = Field(default=False)
     user_name: str = Field(default="", description="user name", example="so1n", min_length=1, max_length=10)
     demo_message: ExampleExampleProtoCommonSingleDemoMessage = Field(
-        default_factory=ExampleExampleProtoCommonSingleDemoMessage,
-        customer_string="c1", customer_int=1
+        default_factory=ExampleExampleProtoCommonSingleDemoMessage, customer_string="c1", customer_int=1
     )
 
 
@@ -488,23 +488,21 @@ class NestedMessage(BaseModel):
     include_enum: IncludeEnum = Field(default=0)
     empty: typing.Any = Field()
     after_refer: AfterReferMessage = Field(default_factory=AfterReferMessage)
-"""
-        assert format_content(content) in self._model_output(demo_pb2.NestedMessage)
+""")
 
     def test_self_referencing(self) -> None:
-        assert format_content(
-            """
+        output = self._model_output(demo_pb2.InvoiceItem)
+        assert_expected_inline(output, """\
 class InvoiceItem(BaseModel):
     name: str = Field(default="")
     amount: int = Field(default=0)
     quantity: int = Field(default=0)
     items: typing.List["InvoiceItem"] = Field(default_factory=list)
-            """
-        ) in self._model_output(demo_pb2.InvoiceItem)
+""")
 
     def test_circular_references(self) -> None:
-        assert format_content(
-            """
+        output = self._model_output(demo_pb2.InvoiceItem2)
+        assert_expected_inline(output, """\
 class Invoice3(BaseModel):
     name: str = Field(default="")
     amount: int = Field(default=0)
@@ -518,12 +516,11 @@ class InvoiceItem2(BaseModel):
     quantity: int = Field(default=0)
     items: typing.List["InvoiceItem2"] = Field(default_factory=list)
     invoice: Invoice3 = Field(default_factory=Invoice3)
-            """
-        ) in self._model_output(demo_pb2.InvoiceItem2)
+""")
 
     def test_message_reference(self) -> None:
-        assert format_content(
-            """
+        output = self._model_output(demo_pb2.RootMessage)
+        assert_expected_inline(output, """\
 class AnOtherMessage(BaseModel):
     class SubMessage(BaseModel):
         text: str = Field(default="")
@@ -535,31 +532,28 @@ class AnOtherMessage(BaseModel):
 class RootMessage(BaseModel):
     field1: str = Field(default="")
     field2: AnOtherMessage = Field(default_factory=AnOtherMessage)
-            """
-        ) in self._model_output(demo_pb2.RootMessage)
+""")
 
     def test_same_bane_inline_structure(self) -> None:
-        assert format_content(
-            """
+        output = self._model_output(demo_pb2.TestSameName0)
+        assert_expected_inline(output, """\
 class TestSameName0(BaseModel):
     class Body(BaseModel):
         input_model: str = Field(default="")
         input_info: typing.Dict[str, str] = Field(default_factory=dict)
 
     body: Body = Field(default_factory=Body)
-            """
-        ) in self._model_output(demo_pb2.TestSameName0)
+""")
 
-        assert format_content(
-            """
+        output = self._model_output(demo_pb2.TestSameName1)
+        assert_expected_inline(output, """\
 class TestSameName1(BaseModel):
     class Body(BaseModel):
         output_model: str = Field(default="")
         output_info: typing.Dict[str, str] = Field(default_factory=dict)
 
     body: Body = Field(default_factory=Body)
-            """
-        ) in self._model_output(demo_pb2.TestSameName1)
+""")
 
 class TestTextCommentByPyi(BaseTestTextComment):
     @staticmethod

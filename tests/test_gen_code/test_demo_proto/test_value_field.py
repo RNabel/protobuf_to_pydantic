@@ -2,6 +2,7 @@
 
 from typing import Any
 
+from expecttest import assert_expected_inline
 from google.protobuf import __version__
 
 from protobuf_to_pydantic._pydantic_adapter import is_v1
@@ -23,7 +24,6 @@ else:
 
 from protobuf_to_pydantic import msg_to_pydantic_model, pydantic_model_to_py_code
 from protobuf_to_pydantic.gen_model import clear_create_model_cache
-from protobuf_to_pydantic.util import format_content
 from tests.test_gen_code.test_helper import P2CNoHeader
 
 
@@ -36,14 +36,14 @@ class TestValueField:
 
     def test_value_field_message(self) -> None:
         """Test that google.protobuf.Value fields are converted to typing.Any"""
-        content = """
+        output = self._model_output(value_demo_pb2.ValueTestMessage)
+        assert_expected_inline(output, """\
 class ValueTestMessage(BaseModel):
     id: str = Field(default="")
     dynamic_value: typing.Optional[typing.Any] = Field(default=None)
     value_list: typing.List[typing.Any] = Field(default_factory=list)
     value_map: typing.Dict[str, typing.Any] = Field(default_factory=dict)
-"""
-        assert format_content(content) in self._model_output(value_demo_pb2.ValueTestMessage)
+""")
 
     def test_plugin_generated_value_field(self) -> None:
         """Test that plugin-generated code with Value fields can be instantiated"""

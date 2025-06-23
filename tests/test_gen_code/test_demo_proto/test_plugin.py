@@ -1,5 +1,6 @@
 from inspect import getsource
 
+from expecttest import assert_expected_inline
 from google.protobuf import __version__
 
 from protobuf_to_pydantic._pydantic_adapter import is_v1
@@ -27,15 +28,16 @@ else:
 class TestPlugin:
 
     def test_empty_message(self) -> None:
-        content = """
+        output = getsource(demo_p2p.EmptyMessage)
+        assert_expected_inline(output, """\
 class EmptyMessage(BaseModel):
     pass
-"""
-        assert content.strip("\n") in getsource(demo_p2p.EmptyMessage)
+""")
 
     def test_user_message(self) -> None:
+        output = getsource(demo_p2p.UserMessage)
         if not is_v1:
-            content = """
+            assert_expected_inline(output, """\
 class UserMessage(BaseModel):
     \"\"\"
     user info
@@ -50,9 +52,9 @@ class UserMessage(BaseModel):
     is_adult: bool = Field(default=False)
     user_name: str = Field(default="", description="user name", min_length=1, max_length=10, example="so1n")
     demo_message: DemoMessage = Field(default_factory=DemoMessage, customer_string="c1", customer_int=1)
-"""
+""")
         else:
-            content = """
+            assert_expected_inline(output, """\
 class UserMessage(BaseModel):
     \"\"\"
     user info
@@ -69,12 +71,12 @@ class UserMessage(BaseModel):
     is_adult: bool = Field(default=False)
     user_name: str = Field(default="", example="so1n", description="user name", min_length=1, max_length=10)
     demo_message: DemoMessage = Field(default_factory=DemoMessage, customer_string="c1", customer_int=1)
-"""
-        assert content.strip("\n") in getsource(demo_p2p.UserMessage)
+""")
 
     def test_other_message(self) -> None:
+        output = getsource(demo_p2p.OtherMessage)
         if is_v1:
-            content = """
+            assert_expected_inline(output, """\
 class OtherMessage(BaseModel):
     class Config:
         arbitrary_types_allowed = True
@@ -82,19 +84,19 @@ class OtherMessage(BaseModel):
     metadata: typing.Dict[str, typing.Any] = Field(default_factory=dict)
     double_value: DoubleValue = Field(default_factory=DoubleValue)
     field_mask: typing.Optional[FieldMask] = Field(default_factory=FieldMask)
-"""
+""")
         else:
-            content = """
+            assert_expected_inline(output, """\
 class OtherMessage(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
     metadata: typing.Dict[str, typing.Any] = Field(default_factory=dict)
     double_value: DoubleValue = Field(default_factory=DoubleValue)
     field_mask: typing.Optional[FieldMask] = Field(default_factory=FieldMask)
-"""
-        assert content.strip("\n") in getsource(demo_p2p.OtherMessage).strip("\n")
+""")
 
     def test_map_message(self) -> None:
-        content = """
+        output = getsource(demo_p2p.MapMessage)
+        assert_expected_inline(output, """\
 class MapMessage(BaseModel):
     \"\"\"
     test map message and bad message
@@ -102,12 +104,12 @@ class MapMessage(BaseModel):
 
     user_map: "typing.Dict[str, UserMessage]" = Field(default_factory=dict)
     user_flag: "typing.Dict[str, bool]" = Field(default_factory=dict)
-"""
-        assert content.strip("\n") in getsource(demo_p2p.MapMessage).strip("\n")
+""")
 
     def test_repeated_message(self) -> None:
+        output = getsource(demo_p2p.RepeatedMessage)
         if is_v1:
-            content = """
+            assert_expected_inline(output, """\
 class RepeatedMessage(BaseModel):
     \"\"\"
     test repeated msg
@@ -116,9 +118,9 @@ class RepeatedMessage(BaseModel):
     str_list: typing.List[str] = Field(default_factory=list, min_items=3, max_items=5)
     int_list: typing.List[int] = Field(default_factory=list, min_items=1, max_items=5, unique_items=True)
     user_list: typing.List[UserMessage] = Field(default_factory=list)
-"""
+""")
         else:
-            content = """
+            assert_expected_inline(output, """\
 class RepeatedMessage(BaseModel):
     \"\"\"
     test repeated msg
@@ -127,11 +129,12 @@ class RepeatedMessage(BaseModel):
     str_list: typing.List[str] = Field(default_factory=list, min_length=3, max_length=5)
     int_list: typing.Set[int] = Field(default_factory=set, min_length=1, max_length=5)
     user_list: typing.List[UserMessage] = Field(default_factory=list)
-"""
-        assert content.strip("\n") in getsource(demo_p2p.RepeatedMessage).strip("\n")
+""")
 
     def test_nested_message(self) -> None:
-        content = """
+        output = getsource(demo_p2p.NestedMessage)
+        if is_v1:
+            assert_expected_inline(output, """\
 class NestedMessage(BaseModel):
     \"\"\"
     test nested message
@@ -156,9 +159,9 @@ class NestedMessage(BaseModel):
     include_enum: "NestedMessage.IncludeEnum" = Field(default=0)
     empty: None = Field()
     after_refer: AfterReferMessage = Field(default_factory=AfterReferMessage)
-"""
-        if not is_v1:
-            content = """
+""")
+        else:
+            assert_expected_inline(output, """\
 class NestedMessage(BaseModel):
     \"\"\"
     test nested message
@@ -181,12 +184,11 @@ class NestedMessage(BaseModel):
     include_enum: "NestedMessage.IncludeEnum" = Field(default=0)
     empty: None = Field()
     after_refer: AfterReferMessage = Field(default_factory=AfterReferMessage)
-"""
-
-        assert content.strip("\n") in getsource(demo_p2p.NestedMessage).strip("\n")
+""")
 
     def test_self_referencing(self) -> None:
-        content = """
+        output = getsource(demo_p2p.InvoiceItem)
+        assert_expected_inline(output, """\
 class InvoiceItem(BaseModel):
     \"\"\"
         Test self-referencing Messages
@@ -197,11 +199,12 @@ class InvoiceItem(BaseModel):
     amount: int = Field(default=0)
     quantity: int = Field(default=0)
     items: typing.List["InvoiceItem"] = Field(default_factory=list)
-"""
-        assert content.strip("\n") in getsource(demo_p2p.InvoiceItem).strip("\n")
+""")
 
     def test_field_optional(self) -> None:
-        content = """
+        output = getsource(demo_p2p.OptionalMessage)
+        if not is_v1:
+            assert_expected_inline(output, """\
 class OptionalMessage(BaseModel):
     _one_of_dict = {"OptionalMessage.a": {"fields": {"x", "yy"}, "required": True}}
     one_of_validator = model_validator(mode="before")(check_one_of)
@@ -213,9 +216,9 @@ class OptionalMessage(BaseModel):
     str_list: typing.List[str] = Field(default_factory=list)
     int_map: "typing.Dict[str, int]" = Field(default_factory=dict)
     default_template_test: float = Field(default=1600000000.0)
-"""
-        if is_v1:
-            content = """
+""")
+        else:
+            assert_expected_inline(output, """\
 class OptionalMessage(BaseModel):
     _one_of_dict = {"OptionalMessage.a": {"fields": {"x", "yy"}, "required": True}}
     one_of_validator = root_validator(pre=True, allow_reuse=True)(check_one_of)
@@ -227,21 +230,23 @@ class OptionalMessage(BaseModel):
     str_list: typing.List[str] = Field(default_factory=list)
     int_map: "typing.Dict[str, int]" = Field(default_factory=dict)
     default_template_test: float = Field(default=1600000000.0)
-"""
-        assert content.strip("\n") in getsource(demo_p2p.OptionalMessage).strip("\n")
+""")
 
-    def test_after_refer_message(self)->None:
+    def test_after_refer_message(self) -> None:
         pass
 
     def test_circular_references(self) -> None:
-        content = """
+        output = getsource(demo_p2p.Invoice3)
+        assert_expected_inline(output, """\
 class Invoice3(BaseModel):
     name: str = Field(default="")
     amount: int = Field(default=0)
     quantity: int = Field(default=0)
-    items: typing.List["InvoiceItem2"] = Field(default_factory=list)"""
-        assert content.strip("\n") in getsource(demo_p2p.Invoice3).strip("\n")
-        content = """
+    items: typing.List["InvoiceItem2"] = Field(default_factory=list)
+""")
+        
+        output = getsource(demo_p2p.InvoiceItem2)
+        assert_expected_inline(output, """\
 class InvoiceItem2(BaseModel):
     \"\"\"
         Test Circular references
@@ -252,20 +257,22 @@ class InvoiceItem2(BaseModel):
     amount: int = Field(default=0)
     quantity: int = Field(default=0)
     items: typing.List["InvoiceItem2"] = Field(default_factory=list)
-    invoice: Invoice3 = Field(default_factory=Invoice3)"""
-        assert content.strip("\n") in getsource(demo_p2p.InvoiceItem2).strip("\n")
+    invoice: Invoice3 = Field(default_factory=Invoice3)
+""")
 
     def test_message_reference(self) -> None:
-        content = """
+        output = getsource(demo_p2p.AnOtherMessage)
+        assert_expected_inline(output, """\
 class AnOtherMessage(BaseModel):
     class SubMessage(BaseModel):
         text: str = Field(default="")
 
     field1: str = Field(default="")
-    field2: SubMessage = Field(default_factory=SubMessage)"""
-        assert content.strip("\n") in getsource(demo_p2p.AnOtherMessage).strip("\n")
+    field2: SubMessage = Field(default_factory=SubMessage)
+""")
 
-        content = """
+        output = getsource(demo_p2p.RootMessage)
+        assert_expected_inline(output, """\
 class RootMessage(BaseModel):
     \"\"\"
         Test Message references
@@ -273,12 +280,13 @@ class RootMessage(BaseModel):
     \"\"\"
 
     field1: str = Field(default="")
-    field2: AnOtherMessage = Field(default_factory=AnOtherMessage)"""
-        assert content.strip("\n") in getsource(demo_p2p.RootMessage).strip("\n")
+    field2: AnOtherMessage = Field(default_factory=AnOtherMessage)
+""")
 
 
     def test_same_bane_inline_structure(self) -> None:
-        content = """
+        output = getsource(demo_p2p.TestSameName0)
+        assert_expected_inline(output, """\
 class TestSameName0(BaseModel):
     \"\"\"
         Test inline structure of the same name
@@ -289,25 +297,29 @@ class TestSameName0(BaseModel):
         input_model: str = Field(default="")
         input_info: "typing.Dict[str, str]" = Field(default_factory=dict)
 
-    body: "TestSameName0.Body" = Field(default_factory=lambda: TestSameName0.Body())"""
-        assert content.strip("\n") in getsource(demo_p2p.TestSameName0).strip("\n")
-        content = """
+    body: "TestSameName0.Body" = Field(default_factory=lambda: TestSameName0.Body())
+""")
+        
+        output = getsource(demo_p2p.TestSameName1)
+        assert_expected_inline(output, """\
 class TestSameName1(BaseModel):
     class Body(BaseModel):
         output_model: str = Field(default="")
         output_info: "typing.Dict[str, str]" = Field(default_factory=dict)
 
-    body: "TestSameName1.Body" = Field(default_factory=lambda: TestSameName1.Body())"""
-        assert content.strip("\n") in getsource(demo_p2p.TestSameName1).strip("\n")
+    body: "TestSameName1.Body" = Field(default_factory=lambda: TestSameName1.Body())
+""")
 
     def test_diff_pkg_refer(self) -> None:
-        content = """
+        output = getsource(diff_pkg_refer_2_p2p.Demo2)
+        assert_expected_inline(output, """\
 class Demo2(BaseModel):
-    myField: "typing.Dict[str, Demo1]" = Field(default_factory=dict)"""
-        assert content.strip("\n") in getsource(diff_pkg_refer_2_p2p.Demo2).strip("\n")
+    myField: "typing.Dict[str, Demo1]" = Field(default_factory=dict)
+""")
 
         # If the source code can be obtained, Demo1 can be imported normally
-        content = """
+        output = getsource(diff_pkg_refer_2_p2p.Demo1)
+        assert_expected_inline(output, """\
 class Demo1(BaseModel):
-    pass"""
-        assert content.strip("\n") in getsource(diff_pkg_refer_2_p2p.Demo1).strip("\n")
+    pass
+""")
