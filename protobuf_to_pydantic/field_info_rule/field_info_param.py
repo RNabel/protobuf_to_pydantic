@@ -22,7 +22,9 @@ support_con_type_module_name: List[str] = [
 ]
 
 
-def field_info_param_dict_migration_v2_handler(field_info_param_dict: Dict[str, Any], is_warnings: bool = True) -> None:
+def field_info_param_dict_migration_v2_handler(
+    field_info_param_dict: Dict[str, Any], is_warnings: bool = True
+) -> None:
     json_schema_extra = {}
     for k in list(field_info_param_dict.keys()):
         new_k = constant.pydantic_field_v1_migration_v2_dict.get(k, k)
@@ -73,7 +75,8 @@ def field_info_param_dict_handle(
     # default_template support
     if (
         field_info_param_dict.get("default", MISSING).__class__ == MISSING.__class__
-        and field_info_param_dict.get("default_template", MISSING).__class__ != MISSING.__class__
+        and field_info_param_dict.get("default_template", MISSING).__class__
+        != MISSING.__class__
     ):
         field_info_param_dict["default"] = field_info_param_dict["default_template"]
     field_info_param_dict.pop("default_template", None)
@@ -94,7 +97,7 @@ def field_info_param_dict_handle(
     _const = field_info_param_dict.pop("const", MISSING)
     # PGV&P2P const handler
     if _const.__class__ != MISSING.__class__:
-        # pydantic v2 not support const, only support Literal
+        # pydantic v2 doesn't support const, only support Literal
         field_info_param_dict["type_"] = Literal.__getitem__(_const)
 
     # required handler
@@ -113,8 +116,10 @@ def field_info_param_dict_handle(
     if field_info_param_dict.get("unique_items", None) is not None:
         # In pydantic v2, not support unique_items
         # only use the Set type instead of this feature
-        if not field_type or get_origin(field_type) != list:
-            raise RuntimeError(f"unique_items only support type List (protobuf type: repeated) not {field_type}")
+        if not field_type or isinstance(field_type, list):
+            raise RuntimeError(
+                f"unique_items only support type List (protobuf type: repeated) not {field_type}"
+            )
         # change type: list -> set
         field_info_param_dict["type_"] = Set.__getitem__(get_args(field_type))  # type: ignore[misc]
         if field_info_param_dict["default_factory"]:
@@ -156,9 +161,14 @@ def field_info_param_dict_handle(
         if sub_field_param_dict and "type_" in sub_field_param_dict:
             # If a nested type is found, use the same treatment
             field_info_param_dict_handle(
-                sub_field_param_dict, default, default_factory, nested_call_count=nested_call_count + 1
+                sub_field_param_dict,
+                default,
+                default_factory,
+                nested_call_count=nested_call_count + 1,
             )
-            field_info_param_dict["type_"] = field_type(sub_field_param_dict["type_"], **type_param_dict)
+            field_info_param_dict["type_"] = field_type(
+                sub_field_param_dict["type_"], **type_param_dict
+            )
         else:
             field_info_param_dict["type_"] = field_type(**type_param_dict)
 
