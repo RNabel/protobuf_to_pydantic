@@ -43,22 +43,24 @@ from protobuf_to_pydantic.customer_validator.v2 import (
     timestamp_lt_validator,
     timestamp_within_validator,
 )
+from protobuf_to_pydantic.default_base_model import ProtobufCompatibleBaseModel
 from protobuf_to_pydantic.field_info_rule.protobuf_option_to_field_info.types import HostNameStr, UriRefStr
 from protobuf_to_pydantic.util import Timedelta
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import ConfigDict, Field, field_validator, model_validator
 from pydantic.alias_generators import to_camel
 from pydantic.aliases import AliasGenerator
 from pydantic.functional_validators import BeforeValidator
 from pydantic.networks import AnyUrl, EmailStr, IPvAnyAddress
 
 
-class AfterReferMessage(BaseModel):
+class AfterReferMessage(ProtobufCompatibleBaseModel):
     model_config = ConfigDict(
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        serialize_by_alias=True,
     )
 
     uid: str = Field(
@@ -80,14 +82,15 @@ class AfterReferMessage(BaseModel):
     )
 
 
-class AnyTest(BaseModel):
+class AnyTest(ProtobufCompatibleBaseModel):
     model_config = ConfigDict(
-        arbitrary_types_allowed=True,
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        arbitrary_types_allowed=True,
+        serialize_by_alias=True,
     )
 
     required_test: Any = Field(alias_priority=1, validation_alias="requiredTest", serialization_alias="requiredTest")
@@ -176,13 +179,14 @@ class AnyTest(BaseModel):
     in_test_any_in_validator = field_validator("in_test", mode="after", check_fields=None)(any_in_validator)
 
 
-class BoolTest(BaseModel):
+class BoolTest(ProtobufCompatibleBaseModel):
     model_config = ConfigDict(
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        serialize_by_alias=True,
     )
 
     bool_1_test: typing.Literal[True] = Field(
@@ -231,13 +235,14 @@ class BoolTest(BaseModel):
     )
 
 
-class BytesTest(BaseModel):
+class BytesTest(ProtobufCompatibleBaseModel):
     model_config = ConfigDict(
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        serialize_by_alias=True,
     )
 
     const_test: typing.Literal[b"demo"] = Field(
@@ -336,13 +341,14 @@ class BytesTest(BaseModel):
     not_in_test_not_in_validator = field_validator("not_in_test", mode="after", check_fields=None)(not_in_validator)
 
 
-class DoubleTest(BaseModel):
+class DoubleTest(ProtobufCompatibleBaseModel):
     model_config = ConfigDict(
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        serialize_by_alias=True,
     )
 
     const_test: typing.Literal[1.0] = Field(
@@ -430,13 +436,14 @@ class DoubleTest(BaseModel):
     not_in_test_not_in_validator = field_validator("not_in_test", mode="after", check_fields=None)(not_in_validator)
 
 
-class DurationTest(BaseModel):
+class DurationTest(ProtobufCompatibleBaseModel):
     model_config = ConfigDict(
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        serialize_by_alias=True,
     )
 
     const_test: typing_extensions.Annotated[timedelta, BeforeValidator(func=Timedelta.validate)] = Field(
@@ -571,14 +578,15 @@ class State(IntEnum):
     ACTIVE = 2
 
 
-class EnumTest(BaseModel):
+class EnumTest(ProtobufCompatibleBaseModel):
     model_config = ConfigDict(
-        validate_default=True,
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        validate_default=True,
+        serialize_by_alias=True,
     )
 
     const_test: typing.Literal[2] = Field(
@@ -629,13 +637,14 @@ class EnumTest(BaseModel):
     not_in_test_not_in_validator = field_validator("not_in_test", mode="after", check_fields=None)(not_in_validator)
 
 
-class Fixed32Test(BaseModel):
+class Fixed32Test(ProtobufCompatibleBaseModel):
     model_config = ConfigDict(
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        serialize_by_alias=True,
     )
 
     const_test: typing.Literal[1] = Field(
@@ -719,13 +728,14 @@ class Fixed32Test(BaseModel):
     not_in_test_not_in_validator = field_validator("not_in_test", mode="after", check_fields=None)(not_in_validator)
 
 
-class Fixed64Test(BaseModel):
+class Fixed64Test(ProtobufCompatibleBaseModel):
     model_config = ConfigDict(
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        serialize_by_alias=True,
     )
 
     const_test: typing.Literal[1] = Field(
@@ -809,13 +819,14 @@ class Fixed64Test(BaseModel):
     not_in_test_not_in_validator = field_validator("not_in_test", mode="after", check_fields=None)(not_in_validator)
 
 
-class FloatTest(BaseModel):
+class FloatTest(ProtobufCompatibleBaseModel):
     model_config = ConfigDict(
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        serialize_by_alias=True,
     )
 
     const_test: typing.Literal[1.0] = Field(
@@ -903,13 +914,14 @@ class FloatTest(BaseModel):
     not_in_test_not_in_validator = field_validator("not_in_test", mode="after", check_fields=None)(not_in_validator)
 
 
-class Int32Test(BaseModel):
+class Int32Test(ProtobufCompatibleBaseModel):
     model_config = ConfigDict(
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        serialize_by_alias=True,
     )
 
     const_test: typing.Literal[1] = Field(
@@ -993,13 +1005,14 @@ class Int32Test(BaseModel):
     not_in_test_not_in_validator = field_validator("not_in_test", mode="after", check_fields=None)(not_in_validator)
 
 
-class Int64Test(BaseModel):
+class Int64Test(ProtobufCompatibleBaseModel):
     model_config = ConfigDict(
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        serialize_by_alias=True,
     )
 
     const_test: typing.Literal[1] = Field(
@@ -1083,13 +1096,14 @@ class Int64Test(BaseModel):
     not_in_test_not_in_validator = field_validator("not_in_test", mode="after", check_fields=None)(not_in_validator)
 
 
-class MapTest(BaseModel):
+class MapTest(ProtobufCompatibleBaseModel):
     model_config = ConfigDict(
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        serialize_by_alias=True,
     )
 
     pair_test: typing.Dict[str, int] = Field(
@@ -1175,13 +1189,14 @@ class MapTest(BaseModel):
     )
 
 
-class MessageIgnoredTest(BaseModel):
+class MessageIgnoredTest(ProtobufCompatibleBaseModel):
     model_config = ConfigDict(
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        serialize_by_alias=True,
     )
 
     const_test: typing.Literal[1] = Field(
@@ -1195,13 +1210,14 @@ class MessageIgnoredTest(BaseModel):
     )
 
 
-class MessageTest(BaseModel):
+class MessageTest(ProtobufCompatibleBaseModel):
     model_config = ConfigDict(
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        serialize_by_alias=True,
     )
 
     skip_test: str = Field(default="", alias_priority=1, validation_alias="skipTest", serialization_alias="skipTest")
@@ -1216,13 +1232,14 @@ class MessageTest(BaseModel):
     )
 
 
-class StringTest(BaseModel):
+class StringTest(ProtobufCompatibleBaseModel):
     model_config = ConfigDict(
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        serialize_by_alias=True,
     )
 
     const_test: typing.Literal["aaa"] = Field(
@@ -1364,14 +1381,15 @@ class StringTest(BaseModel):
     not_in_test_not_in_validator = field_validator("not_in_test", mode="after", check_fields=None)(not_in_validator)
 
 
-class NestedMessage(BaseModel):
-    class UserPayMessage(BaseModel):
+class NestedMessage(ProtobufCompatibleBaseModel):
+    class UserPayMessage(ProtobufCompatibleBaseModel):
         model_config = ConfigDict(
+            ser_json_inf_nan="strings",
             alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
             populate_by_name=True,
-            serialize_by_alias=True,
             validate_by_alias=True,
             validate_by_name=True,
+            serialize_by_alias=True,
         )
 
         bank_number: str = Field(
@@ -1395,13 +1413,14 @@ class NestedMessage(BaseModel):
             timestamp_gt_now_validator
         )
 
-    class NotEnableUserPayMessageWithSkipRule(BaseModel):
+    class NotEnableUserPayMessageWithSkipRule(ProtobufCompatibleBaseModel):
         model_config = ConfigDict(
+            ser_json_inf_nan="strings",
             alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
             populate_by_name=True,
-            serialize_by_alias=True,
             validate_by_alias=True,
             validate_by_name=True,
+            serialize_by_alias=True,
         )
 
         bank_number: str = Field(
@@ -1413,11 +1432,12 @@ class NestedMessage(BaseModel):
         uuid: str = Field(default="", alias_priority=1, validation_alias="uuid", serialization_alias="uuid")
 
     model_config = ConfigDict(
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        serialize_by_alias=True,
     )
 
     string_in_map_test: typing.Dict[str, StringTest] = Field(
@@ -1447,13 +1467,14 @@ class NestedMessage(BaseModel):
     )
 
 
-class OneOfNotTest(BaseModel):
+class OneOfNotTest(ProtobufCompatibleBaseModel):
     model_config = ConfigDict(
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        serialize_by_alias=True,
     )
 
     _one_of_dict = {"p2p_validate_comment_test.OneOfNotTest.id": {"fields": {"x", "y"}, "required": False}}
@@ -1465,13 +1486,14 @@ class OneOfNotTest(BaseModel):
     one_of_validator = model_validator(mode="before")(check_one_of)
 
 
-class OneOfOptionalTest(BaseModel):
+class OneOfOptionalTest(ProtobufCompatibleBaseModel):
     model_config = ConfigDict(
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        serialize_by_alias=True,
     )
 
     _one_of_dict = {"p2p_validate_comment_test.OneOfOptionalTest.id": {"fields": {"x", "y", "z"}, "required": True}}
@@ -1494,13 +1516,14 @@ class OneOfOptionalTest(BaseModel):
     one_of_validator = model_validator(mode="before")(check_one_of)
 
 
-class OneOfTest(BaseModel):
+class OneOfTest(ProtobufCompatibleBaseModel):
     model_config = ConfigDict(
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        serialize_by_alias=True,
     )
 
     _one_of_dict = {"p2p_validate_comment_test.OneOfTest.id": {"fields": {"x", "y"}, "required": True}}
@@ -1512,13 +1535,14 @@ class OneOfTest(BaseModel):
     one_of_validator = model_validator(mode="before")(check_one_of)
 
 
-class OptionalMessage(BaseModel):
+class OptionalMessage(ProtobufCompatibleBaseModel):
     model_config = ConfigDict(
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        serialize_by_alias=True,
     )
 
     my_message1: typing.Optional[MessageIgnoredTest] = Field(
@@ -1544,13 +1568,14 @@ class OptionalMessage(BaseModel):
     )
 
 
-class RepeatedTest(BaseModel):
+class RepeatedTest(ProtobufCompatibleBaseModel):
     model_config = ConfigDict(
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        serialize_by_alias=True,
     )
 
     range_test: typing.List[str] = Field(
@@ -1676,13 +1701,14 @@ class RepeatedTest(BaseModel):
     )
 
 
-class Sfixed32Test(BaseModel):
+class Sfixed32Test(ProtobufCompatibleBaseModel):
     model_config = ConfigDict(
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        serialize_by_alias=True,
     )
 
     const_test: typing.Literal[1] = Field(
@@ -1766,13 +1792,14 @@ class Sfixed32Test(BaseModel):
     not_in_test_not_in_validator = field_validator("not_in_test", mode="after", check_fields=None)(not_in_validator)
 
 
-class Sfixed64Test(BaseModel):
+class Sfixed64Test(ProtobufCompatibleBaseModel):
     model_config = ConfigDict(
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        serialize_by_alias=True,
     )
 
     const_test: typing.Literal[1] = Field(
@@ -1856,13 +1883,14 @@ class Sfixed64Test(BaseModel):
     not_in_test_not_in_validator = field_validator("not_in_test", mode="after", check_fields=None)(not_in_validator)
 
 
-class Sint32Test(BaseModel):
+class Sint32Test(ProtobufCompatibleBaseModel):
     model_config = ConfigDict(
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        serialize_by_alias=True,
     )
 
     const_test: typing.Literal[1] = Field(
@@ -1946,13 +1974,14 @@ class Sint32Test(BaseModel):
     not_in_test_not_in_validator = field_validator("not_in_test", mode="after", check_fields=None)(not_in_validator)
 
 
-class Sint64Test(BaseModel):
+class Sint64Test(ProtobufCompatibleBaseModel):
     model_config = ConfigDict(
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        serialize_by_alias=True,
     )
 
     const_test: typing.Literal[1] = Field(
@@ -2036,13 +2065,14 @@ class Sint64Test(BaseModel):
     not_in_test_not_in_validator = field_validator("not_in_test", mode="after", check_fields=None)(not_in_validator)
 
 
-class TimestampTest(BaseModel):
+class TimestampTest(ProtobufCompatibleBaseModel):
     model_config = ConfigDict(
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        serialize_by_alias=True,
     )
 
     const_test: datetime = Field(
@@ -2194,13 +2224,14 @@ class TimestampTest(BaseModel):
     )(timestamp_within_validator)
 
 
-class Uint32Test(BaseModel):
+class Uint32Test(ProtobufCompatibleBaseModel):
     model_config = ConfigDict(
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        serialize_by_alias=True,
     )
 
     const_test: typing.Literal[1] = Field(
@@ -2284,13 +2315,14 @@ class Uint32Test(BaseModel):
     not_in_test_not_in_validator = field_validator("not_in_test", mode="after", check_fields=None)(not_in_validator)
 
 
-class Uint64Test(BaseModel):
+class Uint64Test(ProtobufCompatibleBaseModel):
     model_config = ConfigDict(
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        serialize_by_alias=True,
     )
 
     const_test: typing.Literal[1] = Field(

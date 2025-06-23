@@ -3,8 +3,9 @@
 # Protobuf Version: 6.31.1
 # Pydantic Version: 2.11.7
 from google.protobuf.message import Message  # type: ignore
-from pydantic import BaseModel
+
+from protobuf_to_pydantic.default_base_model import ProtobufCompatibleBaseModel
 
 
-class Demo1(BaseModel):
+class Demo1(ProtobufCompatibleBaseModel):
     pass

@@ -16,6 +16,7 @@ from typing_extensions import Annotated, get_origin
 from protobuf_to_pydantic import _pydantic_adapter, constant
 from protobuf_to_pydantic.constant import protobuf_common_type_dict
 from protobuf_to_pydantic.customer_validator.v2 import check_one_of
+from protobuf_to_pydantic.default_base_model import ProtobufCompatibleBaseModel
 from protobuf_to_pydantic.exceptions import WaitingToCompleteException
 from protobuf_to_pydantic.field_info_rule.field_info_param import (
     FieldInfoParamModel,
@@ -199,7 +200,9 @@ class M2P(object):
         self._creat_cache: CREATE_MODEL_CACHE_T = (
             create_model_cache or _create_model_cache
         )
-        self._pydantic_base: Type["BaseModel"] = pydantic_base or BaseModel
+        self._pydantic_base: Type["BaseModel"] = (
+            pydantic_base or ProtobufCompatibleBaseModel
+        )
         self._pydantic_module: str = pydantic_module or __name__
         self._comment_template: Template = (template or Template)(
             local_dict or {}, comment_prefix
@@ -767,12 +770,14 @@ class M2P(object):
                     pydantic_model_config_dict
                 ).model_config
                 for one_of_name, sub_one_of_dict in one_of_dict.items():
-                    pydantic_allow_validation_field_handler(
-                        field_dataclass.field_name,
-                        field_info.alias,
-                        sub_one_of_dict["fields"],
-                        model_config_dict,
-                    )
+                    # Only process fields that are actually part of this oneof
+                    if field_dataclass.field_name in sub_one_of_dict["fields"]:
+                        pydantic_allow_validation_field_handler(
+                            field_dataclass.field_name,
+                            field_info.alias,
+                            sub_one_of_dict["fields"],
+                            model_config_dict,
+                        )
 
             if (
                 field_dataclass.field_type in ALLOW_ARBITRARY_TYPE

@@ -4,6 +4,7 @@ import logging
 import os
 import re
 import sys
+from pydantic import AliasGenerator
 from contextlib import contextmanager
 from dataclasses import MISSING
 from datetime import timedelta
@@ -23,7 +24,6 @@ from typing import (
 
 from pydantic import BaseConfig, BaseModel, create_model
 
-from protobuf_to_pydantic import _pydantic_adapter
 
 if TYPE_CHECKING:
     from pydantic.main import Model
@@ -268,6 +268,9 @@ def use_worker_dir_in_ctx(worker_dir: Optional[str] = None) -> Generator:
         yield
 
 
+AliasGenType = Callable[[str], str] | AliasGenerator | None
+
+
 def pydantic_allow_validation_field_handler(
     field_name: str,
     field_alias_name: Optional[str],
@@ -286,15 +289,17 @@ def pydantic_allow_validation_field_handler(
         allow_field_set.add(field_alias_name)
         if model_config_dict.get("populate_by_name") is not True:
             allow_field_set.remove(field_name)
-        alias_generator: Optional[Callable[[str], str]] = model_config_dict.get(
-            "alias_generator"
-        )
-        alias_generator_func: Optional[Callable] = alias_generator
-        if alias_generator:
-            allow_field_set.add(alias_generator(field_name))
+        alias_generator: AliasGenType = model_config_dict.get("alias_generator")
+        alias_generator_func: Optional[Callable] = None
+        if isinstance(alias_generator, AliasGenerator):
+            alias_generator_func = alias_generator.validation_alias
+        elif callable(alias_generator):
+            alias_generator_func = alias_generator
+        else:
+            alias_generator_func = None
+        if alias_generator_func:
+            allow_field_set.add(alias_generator_func(field_name))
     else:
-        from pydantic import AliasGenerator
-
         alias_generator_gte_26: Any = model_config_dict.get("alias_generator")
         if isinstance(alias_generator_gte_26, AliasGenerator):  # type: ignore
             alias_generator_func = alias_generator_gte_26.validation_alias

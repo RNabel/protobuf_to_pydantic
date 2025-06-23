@@ -18,6 +18,7 @@ from warnings import warn
 from pydantic import BaseModel, Field
 
 from protobuf_to_pydantic import _pydantic_adapter
+from protobuf_to_pydantic.default_base_model import ProtobufCompatibleBaseModel
 from protobuf_to_pydantic.plugin.field_desc_proto_to_code import (
     FileDescriptorProtoToCode,
 )
@@ -110,7 +111,7 @@ class ConfigModel(BaseModel):
         description="Ignore the specified pkg file",
     )
     base_model_class: Type[BaseModel] = Field(
-        default=BaseModel, description="Inherited base pydantic model"
+        default=ProtobufCompatibleBaseModel, description="Inherited base pydantic model"
     )
     all_field_set_optional: bool = Field(
         default=False,

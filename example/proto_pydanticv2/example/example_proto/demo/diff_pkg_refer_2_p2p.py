@@ -5,10 +5,12 @@
 import typing
 
 from google.protobuf.message import Message  # type: ignore
-from pydantic import BaseModel, Field
+from pydantic import Field
+
+from protobuf_to_pydantic.default_base_model import ProtobufCompatibleBaseModel
 
 from .diff_pkg_refer_1_p2p import Demo1
 
 
-class Demo2(BaseModel):
+class Demo2(ProtobufCompatibleBaseModel):
     myField: "typing.Dict[str, Demo1]" = Field(default_factory=dict)

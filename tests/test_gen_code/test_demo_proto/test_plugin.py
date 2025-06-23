@@ -15,13 +15,15 @@ class TestPlugin:
 
     def test_empty_message(self) -> None:
         output = getsource(demo_p2p.EmptyMessage)
-        assert_expected_inline(output, """class EmptyMessage(BaseModel):
+        assert_expected_inline(output, """\
+class EmptyMessage(ProtobufCompatibleBaseModel):
     pass
 """)
 
     def test_user_message(self) -> None:
         output = getsource(demo_p2p.UserMessage)
-        assert_expected_inline(output, '''class UserMessage(BaseModel):
+        assert_expected_inline(output, '''\
+class UserMessage(ProtobufCompatibleBaseModel):
     """
     user info
     """
@@ -39,7 +41,8 @@ class TestPlugin:
 
     def test_other_message(self) -> None:
         output = getsource(demo_p2p.OtherMessage)
-        assert_expected_inline(output, """class OtherMessage(BaseModel):
+        assert_expected_inline(output, """\
+class OtherMessage(ProtobufCompatibleBaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
     metadata: typing.Dict[str, typing.Any] = Field(default_factory=dict)
     double_value: DoubleValue = Field(default_factory=DoubleValue)
@@ -48,7 +51,8 @@ class TestPlugin:
 
     def test_map_message(self) -> None:
         output = getsource(demo_p2p.MapMessage)
-        assert_expected_inline(output, '''class MapMessage(BaseModel):
+        assert_expected_inline(output, '''\
+class MapMessage(ProtobufCompatibleBaseModel):
     """
     test map message and bad message
     """
@@ -59,7 +63,8 @@ class TestPlugin:
 
     def test_repeated_message(self) -> None:
         output = getsource(demo_p2p.RepeatedMessage)
-        assert_expected_inline(output, '''class RepeatedMessage(BaseModel):
+        assert_expected_inline(output, '''\
+class RepeatedMessage(ProtobufCompatibleBaseModel):
     """
     test repeated msg
     """
@@ -71,12 +76,13 @@ class TestPlugin:
 
     def test_nested_message(self) -> None:
         output = getsource(demo_p2p.NestedMessage)
-        assert_expected_inline(output, '''class NestedMessage(BaseModel):
+        assert_expected_inline(output, '''\
+class NestedMessage(ProtobufCompatibleBaseModel):
     """
     test nested message
     """
 
-    class UserPayMessage(BaseModel):
+    class UserPayMessage(ProtobufCompatibleBaseModel):
         bank_number: PaymentCardNumber = Field(default="")
         exp: datetime = Field(default_factory=exp_time)
         uuid: str = Field(default_factory=uuid4)
@@ -97,7 +103,8 @@ class TestPlugin:
 
     def test_self_referencing(self) -> None:
         output = getsource(demo_p2p.InvoiceItem)
-        assert_expected_inline(output, '''class InvoiceItem(BaseModel):
+        assert_expected_inline(output, '''\
+class InvoiceItem(ProtobufCompatibleBaseModel):
     """
         Test self-referencing Messages
     from: https://github.com/so1n/protobuf_to_pydantic/issues/7#issuecomment-1490705932
@@ -111,8 +118,14 @@ class TestPlugin:
 
     def test_field_optional(self) -> None:
         output = getsource(demo_p2p.OptionalMessage)
-        assert_expected_inline(output, """class OptionalMessage(BaseModel):
-    _one_of_dict = {"OptionalMessage.a": {"fields": {"x", "yy"}, "required": True}}
+        assert_expected_inline(output, """\
+class OptionalMessage(ProtobufCompatibleBaseModel):
+    _one_of_dict = {
+        "OptionalMessage.a": {
+            "fields": {"age", "defaultTemplateTest", "intMap", "item", "name", "strList", "x", "y", "yy"},
+            "required": True,
+        }
+    }
     one_of_validator = model_validator(mode="before")(check_one_of)
     x: str = Field(default="")
     y: int = Field(default=0, alias="yy", title="use age", ge=0, example=18)
@@ -129,7 +142,8 @@ class TestPlugin:
 
     def test_circular_references(self) -> None:
         output = getsource(demo_p2p.Invoice3)
-        assert_expected_inline(output, """class Invoice3(BaseModel):
+        assert_expected_inline(output, """\
+class Invoice3(ProtobufCompatibleBaseModel):
     name: str = Field(default="")
     amount: int = Field(default=0)
     quantity: int = Field(default=0)
@@ -137,7 +151,8 @@ class TestPlugin:
 """)
         
         output = getsource(demo_p2p.InvoiceItem2)
-        assert_expected_inline(output, '''class InvoiceItem2(BaseModel):
+        assert_expected_inline(output, '''\
+class InvoiceItem2(ProtobufCompatibleBaseModel):
     """
         Test Circular references
     from: https://github.com/so1n/protobuf_to_pydantic/issues/57
@@ -152,8 +167,9 @@ class TestPlugin:
 
     def test_message_reference(self) -> None:
         output = getsource(demo_p2p.AnOtherMessage)
-        assert_expected_inline(output, """class AnOtherMessage(BaseModel):
-    class SubMessage(BaseModel):
+        assert_expected_inline(output, """\
+class AnOtherMessage(ProtobufCompatibleBaseModel):
+    class SubMessage(ProtobufCompatibleBaseModel):
         text: str = Field(default="")
 
     field1: str = Field(default="")
@@ -161,7 +177,8 @@ class TestPlugin:
 """)
 
         output = getsource(demo_p2p.RootMessage)
-        assert_expected_inline(output, '''class RootMessage(BaseModel):
+        assert_expected_inline(output, '''\
+class RootMessage(ProtobufCompatibleBaseModel):
     """
         Test Message references
     from: https://github.com/so1n/protobuf_to_pydantic/issues/64
@@ -174,13 +191,14 @@ class TestPlugin:
 
     def test_same_bane_inline_structure(self) -> None:
         output = getsource(demo_p2p.TestSameName0)
-        assert_expected_inline(output, '''class TestSameName0(BaseModel):
+        assert_expected_inline(output, '''\
+class TestSameName0(ProtobufCompatibleBaseModel):
     """
         Test inline structure of the same name
     from: https://github.com/so1n/protobuf_to_pydantic/issues/76
     """
 
-    class Body(BaseModel):
+    class Body(ProtobufCompatibleBaseModel):
         input_model: str = Field(default="")
         input_info: "typing.Dict[str, str]" = Field(default_factory=dict)
 
@@ -188,8 +206,9 @@ class TestPlugin:
 ''')
         
         output = getsource(demo_p2p.TestSameName1)
-        assert_expected_inline(output, """class TestSameName1(BaseModel):
-    class Body(BaseModel):
+        assert_expected_inline(output, """\
+class TestSameName1(ProtobufCompatibleBaseModel):
+    class Body(ProtobufCompatibleBaseModel):
         output_model: str = Field(default="")
         output_info: "typing.Dict[str, str]" = Field(default_factory=dict)
 
@@ -198,12 +217,14 @@ class TestPlugin:
 
     def test_diff_pkg_refer(self) -> None:
         output = getsource(diff_pkg_refer_2_p2p.Demo2)
-        assert_expected_inline(output, """class Demo2(BaseModel):
+        assert_expected_inline(output, """\
+class Demo2(ProtobufCompatibleBaseModel):
     myField: "typing.Dict[str, Demo1]" = Field(default_factory=dict)
 """)
 
         # If the source code can be obtained, Demo1 can be imported normally
         output = getsource(diff_pkg_refer_2_p2p.Demo1)
-        assert_expected_inline(output, """class Demo1(BaseModel):
+        assert_expected_inline(output, """\
+class Demo1(ProtobufCompatibleBaseModel):
     pass
 """)

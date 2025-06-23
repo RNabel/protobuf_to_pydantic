@@ -15,7 +15,6 @@ if __version__ > "4.0.0":
         alias_demo_p2p,
         all_feidl_set_optional_demo_p2p,
         custom_comment_handler_p2p,
-        demo_p2p,
         single_config_p2p,
     )
 else:
@@ -23,13 +22,14 @@ else:
         alias_demo_p2p,
         all_feidl_set_optional_demo_p2p,
         custom_comment_handler_p2p,
-        demo_p2p,
         single_config_p2p,
     )
+
 
 class TestAliasDemoValidator(BaseTestAliasDemoValidator):
     def test_alias_demo(self) -> None:
         super()._test_alias_demo(alias_demo_p2p.Report)
+
 
 class TestAllFieldSetOptionalDemoValidator(BaseTestAllFieldSetOptionalDemoValidator):
     def test_user_message(self) -> None:
@@ -45,7 +45,9 @@ class TestAllFieldSetOptionalDemoValidator(BaseTestAllFieldSetOptionalDemoValida
         super()._test_repeated_message(all_feidl_set_optional_demo_p2p.RepeatedMessage)
 
     def test_after_refer_message(self) -> None:
-        super()._test_after_refer_message(all_feidl_set_optional_demo_p2p.AfterReferMessage)
+        super()._test_after_refer_message(
+            all_feidl_set_optional_demo_p2p.AfterReferMessage
+        )
 
     def test_nested_message(self) -> None:
         super()._test_nested_message(all_feidl_set_optional_demo_p2p.NestedMessage)
@@ -69,8 +71,8 @@ class TestAllFieldSetOptionalDemoValidator(BaseTestAllFieldSetOptionalDemoValida
 class TestDemoValidator:
     pass
 
-class TestSingleConfigValidator(BaseTestSingleConfigValidator):
 
+class TestSingleConfigValidator(BaseTestSingleConfigValidator):
     def test_user_message(self) -> None:
         super()._test_user_message(single_config_p2p.UserMessage)
 
