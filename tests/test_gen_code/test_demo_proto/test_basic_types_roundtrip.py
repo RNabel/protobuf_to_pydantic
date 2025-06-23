@@ -417,11 +417,13 @@ class TestBasicTypesRoundTrip:
         self._test_roundtrip(msg, test_data)
 
     def test_edge_cases(self):
-        """Test edge cases with special values."""
+        """Test edge cases with special values (excluding inf/nan due to Pydantic JSON limitations)."""
         msg = basic_types_roundtrip_pb2.EdgeCasesMessage()
 
-        # Test min/max values
+        # Test min/max values but exclude special float values (inf/nan)
+        # due to Pydantic JSON serialization limitations tracked in subtask 14.7
         test_data = {
+            # Integer min/max values
             "min_int32": -2147483648,
             "max_int32": 2147483647,
             "min_int64": -9223372036854775808,
@@ -430,8 +432,12 @@ class TestBasicTypesRoundTrip:
             "max_uint32": 4294967295,
             "min_uint64": 0,
             "max_uint64": 18446744073709551614,  # max uint64 - 1 (to avoid float precision issues)
+            # Regular float values (not special ones)
             "zero_float": 0.0,
+            "negative_zero_float": -0.0,
             "zero_double": 0.0,
+            "negative_zero_double": -0.0,
+            # String edge cases
             "empty_string": "",
             "empty_bytes": b"",
             "unicode_string": "αβγδε АБВГД 中文 日本語",
@@ -613,3 +619,105 @@ class TestBasicTypesRoundTrip:
         assert static_model.int32_field == 42
         assert static_model.string_field == "Compatibility test"
         assert static_model.repeated_bool == [True, False, True]
+
+    def test_special_float_values_protobuf_only(self):
+        """Test that protobuf correctly handles special float values in binary serialization."""
+        pb_msg = basic_types_roundtrip_pb2.EdgeCasesMessage()
+        
+        # Set special float values
+        pb_msg.infinity_float = float('inf')
+        pb_msg.negative_infinity_float = float('-inf')
+        pb_msg.nan_float = float('nan')
+        pb_msg.infinity_double = float('inf')
+        pb_msg.negative_infinity_double = float('-inf')
+        pb_msg.nan_double = float('nan')
+        
+        # Binary serialization round-trip
+        binary_data = pb_msg.SerializeToString()
+        pb_msg2 = basic_types_roundtrip_pb2.EdgeCasesMessage()
+        pb_msg2.ParseFromString(binary_data)
+        
+        # Verify special values are preserved in binary serialization
+        assert pb_msg2.infinity_float == float('inf')
+        assert pb_msg2.negative_infinity_float == float('-inf')
+        assert pb_msg2.infinity_double == float('inf')
+        assert pb_msg2.negative_infinity_double == float('-inf')
+        
+        # NaN is special - it's not equal to itself, so we use isnan
+        import math
+        assert math.isnan(pb_msg2.nan_float)
+        assert math.isnan(pb_msg2.nan_double)
+        
+    def test_special_float_values_json_handling(self):
+        """Test how special float values are handled in JSON serialization."""
+        pb_msg = basic_types_roundtrip_pb2.EdgeCasesMessage()
+        
+        # Set special float values
+        pb_msg.infinity_float = float('inf')
+        pb_msg.negative_infinity_float = float('-inf')
+        pb_msg.nan_float = float('nan')
+        
+        # Convert to JSON
+        proto_json = self._protobuf_to_json(pb_msg)
+        json_dict = json.loads(proto_json)
+        
+        # Protobuf JSON format uses strings for special values
+        assert json_dict.get('infinityFloat') == 'Infinity'
+        assert json_dict.get('negativeInfinityFloat') == '-Infinity'
+        assert json_dict.get('nanFloat') == 'NaN'
+        
+        # Test protobuf's ability to parse these back
+        pb_msg2 = self._json_to_protobuf(proto_json, type(pb_msg))
+        
+        # Verify protobuf correctly parses the special string values
+        assert pb_msg2.infinity_float == float('inf')
+        assert pb_msg2.negative_infinity_float == float('-inf')
+        import math
+        assert math.isnan(pb_msg2.nan_float)
+        
+    def test_pydantic_special_float_values_limitation(self):
+        """Document the known limitation with special float values in Pydantic JSON serialization.
+        
+        This test demonstrates that special float values (inf, -inf, nan) are not properly
+        preserved through Pydantic JSON serialization. This is tracked in subtask 14.7.
+        """
+        pb_msg = basic_types_roundtrip_pb2.EdgeCasesMessage()
+        
+        # Set special float values
+        pb_msg.infinity_float = float('inf')
+        pb_msg.negative_infinity_float = float('-inf')
+        pb_msg.nan_float = float('nan')
+        
+        # Convert to JSON (protobuf correctly serializes as strings)
+        proto_json = self._protobuf_to_json(pb_msg)
+        json_dict = json.loads(proto_json)
+        assert json_dict['infinityFloat'] == 'Infinity'
+        assert json_dict['negativeInfinityFloat'] == '-Infinity'
+        assert json_dict['nanFloat'] == 'NaN'
+        
+        # Create Pydantic model and parse the JSON
+        model_class = self._create_pydantic_model(type(pb_msg))
+        pydantic_model = self._json_to_pydantic(proto_json, model_class)
+        
+        # Check that Pydantic correctly parses the special string values
+        assert pydantic_model.infinity_float == float('inf')
+        assert pydantic_model.negative_infinity_float == float('-inf')
+        import math
+        assert math.isnan(pydantic_model.nan_float)
+        
+        # Now convert back to JSON from Pydantic
+        pydantic_json = self._pydantic_to_json(pydantic_model)
+        pydantic_json_dict = json.loads(pydantic_json)
+        
+        # Document the limitation: Pydantic serializes special floats as None
+        assert pydantic_json_dict['infinityFloat'] is None
+        assert pydantic_json_dict['negativeInfinityFloat'] is None
+        assert pydantic_json_dict['nanFloat'] is None
+        
+        # When converted back to protobuf, these become 0.0
+        pb_msg2 = self._json_to_protobuf(pydantic_json, type(pb_msg))
+        assert pb_msg2.infinity_float == 0.0
+        assert pb_msg2.negative_infinity_float == 0.0
+        assert pb_msg2.nan_float == 0.0
+        
+        # This is a known limitation that needs to be fixed (subtask 14.7)
