@@ -436,19 +436,19 @@ class Fixed32Test(BaseModel):
     const_test: typing.Literal[1] = Field(
         default=0, alias_priority=1, validation_alias="constTest", serialization_alias="constTest"
     )
-    range_e_test: float = Field(
+    range_e_test: int = Field(
         default=0, alias_priority=1, validation_alias="rangeETest", serialization_alias="rangeETest", ge=1, le=10
     )
-    range_test: float = Field(
+    range_test: int = Field(
         default=0, alias_priority=1, validation_alias="rangeTest", serialization_alias="rangeTest", gt=1, lt=10
     )
-    in_test: float = Field(
+    in_test: int = Field(
         default=0, alias_priority=1, validation_alias="inTest", serialization_alias="inTest", in_=[1, 2, 3]
     )
-    not_in_test: float = Field(
+    not_in_test: int = Field(
         default=0, alias_priority=1, validation_alias="notInTest", serialization_alias="notInTest", not_in=[1, 2, 3]
     )
-    ignore_test: float = Field(
+    ignore_test: int = Field(
         default=0, alias_priority=1, validation_alias="ignoreTest", serialization_alias="ignoreTest"
     )
 
@@ -474,19 +474,19 @@ class Fixed64Test(BaseModel):
     const_test: typing.Literal[1] = Field(
         default=0, alias_priority=1, validation_alias="constTest", serialization_alias="constTest"
     )
-    range_e_test: float = Field(
+    range_e_test: int = Field(
         default=0, alias_priority=1, validation_alias="rangeETest", serialization_alias="rangeETest", ge=1, le=10
     )
-    range_test: float = Field(
+    range_test: int = Field(
         default=0, alias_priority=1, validation_alias="rangeTest", serialization_alias="rangeTest", gt=1, lt=10
     )
-    in_test: float = Field(
+    in_test: int = Field(
         default=0, alias_priority=1, validation_alias="inTest", serialization_alias="inTest", in_=[1, 2, 3]
     )
-    not_in_test: float = Field(
+    not_in_test: int = Field(
         default=0, alias_priority=1, validation_alias="notInTest", serialization_alias="notInTest", not_in=[1, 2, 3]
     )
-    ignore_test: float = Field(
+    ignore_test: int = Field(
         default=0, alias_priority=1, validation_alias="ignoreTest", serialization_alias="ignoreTest"
     )
 
@@ -1123,19 +1123,19 @@ class Sfixed32Test(BaseModel):
     const_test: typing.Literal[1] = Field(
         default=0, alias_priority=1, validation_alias="constTest", serialization_alias="constTest"
     )
-    range_e_test: float = Field(
+    range_e_test: int = Field(
         default=0, alias_priority=1, validation_alias="rangeETest", serialization_alias="rangeETest", ge=1, le=10
     )
-    range_test: float = Field(
+    range_test: int = Field(
         default=0, alias_priority=1, validation_alias="rangeTest", serialization_alias="rangeTest", gt=1, lt=10
     )
-    in_test: float = Field(
+    in_test: int = Field(
         default=0, alias_priority=1, validation_alias="inTest", serialization_alias="inTest", in_=[1, 2, 3]
     )
-    not_in_test: float = Field(
+    not_in_test: int = Field(
         default=0, alias_priority=1, validation_alias="notInTest", serialization_alias="notInTest", not_in=[1, 2, 3]
     )
-    ignore_test: float = Field(
+    ignore_test: int = Field(
         default=0, alias_priority=1, validation_alias="ignoreTest", serialization_alias="ignoreTest"
     )
 
@@ -1161,19 +1161,19 @@ class Sfixed64Test(BaseModel):
     const_test: typing.Literal[1] = Field(
         default=0, alias_priority=1, validation_alias="constTest", serialization_alias="constTest"
     )
-    range_e_test: float = Field(
+    range_e_test: int = Field(
         default=0, alias_priority=1, validation_alias="rangeETest", serialization_alias="rangeETest", ge=1, le=10
     )
-    range_test: float = Field(
+    range_test: int = Field(
         default=0, alias_priority=1, validation_alias="rangeTest", serialization_alias="rangeTest", gt=1, lt=10
     )
-    in_test: float = Field(
+    in_test: int = Field(
         default=0, alias_priority=1, validation_alias="inTest", serialization_alias="inTest", in_=[1, 2, 3]
     )
-    not_in_test: float = Field(
+    not_in_test: int = Field(
         default=0, alias_priority=1, validation_alias="notInTest", serialization_alias="notInTest", not_in=[1, 2, 3]
     )
-    ignore_test: float = Field(
+    ignore_test: int = Field(
         default=0, alias_priority=1, validation_alias="ignoreTest", serialization_alias="ignoreTest"
     )
 
