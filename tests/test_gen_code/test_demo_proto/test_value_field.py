@@ -39,7 +39,7 @@ class TestValueField:
         content = """
 class ValueTestMessage(BaseModel):
     id: str = Field(default="")
-    dynamic_value: typing.Any = Field()
+    dynamic_value: typing.Optional[typing.Any] = Field(default=None)
     value_list: typing.List[typing.Any] = Field(default_factory=list)
     value_map: typing.Dict[str, typing.Any] = Field(default_factory=dict)
 """
@@ -71,3 +71,72 @@ class ValueTestMessage(BaseModel):
         assert instance.value_map["key2"] == 123
         assert instance.value_map["key3"] is None
         assert instance.value_map["key4"] == {"nested": "dict"}
+
+    def test_value_field_type_conversion_variations(self) -> None:
+        """Test various type conversions for Value fields"""
+        # Test different primitive types
+        test_cases = [
+            {"dynamic_value": 42},  # int
+            {"dynamic_value": 3.14},  # float
+            {"dynamic_value": True},  # bool
+            {"dynamic_value": False},  # bool
+            {"dynamic_value": None},  # null
+            {"dynamic_value": "test"},  # string
+            {"dynamic_value": {"key": "value"}},  # dict/struct
+            {"dynamic_value": [1, 2, 3]},  # list
+            {"dynamic_value": {"nested": {"deeply": {"value": 123}}}},  # nested dict
+        ]
+        
+        for test_data in test_cases:
+            test_data["id"] = "test"
+            instance = value_demo_p2p.ValueTestMessage(**test_data)
+            assert instance.dynamic_value == test_data["dynamic_value"]
+    
+    def test_value_field_json_serialization(self) -> None:
+        """Test JSON serialization/deserialization of Value fields"""
+        instance = value_demo_p2p.ValueTestMessage(
+            id="json-test",
+            dynamic_value={"complex": [1, "two", 3.0, None]},
+            value_list=[{"nested": "dict"}, [1, 2], "string", None],
+            value_map={
+                "mixed": [True, False, None],
+                "number": 42.5,
+                "object": {"a": 1, "b": 2}
+            }
+        )
+        
+        # Convert to JSON and back
+        json_dict = instance.model_dump() if hasattr(instance, "model_dump") else instance.dict()
+        
+        # Recreate from dict
+        new_instance = value_demo_p2p.ValueTestMessage(**json_dict)
+        
+        # Verify all fields match
+        assert new_instance.id == instance.id
+        assert new_instance.dynamic_value == instance.dynamic_value
+        assert new_instance.value_list == instance.value_list
+        assert new_instance.value_map == instance.value_map
+    
+    def test_value_field_edge_cases(self) -> None:
+        """Test edge cases for Value fields"""
+        # Empty values
+        instance1 = value_demo_p2p.ValueTestMessage(id="empty")
+        assert instance1.id == "empty"
+        assert instance1.value_list == []
+        assert instance1.value_map == {}
+        
+        # Very nested structures
+        deep_nested = {"level1": {"level2": {"level3": {"level4": {"level5": "deep"}}}}}
+        instance2 = value_demo_p2p.ValueTestMessage(
+            id="nested",
+            dynamic_value=deep_nested
+        )
+        assert instance2.dynamic_value == deep_nested
+        
+        # Large lists
+        large_list = list(range(100))
+        instance3 = value_demo_p2p.ValueTestMessage(
+            id="large",
+            value_list=large_list
+        )
+        assert instance3.value_list == large_list

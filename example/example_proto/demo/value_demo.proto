@@ -7,7 +7,7 @@ import "google/protobuf/struct.proto";
 // Test message with google.protobuf.Value field
 message ValueTestMessage {
   string id = 1;
-  google.protobuf.Value dynamic_value = 2;
+  optional google.protobuf.Value dynamic_value = 2;
   repeated google.protobuf.Value value_list = 3;
   map<string, google.protobuf.Value> value_map = 4;
 }

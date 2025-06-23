@@ -14,6 +14,6 @@ class ValueTestMessage(BaseModel):
     """
 
     id: str = Field(default="")
-    dynamic_value: typing.Any = Field()
+    dynamic_value: typing.Optional[typing.Any] = Field(default=None)
     value_list: typing.List[typing.Any] = Field(default_factory=list)
     value_map: "typing.Dict[str, typing.Any]" = Field(default_factory=dict)
