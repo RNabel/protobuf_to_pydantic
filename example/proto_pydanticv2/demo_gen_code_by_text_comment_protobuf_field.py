@@ -12,56 +12,155 @@ from google.protobuf.field_mask_pb2 import FieldMask  # type: ignore
 from google.protobuf.wrappers_pb2 import DoubleValue  # type: ignore
 from protobuf_to_pydantic.customer_validator.v2 import check_one_of
 from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic.alias_generators import to_camel
+from pydantic.aliases import AliasGenerator
 from pydantic.types import PaymentCardNumber
 
 
 class AfterReferMessage(BaseModel):
-    uid: str = Field(title="UID", description="user union id", example="10086")
-    age: int = Field(default=0, title="use age", example=18, ge=0)
+    model_config = ConfigDict(
+        alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
+        populate_by_name=True,
+        serialize_by_alias=True,
+        validate_by_alias=True,
+        validate_by_name=True,
+    )
+
+    uid: str = Field(
+        alias_priority=1,
+        validation_alias="uid",
+        serialization_alias="uid",
+        title="UID",
+        description="user union id",
+        example="10086",
+    )
+    age: int = Field(
+        default=0,
+        alias_priority=1,
+        validation_alias="age",
+        serialization_alias="age",
+        title="use age",
+        example=18,
+        ge=0,
+    )
 
 
 class AnOtherMessage(BaseModel):
     class SubMessage(BaseModel):
-        text: str = Field(default="")
+        model_config = ConfigDict(
+            alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
+            populate_by_name=True,
+            serialize_by_alias=True,
+            validate_by_alias=True,
+            validate_by_name=True,
+        )
 
-    field1: str = Field(default="")
-    field2: SubMessage = Field(default_factory=SubMessage)
+        text: str = Field(default="", alias_priority=1, validation_alias="text", serialization_alias="text")
+
+    model_config = ConfigDict(
+        alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
+        populate_by_name=True,
+        serialize_by_alias=True,
+        validate_by_alias=True,
+        validate_by_name=True,
+    )
+
+    field1: str = Field(default="", alias_priority=1, validation_alias="field1", serialization_alias="field1")
+    field2: SubMessage = Field(
+        default_factory=SubMessage, alias_priority=1, validation_alias="field2", serialization_alias="field2"
+    )
 
 
 class DemoState(BaseModel):
-    paramsDID: int = Field(default=0)
+    model_config = ConfigDict(
+        alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
+        populate_by_name=True,
+        serialize_by_alias=True,
+        validate_by_alias=True,
+        validate_by_name=True,
+    )
+
+    paramsDID: int = Field(default=0, alias_priority=1, validation_alias="paramsDID", serialization_alias="paramsDID")
 
 
 class DemoResp(BaseModel):
-    demoState: typing.Dict[int, DemoState] = Field(default_factory=dict)
-    pramsArea: int = Field(default=0)
-    paramsSeason: bool = Field(default=False)
+    model_config = ConfigDict(
+        alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
+        populate_by_name=True,
+        serialize_by_alias=True,
+        validate_by_alias=True,
+        validate_by_name=True,
+    )
+
+    demoState: typing.Dict[int, DemoState] = Field(
+        default_factory=dict, alias_priority=1, validation_alias="demoState", serialization_alias="demoState"
+    )
+    pramsArea: int = Field(default=0, alias_priority=1, validation_alias="pramsArea", serialization_alias="pramsArea")
+    paramsSeason: bool = Field(
+        default=False, alias_priority=1, validation_alias="paramsSeason", serialization_alias="paramsSeason"
+    )
 
 
 class EmptyMessage(BaseModel):
-    pass
+    model_config = ConfigDict(
+        alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
+        populate_by_name=True,
+        serialize_by_alias=True,
+        validate_by_alias=True,
+        validate_by_name=True,
+    )
 
 
 class InvoiceItem2(BaseModel):
-    name: str = Field(default="")
-    amount: int = Field(default=0)
-    quantity: int = Field(default=0)
-    items: typing.List["InvoiceItem2"] = Field(default_factory=list)
+    model_config = ConfigDict(
+        alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
+        populate_by_name=True,
+        serialize_by_alias=True,
+        validate_by_alias=True,
+        validate_by_name=True,
+    )
+
+    name: str = Field(default="", alias_priority=1, validation_alias="name", serialization_alias="name")
+    amount: int = Field(default=0, alias_priority=1, validation_alias="amount", serialization_alias="amount")
+    quantity: int = Field(default=0, alias_priority=1, validation_alias="quantity", serialization_alias="quantity")
+    items: typing.List["InvoiceItem2"] = Field(
+        default_factory=list, alias_priority=1, validation_alias="items", serialization_alias="items"
+    )
     invoice: "Invoice3" = Field()
 
 
 class Invoice3(BaseModel):
-    name: str = Field(default="")
-    amount: int = Field(default=0)
-    quantity: int = Field(default=0)
-    items: typing.List[InvoiceItem2] = Field(default_factory=list)
+    model_config = ConfigDict(
+        alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
+        populate_by_name=True,
+        serialize_by_alias=True,
+        validate_by_alias=True,
+        validate_by_name=True,
+    )
+
+    name: str = Field(default="", alias_priority=1, validation_alias="name", serialization_alias="name")
+    amount: int = Field(default=0, alias_priority=1, validation_alias="amount", serialization_alias="amount")
+    quantity: int = Field(default=0, alias_priority=1, validation_alias="quantity", serialization_alias="quantity")
+    items: typing.List[InvoiceItem2] = Field(
+        default_factory=list, alias_priority=1, validation_alias="items", serialization_alias="items"
+    )
 
 
 class InvoiceItem(BaseModel):
-    name: str = Field(default="")
-    amount: int = Field(default=0)
-    quantity: int = Field(default=0)
-    items: typing.List["InvoiceItem"] = Field(default_factory=list)
+    model_config = ConfigDict(
+        alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
+        populate_by_name=True,
+        serialize_by_alias=True,
+        validate_by_alias=True,
+        validate_by_name=True,
+    )
+
+    name: str = Field(default="", alias_priority=1, validation_alias="name", serialization_alias="name")
+    amount: int = Field(default=0, alias_priority=1, validation_alias="amount", serialization_alias="amount")
+    quantity: int = Field(default=0, alias_priority=1, validation_alias="quantity", serialization_alias="quantity")
+    items: typing.List["InvoiceItem"] = Field(
+        default_factory=list, alias_priority=1, validation_alias="items", serialization_alias="items"
+    )
 
 
 class SexType(IntEnum):
@@ -82,100 +181,309 @@ class ExampleExampleProtoCommonSingleDemoMessage(BaseModel):
     """Note: The current class does not belong to the package
     ExampleExampleProtoCommonSingleDemoMessage protobuf path:example/example_proto/common/single.proto"""
 
-    earth: str = Field(default="")
-    mercury: str = Field(default="")
-    mars: str = Field(default="")
+    model_config = ConfigDict(
+        alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
+        populate_by_name=True,
+        serialize_by_alias=True,
+        validate_by_alias=True,
+        validate_by_name=True,
+    )
+
+    earth: str = Field(default="", alias_priority=1, validation_alias="earth", serialization_alias="earth")
+    mercury: str = Field(default="", alias_priority=1, validation_alias="mercury", serialization_alias="mercury")
+    mars: str = Field(default="", alias_priority=1, validation_alias="mars", serialization_alias="mars")
 
 
 class UserMessage(BaseModel):
-    model_config = ConfigDict(validate_default=True)
+    model_config = ConfigDict(
+        validate_default=True,
+        alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
+        populate_by_name=True,
+        serialize_by_alias=True,
+        validate_by_alias=True,
+        validate_by_name=True,
+    )
 
-    uid: str = Field(title="UID", description="user union id", example="10086")
-    age: int = Field(default=0, title="use age", example=18, ge=0)
-    height: float = Field(default=0.0, ge=0.0, le=2.5)
-    sex: SexType = Field(default=0)
-    demo: ExampleExampleProtoCommonSingleDemoEnum = Field(default=0)
-    is_adult: bool = Field(default=False)
-    user_name: str = Field(default="", description="user name", example="so1n", min_length=1, max_length=10)
+    uid: str = Field(
+        alias_priority=1,
+        validation_alias="uid",
+        serialization_alias="uid",
+        title="UID",
+        description="user union id",
+        example="10086",
+    )
+    age: int = Field(
+        default=0,
+        alias_priority=1,
+        validation_alias="age",
+        serialization_alias="age",
+        title="use age",
+        example=18,
+        ge=0,
+    )
+    height: float = Field(
+        default=0.0, alias_priority=1, validation_alias="height", serialization_alias="height", ge=0.0, le=2.5
+    )
+    sex: SexType = Field(default=0, alias_priority=1, validation_alias="sex", serialization_alias="sex")
+    demo: ExampleExampleProtoCommonSingleDemoEnum = Field(
+        default=0, alias_priority=1, validation_alias="demo", serialization_alias="demo"
+    )
+    is_adult: bool = Field(default=False, alias_priority=1, validation_alias="isAdult", serialization_alias="isAdult")
+    user_name: str = Field(
+        default="",
+        alias_priority=1,
+        validation_alias="userName",
+        serialization_alias="userName",
+        description="user name",
+        example="so1n",
+        min_length=1,
+        max_length=10,
+    )
     demo_message: ExampleExampleProtoCommonSingleDemoMessage = Field(
-        default_factory=ExampleExampleProtoCommonSingleDemoMessage, customer_string="c1", customer_int=1
+        default_factory=ExampleExampleProtoCommonSingleDemoMessage,
+        alias_priority=1,
+        validation_alias="demoMessage",
+        serialization_alias="demoMessage",
+        customer_string="c1",
+        customer_int=1,
     )
 
 
 class MapMessage(BaseModel):
-    user_map: typing.Dict[str, UserMessage] = Field(default_factory=dict)
-    user_flag: typing.Dict[str, bool] = Field(default_factory=dict)
+    model_config = ConfigDict(
+        alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
+        populate_by_name=True,
+        serialize_by_alias=True,
+        validate_by_alias=True,
+        validate_by_name=True,
+    )
+
+    user_map: typing.Dict[str, UserMessage] = Field(
+        default_factory=dict, alias_priority=1, validation_alias="userMap", serialization_alias="userMap"
+    )
+    user_flag: typing.Dict[str, bool] = Field(
+        default_factory=dict, alias_priority=1, validation_alias="userFlag", serialization_alias="userFlag"
+    )
 
 
 class RepeatedMessage(BaseModel):
-    str_list: typing.List[str] = Field(default_factory=list, min_length=3, max_length=5)
-    int_list: typing.Set[int] = Field(default_factory=set, min_length=1, max_length=5)
-    user_list: typing.List[UserMessage] = Field(default_factory=list)
+    model_config = ConfigDict(
+        alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
+        populate_by_name=True,
+        serialize_by_alias=True,
+        validate_by_alias=True,
+        validate_by_name=True,
+    )
+
+    str_list: typing.List[str] = Field(
+        default_factory=list,
+        alias_priority=1,
+        validation_alias="strList",
+        serialization_alias="strList",
+        min_length=3,
+        max_length=5,
+    )
+    int_list: typing.Set[int] = Field(
+        default_factory=set,
+        alias_priority=1,
+        validation_alias="intList",
+        serialization_alias="intList",
+        min_length=1,
+        max_length=5,
+    )
+    user_list: typing.List[UserMessage] = Field(
+        default_factory=list, alias_priority=1, validation_alias="userList", serialization_alias="userList"
+    )
 
 
 class NestedMessage(BaseModel):
     class UserPayMessage(BaseModel):
-        bank_number: PaymentCardNumber = Field(default="")
-        exp: datetime = Field(default_factory=exp_time)
-        uuid: str = Field(default_factory=uuid4)
+        model_config = ConfigDict(
+            alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
+            populate_by_name=True,
+            serialize_by_alias=True,
+            validate_by_alias=True,
+            validate_by_name=True,
+        )
+
+        bank_number: PaymentCardNumber = Field(
+            default="", alias_priority=1, validation_alias="bankNumber", serialization_alias="bankNumber"
+        )
+        exp: datetime = Field(
+            default_factory=exp_time, alias_priority=1, validation_alias="exp", serialization_alias="exp"
+        )
+        uuid: str = Field(default_factory=uuid4, alias_priority=1, validation_alias="uuid", serialization_alias="uuid")
 
     class IncludeEnum(IntEnum):
         zero = 0
         one = 1
         two = 2
 
-    model_config = ConfigDict(validate_default=True)
+    model_config = ConfigDict(
+        validate_default=True,
+        alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
+        populate_by_name=True,
+        serialize_by_alias=True,
+        validate_by_alias=True,
+        validate_by_name=True,
+    )
 
-    user_list_map: typing.Dict[str, RepeatedMessage] = Field(default_factory=dict)
-    user_map: typing.Dict[str, MapMessage] = Field(default_factory=dict)
-    user_pay: UserPayMessage = Field(default_factory=UserPayMessage)
-    include_enum: IncludeEnum = Field(default=0)
-    empty: typing.Any = Field()
-    after_refer: AfterReferMessage = Field(default_factory=AfterReferMessage)
+    user_list_map: typing.Dict[str, RepeatedMessage] = Field(
+        default_factory=dict, alias_priority=1, validation_alias="userListMap", serialization_alias="userListMap"
+    )
+    user_map: typing.Dict[str, MapMessage] = Field(
+        default_factory=dict, alias_priority=1, validation_alias="userMap", serialization_alias="userMap"
+    )
+    user_pay: UserPayMessage = Field(
+        default_factory=UserPayMessage, alias_priority=1, validation_alias="userPay", serialization_alias="userPay"
+    )
+    include_enum: IncludeEnum = Field(
+        default=0, alias_priority=1, validation_alias="includeEnum", serialization_alias="includeEnum"
+    )
+    empty: typing.Any = Field(alias_priority=1, validation_alias="empty", serialization_alias="empty")
+    after_refer: AfterReferMessage = Field(
+        default_factory=AfterReferMessage,
+        alias_priority=1,
+        validation_alias="afterRefer",
+        serialization_alias="afterRefer",
+    )
 
 
 class OptionalMessage(BaseModel):
+    model_config = ConfigDict(
+        alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
+        populate_by_name=True,
+        serialize_by_alias=True,
+        validate_by_alias=True,
+        validate_by_name=True,
+    )
+
     _one_of_dict = {"user.OptionalMessage.a": {"fields": {"x", "yy"}, "required": False}}
 
-    x: str = Field(default="")
-    y: int = Field(default=0, alias="yy", alias_priority=2, title="use age", example=18, ge=0)
-    name: typing.Optional[str] = Field(default="")
-    age: typing.Optional[int] = Field(default=0)
-    item: typing.Optional[InvoiceItem] = Field(default_factory=InvoiceItem)
-    str_list: typing.List[str] = Field(default_factory=list)
-    int_map: typing.Dict[str, int] = Field(default_factory=dict)
-    default_template_test: float = Field(default=1600000000.0)
+    x: str = Field(default="", alias_priority=1, validation_alias="x", serialization_alias="x")
+    y: int = Field(
+        default=0,
+        alias="yy",
+        alias_priority=2,
+        validation_alias="y",
+        serialization_alias="y",
+        title="use age",
+        example=18,
+        ge=0,
+    )
+    name: typing.Optional[str] = Field(
+        default="", alias_priority=1, validation_alias="name", serialization_alias="name"
+    )
+    age: typing.Optional[int] = Field(default=0, alias_priority=1, validation_alias="age", serialization_alias="age")
+    item: typing.Optional[InvoiceItem] = Field(
+        default_factory=InvoiceItem, alias_priority=1, validation_alias="item", serialization_alias="item"
+    )
+    str_list: typing.List[str] = Field(
+        default_factory=list, alias_priority=1, validation_alias="strList", serialization_alias="strList"
+    )
+    int_map: typing.Dict[str, int] = Field(
+        default_factory=dict, alias_priority=1, validation_alias="intMap", serialization_alias="intMap"
+    )
+    default_template_test: float = Field(
+        default=1600000000.0,
+        alias_priority=1,
+        validation_alias="defaultTemplateTest",
+        serialization_alias="defaultTemplateTest",
+    )
 
     one_of_validator = model_validator(mode="before")(check_one_of)
 
 
 class OtherMessage(BaseModel):
-    model_config = ConfigDict(arbitrary_types_allowed=True)
+    model_config = ConfigDict(
+        alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
+        populate_by_name=True,
+        serialize_by_alias=True,
+        arbitrary_types_allowed=True,
+        validate_by_alias=True,
+        validate_by_name=True,
+    )
 
-    metadata: typing.Dict[str, typing.Any] = Field(default_factory=dict)
-    double_value: DoubleValue = Field(default_factory=DoubleValue)
-    field_mask: typing.Optional[FieldMask] = Field(default_factory=FieldMask)
+    metadata: typing.Dict[str, typing.Any] = Field(
+        default_factory=dict, alias_priority=1, validation_alias="metadata", serialization_alias="metadata"
+    )
+    double_value: DoubleValue = Field(
+        default_factory=DoubleValue, alias_priority=1, validation_alias="doubleValue", serialization_alias="doubleValue"
+    )
+    field_mask: typing.Optional[FieldMask] = Field(
+        default_factory=FieldMask, alias_priority=1, validation_alias="fieldMask", serialization_alias="fieldMask"
+    )
 
 
 class RootMessage(BaseModel):
-    field1: str = Field(default="")
-    field2: AnOtherMessage = Field(default_factory=AnOtherMessage)
+    model_config = ConfigDict(
+        alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
+        populate_by_name=True,
+        serialize_by_alias=True,
+        validate_by_alias=True,
+        validate_by_name=True,
+    )
+
+    field1: str = Field(default="", alias_priority=1, validation_alias="field1", serialization_alias="field1")
+    field2: AnOtherMessage = Field(
+        default_factory=AnOtherMessage, alias_priority=1, validation_alias="field2", serialization_alias="field2"
+    )
 
 
 class TestSameName0(BaseModel):
     class Body(BaseModel):
-        input_model: str = Field(default="")
-        input_info: typing.Dict[str, str] = Field(default_factory=dict)
+        model_config = ConfigDict(
+            alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
+            populate_by_name=True,
+            serialize_by_alias=True,
+            validate_by_alias=True,
+            validate_by_name=True,
+        )
 
-    body: Body = Field(default_factory=Body)
+        input_model: str = Field(
+            default="", alias_priority=1, validation_alias="inputModel", serialization_alias="inputModel"
+        )
+        input_info: typing.Dict[str, str] = Field(
+            default_factory=dict, alias_priority=1, validation_alias="inputInfo", serialization_alias="inputInfo"
+        )
+
+    model_config = ConfigDict(
+        alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
+        populate_by_name=True,
+        serialize_by_alias=True,
+        validate_by_alias=True,
+        validate_by_name=True,
+    )
+
+    body: Body = Field(default_factory=Body, alias_priority=1, validation_alias="body", serialization_alias="body")
 
 
 class TestSameName1(BaseModel):
     class Body(BaseModel):
-        output_model: str = Field(default="")
-        output_info: typing.Dict[str, str] = Field(default_factory=dict)
+        model_config = ConfigDict(
+            alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
+            populate_by_name=True,
+            serialize_by_alias=True,
+            validate_by_alias=True,
+            validate_by_name=True,
+        )
 
-    body: Body = Field(default_factory=Body)
+        output_model: str = Field(
+            default="", alias_priority=1, validation_alias="outputModel", serialization_alias="outputModel"
+        )
+        output_info: typing.Dict[str, str] = Field(
+            default_factory=dict, alias_priority=1, validation_alias="outputInfo", serialization_alias="outputInfo"
+        )
+
+    model_config = ConfigDict(
+        alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
+        populate_by_name=True,
+        serialize_by_alias=True,
+        validate_by_alias=True,
+        validate_by_name=True,
+    )
+
+    body: Body = Field(default_factory=Body, alias_priority=1, validation_alias="body", serialization_alias="body")
 
 
 class OptionalEnum(IntEnum):
@@ -185,6 +493,15 @@ class OptionalEnum(IntEnum):
 
 
 class WithOptionalEnumMsgEntry(BaseModel):
-    model_config = ConfigDict(validate_default=True)
+    model_config = ConfigDict(
+        validate_default=True,
+        alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
+        populate_by_name=True,
+        serialize_by_alias=True,
+        validate_by_alias=True,
+        validate_by_name=True,
+    )
 
-    enum: typing.Optional[OptionalEnum] = Field(default=0)
+    enum: typing.Optional[OptionalEnum] = Field(
+        default=0, alias_priority=1, validation_alias="enum", serialization_alias="enum"
+    )
