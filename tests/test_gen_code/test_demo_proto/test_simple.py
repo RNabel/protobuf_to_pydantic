@@ -438,15 +438,40 @@ class NestedMessage(BaseModel):
         one = 1
         two = 2
 
-    model_config = ConfigDict(validate_default=True)
+    model_config = ConfigDict(
+        validate_default=True,
+        alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
+        populate_by_name=True,
+        serialize_by_alias=True,
+        validate_by_alias=True,
+        validate_by_name=True,
+    )
 
-    user_list_map: typing.Dict[str, RepeatedMessage] = Field(default_factory=dict)
-    user_map: typing.Dict[str, MapMessage] = Field(default_factory=dict)
-    user_pay: UserPayMessage = Field(default_factory=UserPayMessage)
-    include_enum: IncludeEnum = Field(default=0)
-    not_enable_user_pay: UserPayMessage = Field(default_factory=UserPayMessage)
-    empty: typing.Any = Field()
-    after_refer: AfterReferMessage = Field(default_factory=AfterReferMessage)
+    user_list_map: typing.Dict[str, RepeatedMessage] = Field(
+        default_factory=dict, alias_priority=1, validation_alias="userListMap", serialization_alias="userListMap"
+    )
+    user_map: typing.Dict[str, MapMessage] = Field(
+        default_factory=dict, alias_priority=1, validation_alias="userMap", serialization_alias="userMap"
+    )
+    user_pay: UserPayMessage = Field(
+        default_factory=UserPayMessage, alias_priority=1, validation_alias="userPay", serialization_alias="userPay"
+    )
+    include_enum: IncludeEnum = Field(
+        default=0, alias_priority=1, validation_alias="includeEnum", serialization_alias="includeEnum"
+    )
+    not_enable_user_pay: UserPayMessage = Field(
+        default_factory=UserPayMessage,
+        alias_priority=1,
+        validation_alias="notEnableUserPay",
+        serialization_alias="notEnableUserPay",
+    )
+    empty: typing.Any = Field(alias_priority=1, validation_alias="empty", serialization_alias="empty")
+    after_refer: AfterReferMessage = Field(
+        default_factory=AfterReferMessage,
+        alias_priority=1,
+        validation_alias="afterRefer",
+        serialization_alias="afterRefer",
+    )
 ''',
         )
 
@@ -688,13 +713,32 @@ class TestSameName1(BaseModel):
         output = self._model_output(diff_pkg_refer_2_pb2.Demo2)
         assert_expected_inline(
             output,
-            '''class ExampleExampleProtoDemoDiffPkgRefer1Demo1(BaseModel):
+            '''\
+class ExampleExampleProtoDemoDiffPkgRefer1Demo1(BaseModel):
     """Note: The current class does not belong to the package
     ExampleExampleProtoDemoDiffPkgRefer1Demo1 protobuf path:example/example_proto/demo/diff_pkg_refer_1.proto"""
 
+    model_config = ConfigDict(
+        alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
+        populate_by_name=True,
+        serialize_by_alias=True,
+        validate_by_alias=True,
+        validate_by_name=True,
+    )
+
 
 class Demo2(BaseModel):
-    myField: typing.Dict[str, ExampleExampleProtoDemoDiffPkgRefer1Demo1] = Field(default_factory=dict)
+    model_config = ConfigDict(
+        alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
+        populate_by_name=True,
+        serialize_by_alias=True,
+        validate_by_alias=True,
+        validate_by_name=True,
+    )
+
+    myField: typing.Dict[str, ExampleExampleProtoDemoDiffPkgRefer1Demo1] = Field(
+        default_factory=dict, alias_priority=1, validation_alias="myField", serialization_alias="myField"
+    )
 ''',
         )
 

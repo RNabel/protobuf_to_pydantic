@@ -32,11 +32,26 @@ class TestValueField:
         output = self._model_output(value_demo_pb2.ValueTestMessage)
         assert_expected_inline(
             output,
-            """class ValueTestMessage(BaseModel):
-    id: str = Field(default="")
-    dynamic_value: typing.Optional[typing.Any] = Field(default=None)
-    value_list: typing.List[typing.Any] = Field(default_factory=list)
-    value_map: typing.Dict[str, typing.Any] = Field(default_factory=dict)
+            """\
+class ValueTestMessage(BaseModel):
+    model_config = ConfigDict(
+        alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
+        populate_by_name=True,
+        serialize_by_alias=True,
+        validate_by_alias=True,
+        validate_by_name=True,
+    )
+
+    id: str = Field(default="", alias_priority=1, validation_alias="id", serialization_alias="id")
+    dynamic_value: typing.Optional[typing.Any] = Field(
+        default=None, alias_priority=1, validation_alias="dynamicValue", serialization_alias="dynamicValue"
+    )
+    value_list: typing.List[typing.Any] = Field(
+        default_factory=list, alias_priority=1, validation_alias="valueList", serialization_alias="valueList"
+    )
+    value_map: typing.Dict[str, typing.Any] = Field(
+        default_factory=dict, alias_priority=1, validation_alias="valueMap", serialization_alias="valueMap"
+    )
 """,
         )
 

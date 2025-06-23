@@ -8,7 +8,8 @@ from enum import IntEnum
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Tuple, Type, Union
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import AliasGenerator, BaseModel, ConfigDict
+from pydantic.alias_generators import to_camel
 from pydantic.fields import FieldInfo
 from typing_extensions import Annotated, get_origin
 
@@ -675,9 +676,6 @@ class M2P(object):
             if not field_info_dict.get(remove_key, True):  # type: ignore[misc]
                 field_info_dict.pop(remove_key)  # type: ignore[misc]
 
-        # Debug: print field_info_dict before creating FieldInfo
-        # print(f"Creating FieldInfo for {field_dataclass.field_name} with dict: {field_info_dict}")
-
         return field_class(**field_info_dict)  # type: ignore
 
     def _parse_msg_to_pydantic_model(
@@ -784,23 +782,14 @@ class M2P(object):
             ):
                 pydantic_model_config_dict["arbitrary_types_allowed"] = True
 
-        # Configure alias handling for protobuf JSON compatibility
-        if not _pydantic_adapter.is_v1:
-            # For Pydantic v2, use AliasGenerator for automatic camelCase conversion
-            from pydantic import AliasGenerator
-            from pydantic.alias_generators import to_camel
-
-            pydantic_model_config_dict["alias_generator"] = AliasGenerator(
-                validation_alias=to_camel,
-                serialization_alias=to_camel,
-            )
-            # Allow both snake_case and camelCase during validation
-            pydantic_model_config_dict["populate_by_name"] = True
-            # Ensure serialization uses aliases
-            pydantic_model_config_dict["serialize_by_alias"] = True
-        else:
-            # For Pydantic v1, just enable populate_by_name
-            pydantic_model_config_dict["populate_by_name"] = True
+        pydantic_model_config_dict["alias_generator"] = AliasGenerator(
+            validation_alias=to_camel,
+            serialization_alias=to_camel,
+        )
+        # Allow both snake_case and camelCase during validation
+        pydantic_model_config_dict["populate_by_name"] = True
+        # Ensure serialization uses aliases
+        pydantic_model_config_dict["serialize_by_alias"] = True
 
         if one_of_dict:
             validators["one_of_validator"] = _pydantic_adapter.model_validator(
