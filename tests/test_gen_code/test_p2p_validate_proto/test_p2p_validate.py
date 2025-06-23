@@ -1213,23 +1213,52 @@ class MapTest(BaseModel):
 
     def test_message_ignored(self) -> None:
         output = self._model_output(demo_pb2.MessageIgnoredTest)
-        expected = textwrap.dedent("""
+        assert_expected_inline(
+            output,
+            """\
 class MessageIgnoredTest(BaseModel):
-    const_test: int = Field(default=0)
-    range_e_test: int = Field(default=0)
-    range_test: int = Field(default=0)
-""").strip()
-        assert expected in output
+    model_config = ConfigDict(
+        alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
+        populate_by_name=True,
+        serialize_by_alias=True,
+        validate_by_alias=True,
+        validate_by_name=True,
+    )
+
+    const_test: int = Field(default=0, alias_priority=1, validation_alias="constTest", serialization_alias="constTest")
+    range_e_test: int = Field(
+        default=0, alias_priority=1, validation_alias="rangeETest", serialization_alias="rangeETest"
+    )
+    range_test: int = Field(default=0, alias_priority=1, validation_alias="rangeTest", serialization_alias="rangeTest")
+""",
+        )
 
     def test_message(self) -> None:
         output = self._model_output(demo_pb2.MessageTest)
-        expected = textwrap.dedent("""
+        assert_expected_inline(
+            output,
+            """\
 class MessageTest(BaseModel):
-    skip_test: str = Field(default="")
-    required_test: str = Field()
-    extra_test: str = Field(default="", customer_string="c1", customer_int=1)
-""").strip()
-        assert expected in output
+    model_config = ConfigDict(
+        alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
+        populate_by_name=True,
+        serialize_by_alias=True,
+        validate_by_alias=True,
+        validate_by_name=True,
+    )
+
+    skip_test: str = Field(default="", alias_priority=1, validation_alias="skipTest", serialization_alias="skipTest")
+    required_test: str = Field(alias_priority=1, validation_alias="requiredTest", serialization_alias="requiredTest")
+    extra_test: str = Field(
+        default="",
+        alias_priority=1,
+        validation_alias="extraTest",
+        serialization_alias="extraTest",
+        customer_string="c1",
+        customer_int=1,
+    )
+""",
+        )
 
     def test_nested(self) -> None:
         output = self._model_output(demo_pb2.NestedMessage)
