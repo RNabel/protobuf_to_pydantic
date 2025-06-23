@@ -10,6 +10,7 @@
 - [x] 生成的源码自动格式化。
 - [x] 支持多种校验规则，兼容`proto-gen-validate`(后续版本将支持`proto-gen-validate`1.0的规则)。
 - [x] 通过模板支持自定义功能。
+- [x] 支持 Google Well-Known Types（包括 `google.protobuf.Value`）。
 - [ ] 支持`protovalidate`校验规则（也就是`proto-gen-validate`1.0）
 
 
@@ -840,16 +841,81 @@ remove-all-unused-imports = true
 remove-unused-variables = true
 ```
 
-## 4.example
+## 4.Google Well-Known Types 支持
+`protobuf-to-pydantic` 支持 Google 的 Well-Known Types，自动将它们转换为适当的 Python/Pydantic 类型：
+
+### 4.1.支持的 Well-Known Types
+
+| Protobuf 类型 | Python 类型 | 备注 |
+|---------------|-------------|------|
+| `google.protobuf.Timestamp` | `datetime.datetime` | 自动处理 |
+| `google.protobuf.Duration` | `datetime.timedelta` | 自动处理 |
+| `google.protobuf.Any` | `Any` | 需要 `ConfigDict(arbitrary_types_allowed=True)` |
+| `google.protobuf.Empty` | `Any` | 自动处理 |
+| `google.protobuf.Struct` | `Dict[str, Any]` | JSON 结构 |
+| `google.protobuf.Value` | `typing.Any` | **新增:** 支持任何 JSON 兼容的值 |
+| `google.protobuf.FieldMask` | `FieldMask` | 需要 `ConfigDict(arbitrary_types_allowed=True)` |
+| `google.protobuf.DoubleValue` | `float` | 包装类型 |
+| `google.protobuf.FloatValue` | `float` | 包装类型 |
+| `google.protobuf.Int32Value` | `int` | 包装类型 |
+| `google.protobuf.Int64Value` | `int` | 包装类型 |
+| `google.protobuf.UInt32Value` | `int` | 包装类型 |
+| `google.protobuf.UInt64Value` | `int` | 包装类型 |
+| `google.protobuf.BoolValue` | `bool` | 包装类型 |
+| `google.protobuf.StringValue` | `str` | 包装类型 |
+| `google.protobuf.BytesValue` | `bytes` | 包装类型 |
+
+### 4.2.google.protobuf.Value 使用方法
+
+`google.protobuf.Value` 类型是一个动态类型，可以保存任何 JSON 兼容的值（字符串、数字、布尔值、null、列表或对象）。在 `protobuf-to-pydantic` 中，它会自动转换为 `typing.Any`：
+
+```protobuf
+syntax = "proto3";
+import "google/protobuf/struct.proto";
+
+message ValueExample {
+  string id = 1;
+  google.protobuf.Value dynamic_data = 2;  // 可以保存任何 JSON 值
+  repeated google.protobuf.Value value_list = 3;  // 动态值列表
+  map<string, google.protobuf.Value> value_map = 4;  // 动态值映射
+}
+```
+
+这将生成：
+
+```python
+from typing import Any, Dict, List
+from pydantic import BaseModel, Field
+
+class ValueExample(BaseModel):
+    id: str = Field(default="")
+    dynamic_data: Any = Field(default=None)
+    value_list: List[Any] = Field(default_factory=list)
+    value_map: Dict[str, Any] = Field(default_factory=dict)
+```
+
+`dynamic_data` 字段可以接受任何 JSON 兼容的值：
+```python
+# 以下都是有效的：
+example1 = ValueExample(dynamic_data="string value")
+example2 = ValueExample(dynamic_data=42)
+example3 = ValueExample(dynamic_data=3.14)
+example4 = ValueExample(dynamic_data=True)
+example5 = ValueExample(dynamic_data=None)
+example6 = ValueExample(dynamic_data={"nested": "object"})
+example7 = ValueExample(dynamic_data=[1, 2, 3])
+```
+
+## 5.example
 `protobuf-to-pydantic`提供了一些简单的示例代码，以下是示例代码和protobuf文件的路径，仅供参考。
 
-### 4.1.直接生成
+### 5.1.直接生成
 protobuf文件: [demo/demo.proto](https://github.com/so1n/protobuf_to_pydantic/blob/master/example/example_proto/demo/demo.proto)
 
 生成的`Pydantic Model`(Pydantic V1): [proto_pydanticv1/demo_gen_code.py](https://github.com/so1n/protobuf_to_pydantic/blob/master/example/proto_pydanticv1/demo_gen_code.py)
 
 生成的`Pydantic Model`(Pydantic V2): [proto_pydanticv2/demo_gen_code.py](https://github.com/so1n/protobuf_to_pydantic/blob/master/example/proto_pydanticv2/demo_gen_code.py)
-### 4.2.注释规则
+### 5.2.注释规则
 protobuf文件: [demo/demo.proto](https://github.com/so1n/protobuf_to_pydantic/blob/master/example/example_proto/demo/demo.proto)
 
 基于`pyi`文件生成的`Pydantic Model`(Pydantic V1): [proto_pydanticv1/demo_gen_code_by_text_comment_pyi.py](https://github.com/so1n/protobuf_to_pydantic/blob/master/example/proto_pydanticv1/demo_gen_code_by_text_comment_pyi.py)
@@ -859,19 +925,19 @@ protobuf文件: [demo/demo.proto](https://github.com/so1n/protobuf_to_pydantic/b
 基于Protobuf文件生成的`Pydantic Model`(Pydantic V1): [proto_pydanticv1/demo_gen_code_by_text_comment_protobuf_field.py](https://github.com/so1n/protobuf_to_pydantic/blob/master/example/proto_pydanticv1/demo_gen_code_by_text_comment_protobuf_field.py)
 
 基于Protobuf文件生成的`Pydantic Model`(Pydantic V2): [proto_pydanticv2/demo_gen_code_by_text_comment_protobuf_field.py](https://github.com/so1n/protobuf_to_pydantic/blob/master/example/proto_pydanticv2/demo_gen_code_by_text_comment_protobuf_field.py)
-### 4.3.PGV规则
+### 5.3.PGV规则
 protobuf文件: [validate/demo.proto](https://github.com/so1n/protobuf_to_pydantic/blob/master/example/example_proto/validate/demo.proto)
 
 生成的`Pydantic Model`(Pydantic V1): [proto_pydanticv1/demo_gen_code_by_pgv.py](https://github.com/so1n/protobuf_to_pydantic/blob/master/example/proto_pydanticv1/demo_gen_code_by_pgv.py)
 
 生成的`Pydantic Model`(Pydantic V2): [proto_pydanticv2/demo_gen_code_by_pgv.py](https://github.com/so1n/protobuf_to_pydantic/blob/master/example/proto_pydanticv2/demo_gen_code_by_pgv.py)
-### 4.4.P2P规则
+### 5.4.P2P规则
 protobuf文件: [p2p_validate/demo.proto](https://github.com/so1n/protobuf_to_pydantic/blob/master/example/example_proto/p2p_validate/demo.proto)
 
 生成的`Pydantic Model`(Pydantic V1): [proto_pydanticv1/demo_gen_code_by_p2p.py](https://github.com/so1n/protobuf_to_pydantic/blob/master/example/proto_pydanticv1/demo_gen_code_by_p2p.py)
 
 生成的`Pydantic Model`(Pydantic V2): [proto_pydanticv2/demo_gen_code_by_p2p.py](https://github.com/so1n/protobuf_to_pydantic/blob/master/example/proto_pydanticv2/demo_gen_code_by_p2p.py)
-### 4.5.Protoc插件
+### 5.5.Protoc插件
 protobuf文件:
  - [demo/demo.proto](https://github.com/so1n/protobuf_to_pydantic/blob/master/example/example_proto/demo/demo.proto)
  - [validate/demo.proto](https://github.com/so1n/protobuf_to_pydantic/blob/master/example/example_proto/validate/demo.proto)

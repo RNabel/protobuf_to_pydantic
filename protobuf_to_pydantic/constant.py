@@ -27,13 +27,16 @@ message_name_type_dict: Dict[str, Any] = {
     "Empty": Any,
     "Duration": Timedelta,
     "Any": AnyMessage,
+    "Value": Any,
 }
 
 if not _pydantic_adapter.is_v1:
     from pydantic import BeforeValidator
     from typing_extensions import Annotated
 
-    message_name_type_dict["Duration"] = Annotated[datetime.timedelta, BeforeValidator(Timedelta.validate)]
+    message_name_type_dict["Duration"] = Annotated[
+        datetime.timedelta, BeforeValidator(Timedelta.validate)
+    ]
 python_type_default_value_dict: Dict[type, Any] = {
     float: 0.0,
     int: 0,

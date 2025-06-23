@@ -931,6 +931,11 @@ class FileDescriptorProtoToCode(BaseP2C):
                 rule_type_str = "struct"
                 type_factory = dict
                 self._add_import_code("typing")
+            elif _type_str == "Value":
+                py_type_str = "typing.Any"
+                rule_type_str = "any"
+                type_factory = None
+                self._add_import_code("typing")
             elif field.type_name.startswith(".google.protobuf"):
                 py_type_str = _type_str
                 rule_type_str = "any"

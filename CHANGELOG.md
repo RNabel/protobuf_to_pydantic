@@ -6,6 +6,7 @@
 ## 0.3.0.1[Now]
 - Fix, fix pydantic issue 6506
 - Fix, fix issue 74
+- Feat, support google.protobuf.Value type conversion to typing.Any
 ## 0.3
 - Note: Template is the introduction method that changes
   - OLD: `from protobuf_to_pydantic.desc_template import DescTemplate`

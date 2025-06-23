@@ -12,6 +12,7 @@ Feature：
 - [x] Compatible with `V1` and `V2` versions of `Pydantic`。
 - [x] Supports multiple verification rules and is compatible with `proto-gen-validate` (subsequent versions will support the rules of `proto-gen-validate` 1.0)。
 - [x] Support custom functionality through templates。
+- [x] Support for Google Well-Known Types (including `google.protobuf.Value`)。
 - [ ] Supports `protovalidate` verification rules（`proto-gen-validate` version >= 1.0）
 
 The following is a functional overview diagram of `protobuf-to-pydantic`.
@@ -852,16 +853,81 @@ remove-all-unused-imports = true
 remove-unused-variables = true
 ```
 
-## 4.example
+## 4.Google Well-Known Types Support
+`protobuf-to-pydantic` supports Google's Well-Known Types, automatically converting them to appropriate Python/Pydantic types:
+
+### 4.1.Supported Well-Known Types
+
+| Protobuf Type | Python Type | Notes |
+|---------------|-------------|-------|
+| `google.protobuf.Timestamp` | `datetime.datetime` | Automatically handled |
+| `google.protobuf.Duration` | `datetime.timedelta` | Automatically handled |
+| `google.protobuf.Any` | `Any` | Requires `ConfigDict(arbitrary_types_allowed=True)` |
+| `google.protobuf.Empty` | `Any` | Automatically handled |
+| `google.protobuf.Struct` | `Dict[str, Any]` | JSON-like structure |
+| `google.protobuf.Value` | `typing.Any` | **New:** Supports any JSON-compatible value |
+| `google.protobuf.FieldMask` | `FieldMask` | Requires `ConfigDict(arbitrary_types_allowed=True)` |
+| `google.protobuf.DoubleValue` | `float` | Wrapper type |
+| `google.protobuf.FloatValue` | `float` | Wrapper type |
+| `google.protobuf.Int32Value` | `int` | Wrapper type |
+| `google.protobuf.Int64Value` | `int` | Wrapper type |
+| `google.protobuf.UInt32Value` | `int` | Wrapper type |
+| `google.protobuf.UInt64Value` | `int` | Wrapper type |
+| `google.protobuf.BoolValue` | `bool` | Wrapper type |
+| `google.protobuf.StringValue` | `str` | Wrapper type |
+| `google.protobuf.BytesValue` | `bytes` | Wrapper type |
+
+### 4.2.google.protobuf.Value Usage
+
+The `google.protobuf.Value` type is a dynamic type that can hold any JSON-compatible value (string, number, boolean, null, list, or object). In `protobuf-to-pydantic`, it is automatically converted to `typing.Any`:
+
+```protobuf
+syntax = "proto3";
+import "google/protobuf/struct.proto";
+
+message ValueExample {
+  string id = 1;
+  google.protobuf.Value dynamic_data = 2;  // Can hold any JSON value
+  repeated google.protobuf.Value value_list = 3;  // List of dynamic values
+  map<string, google.protobuf.Value> value_map = 4;  // Map of dynamic values
+}
+```
+
+This will generate:
+
+```python
+from typing import Any, Dict, List
+from pydantic import BaseModel, Field
+
+class ValueExample(BaseModel):
+    id: str = Field(default="")
+    dynamic_data: Any = Field(default=None)
+    value_list: List[Any] = Field(default_factory=list)
+    value_map: Dict[str, Any] = Field(default_factory=dict)
+```
+
+The `dynamic_data` field can accept any JSON-compatible value:
+```python
+# All of these are valid:
+example1 = ValueExample(dynamic_data="string value")
+example2 = ValueExample(dynamic_data=42)
+example3 = ValueExample(dynamic_data=3.14)
+example4 = ValueExample(dynamic_data=True)
+example5 = ValueExample(dynamic_data=None)
+example6 = ValueExample(dynamic_data={"nested": "object"})
+example7 = ValueExample(dynamic_data=[1, 2, 3])
+```
+
+## 5.example
 `protobuf-to-pydantic` provides some simple example code for reference only.
 
-### 4.1.Generate code directly
+### 5.1.Generate code directly
 Protobuf file: [demo/demo.proto](https://github.com/so1n/protobuf_to_pydantic/blob/master/example/example_proto/demo/demo.proto)
 
 Generate `Pydantic Model`(Pydantic V1): [proto_pydanticv1/demo_gen_code.py](https://github.com/so1n/protobuf_to_pydantic/blob/master/example/proto_pydanticv1/demo_gen_code.py)
 
 Generate `Pydantic Model`(Pydantic V2): [proto_pydanticv2/demo_gen_code.py](https://github.com/so1n/protobuf_to_pydantic/blob/master/example/proto_pydanticv2/demo_gen_code.py)
-### 4.2.Text annotation
+### 5.2.Text annotation
 Protobuf File: [demo/demo.proto](https://github.com/so1n/protobuf_to_pydantic/blob/master/example/example_proto/demo/demo.proto)
 
 `Pydantic Model` generated based on `pyi` file(Pydantic V1): [proto_pydanticv1/demo_gen_code_by_text_comment_pyi.py](https://github.com/so1n/protobuf_to_pydantic/blob/master/example/proto_pydanticv1/demo_gen_code_by_text_comment_pyi.py)
@@ -875,13 +941,13 @@ validate/demo.proto](https://github.com/so1n/protobuf_to_pydantic/blob/master/ex
 Generate `Pydantic Model`(Pydantic V1): [proto_pydanticv1/demo_gen_code_by_pgv.py](https://github.com/so1n/protobuf_to_pydantic/blob/master/example/proto_pydanticv1/demo_gen_code_by_pgv.py)
 
 Generate `Pydantic Model`(Pydantic V2): [proto_pydanticv2/demo_gen_code_by_pgv.py](https://github.com/so1n/protobuf_to_pydantic/blob/master/example/proto_pydanticv2/demo_gen_code_by_pgv.py)
-### 4.4.P2P rule
+### 5.3.P2P rule
 Protobuf file: [p2p_validate/demo.proto](https://github.com/so1n/protobuf_to_pydantic/blob/master/example/example_proto/p2p_validate/demo.proto)
 
 Generate `Pydantic Model`(Pydantic V1): [proto_pydanticv1/demo_gen_code_by_p2p.py](https://github.com/so1n/protobuf_to_pydantic/blob/master/example/proto_pydanticv1/demo_gen_code_by_p2p.py)
 
 Generate `Pydantic Model`(Pydantic V2): [proto_pydanticv2/demo_gen_code_by_p2p.py](https://github.com/so1n/protobuf_to_pydantic/blob/master/example/proto_pydanticv2/demo_gen_code_by_p2p.py)
-### 4.5.Protoc Plugin-in
+### 5.4.Protoc Plugin-in
 Protobuf field:
  - [demo/demo.proto](https://github.com/so1n/protobuf_to_pydantic/blob/master/example/example_proto/demo/demo.proto)
  - [validate/demo.proto](https://github.com/so1n/protobuf_to_pydantic/blob/master/example/example_proto/validate/demo.proto)
