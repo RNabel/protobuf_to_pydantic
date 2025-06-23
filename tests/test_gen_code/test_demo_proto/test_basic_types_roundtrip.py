@@ -523,11 +523,10 @@ class TestBasicTypesRoundTrip:
         assert pb_msg3.bool_field == pb_msg.bool_field
         assert list(pb_msg3.repeated_int32) == list(pb_msg.repeated_int32)
 
-    def test_static_pydantic_model_roundtrip(self):
-        """Test round-trip using the statically generated Pydantic models from _p2p.py files."""
-        # Create a Pydantic model using the pre-generated class
-        pydantic_data = {
-            "int32Field": 100,
+    def test_static_pydantic_model_snake_case_input(self):
+        """Test that static Pydantic models accept snake_case field names."""
+        snake_case_data = {
+            "int32_field": 100,
             "int64_field": 1000000,
             "string_field": "Static test",
             "bool_field": True,
@@ -536,64 +535,247 @@ class TestBasicTypesRoundTrip:
             "optional_int32": 999,
         }
 
-        # Create static Pydantic model
-        static_model = basic_types_roundtrip_p2p.BasicTypesMessage(**pydantic_data)
+        # Create static Pydantic model with snake_case
+        static_model = basic_types_roundtrip_p2p.BasicTypesMessage(**snake_case_data)
 
-        # Convert to dict (note: no camelCase conversion here)
-        model_dict = static_model.model_dump()
+        # Verify values
+        assert static_model.int32_field == 100
+        assert static_model.int64_field == 1000000
+        assert static_model.string_field == "Static test"
+        assert static_model.bool_field is True
+        assert static_model.float_field == 2.718
+        assert static_model.repeated_string == ["a", "b", "c"]
+        assert static_model.optional_int32 == 999
 
-        # Create protobuf message and populate it
+    def test_static_pydantic_model_camel_case_input(self):
+        """Test that static Pydantic models accept camelCase field names via aliases."""
+        camel_case_data = {
+            "int32Field": 100,
+            "int64Field": 1000000,
+            "stringField": "Static test",
+            "boolField": True,
+            "floatField": 2.718,
+            "repeatedString": ["a", "b", "c"],
+            "optionalInt32": 999,
+        }
+
+        # Create static Pydantic model with camelCase
+        static_model = basic_types_roundtrip_p2p.BasicTypesMessage(**camel_case_data)
+
+        # Verify values
+        assert static_model.int32_field == 100
+        assert static_model.int64_field == 1000000
+        assert static_model.string_field == "Static test"
+        assert static_model.bool_field is True
+        assert static_model.float_field == 2.718
+        assert static_model.repeated_string == ["a", "b", "c"]
+        assert static_model.optional_int32 == 999
+
+    def test_static_pydantic_model_snake_and_camel_equivalence(self):
+        """Test that models created with snake_case and camelCase inputs are equivalent."""
+        test_data = {
+            "snake": {
+                "int32_field": 100,
+                "string_field": "Test",
+                "repeated_string": ["a", "b"],
+            },
+            "camel": {
+                "int32Field": 100,
+                "stringField": "Test",
+                "repeatedString": ["a", "b"],
+            },
+        }
+
+        snake_model = basic_types_roundtrip_p2p.BasicTypesMessage(**test_data["snake"])
+        camel_model = basic_types_roundtrip_p2p.BasicTypesMessage(**test_data["camel"])
+
+        # Verify both models have identical values
+        assert snake_model.int32_field == camel_model.int32_field
+        assert snake_model.string_field == camel_model.string_field
+        assert snake_model.repeated_string == camel_model.repeated_string
+
+    def test_static_pydantic_model_json_serialization_with_aliases(self):
+        """Test JSON serialization with aliases produces camelCase output."""
+        model = basic_types_roundtrip_p2p.BasicTypesMessage(
+            int32_field=42,
+            string_field="Test",
+            repeated_int32=[1, 2, 3],
+            optional_bool=True,
+        )
+
+        # Serialize with aliases
+        json_output = model.model_dump_json(by_alias=True)
+        json_dict = json.loads(json_output)
+
+        # Verify camelCase keys
+        assert "int32Field" in json_dict
+        assert "stringField" in json_dict
+        assert "repeatedInt32" in json_dict
+        assert "optionalBool" in json_dict
+
+        # Verify values
+        assert json_dict["int32Field"] == 42
+        assert json_dict["stringField"] == "Test"
+        assert json_dict["repeatedInt32"] == [1, 2, 3]
+        assert json_dict["optionalBool"] is True
+
+    def test_static_pydantic_model_json_serialization_without_aliases(self):
+        """Test JSON serialization without aliases produces snake_case output."""
+        model = basic_types_roundtrip_p2p.BasicTypesMessage(
+            int32_field=42,
+            string_field="Test",
+            repeated_int32=[1, 2, 3],
+            optional_bool=True,
+        )
+
+        # Serialize without aliases
+        json_output = model.model_dump_json(by_alias=False)
+        json_dict = json.loads(json_output)
+
+        # Verify snake_case keys
+        assert "int32_field" in json_dict
+        assert "string_field" in json_dict
+        assert "repeated_int32" in json_dict
+        assert "optional_bool" in json_dict
+
+        # Verify values
+        assert json_dict["int32_field"] == 42
+        assert json_dict["string_field"] == "Test"
+        assert json_dict["repeated_int32"] == [1, 2, 3]
+        assert json_dict["optional_bool"] is True
+
+    def test_static_pydantic_model_parse_camel_case_json(self):
+        """Test that static models can parse JSON with camelCase field names."""
+        camel_json = json.dumps(
+            {
+                "int32Field": 100,
+                "stringField": "JSON test",
+                "repeatedString": ["x", "y", "z"],
+                "optionalInt32": 555,
+            }
+        )
+
+        # Parse camelCase JSON
+        model = basic_types_roundtrip_p2p.BasicTypesMessage.model_validate_json(
+            camel_json
+        )
+
+        # Verify values
+        assert model.int32_field == 100
+        assert model.string_field == "JSON test"
+        assert model.repeated_string == ["x", "y", "z"]
+        assert model.optional_int32 == 555
+
+    def test_static_pydantic_model_parse_snake_case_json(self):
+        """Test that static models can parse JSON with snake_case field names."""
+        snake_json = json.dumps(
+            {
+                "int32_field": 200,
+                "string_field": "Snake JSON",
+                "repeated_string": ["m", "n"],
+                "optional_int32": 777,
+            }
+        )
+
+        # Parse snake_case JSON
+        model = basic_types_roundtrip_p2p.BasicTypesMessage.model_validate_json(
+            snake_json
+        )
+
+        # Verify values
+        assert model.int32_field == 200
+        assert model.string_field == "Snake JSON"
+        assert model.repeated_string == ["m", "n"]
+        assert model.optional_int32 == 777
+
+    def test_static_pydantic_model_protobuf_roundtrip(self):
+        """Test full round-trip: Protobuf -> camelCase JSON -> Pydantic -> camelCase JSON -> Protobuf."""
+        # Create protobuf message
         pb_msg = basic_types_roundtrip_pb2.BasicTypesMessage()
-        for field, value in model_dict.items():
-            if hasattr(pb_msg, field):
-                field_descriptor = pb_msg.DESCRIPTOR.fields_by_name[field]
-                if field_descriptor.label == field_descriptor.LABEL_REPEATED:
-                    # Handle type conversions for repeated fixed fields
-                    if field in [
-                        "repeated_fixed32",
-                        "repeated_fixed64",
-                        "repeated_sfixed32",
-                        "repeated_sfixed64",
-                    ]:
-                        int_values = [
-                            int(v) if isinstance(v, float) else v for v in value
-                        ]
-                        getattr(pb_msg, field).extend(int_values)
-                    else:
-                        getattr(pb_msg, field).extend(value)
-                else:
-                    # Handle type conversions for fixed32/fixed64 fields
-                    # TODO: Remove this workaround once issue #14.6 is fixed
-                    if field in [
-                        "fixed32_field",
-                        "fixed64_field",
-                        "sfixed32_field",
-                        "sfixed64_field",
-                    ]:
-                        value = int(value) if isinstance(value, float) else value
-                    setattr(pb_msg, field, value)
+        pb_msg.int32_field = 42
+        pb_msg.string_field = "Round trip test"
+        pb_msg.bool_field = True
+        pb_msg.repeated_int32.extend([1, 2, 3])
+        pb_msg.optional_string = "Optional value"
+
+        # Step 1: Protobuf to JSON (uses camelCase)
+        proto_json = self._protobuf_to_json(pb_msg)
+        proto_dict = json.loads(proto_json)
+
+        # Verify protobuf JSON uses camelCase
+        assert "int32Field" in proto_dict
+        assert "stringField" in proto_dict
+        assert "boolField" in proto_dict
+        assert "repeatedInt32" in proto_dict
+        assert "optionalString" in proto_dict
+
+        # Step 2: Parse protobuf JSON into Pydantic model
+        pydantic_model = (
+            basic_types_roundtrip_p2p.BasicTypesMessage.model_validate_json(proto_json)
+        )
+
+        # Verify Pydantic model values
+        assert pydantic_model.int32_field == 42
+        assert pydantic_model.string_field == "Round trip test"
+        assert pydantic_model.bool_field is True
+        assert pydantic_model.repeated_int32 == [1, 2, 3]
+        assert pydantic_model.optional_string == "Optional value"
+
+        # Step 3: Serialize Pydantic to camelCase JSON
+        pydantic_json = pydantic_model.model_dump_json(by_alias=True)
+
+        # Step 4: Parse JSON back to protobuf
+        pb_msg_final = self._json_to_protobuf(
+            pydantic_json, basic_types_roundtrip_pb2.BasicTypesMessage
+        )
+
+        # Verify final protobuf matches original
+        assert pb_msg_final.int32_field == pb_msg.int32_field
+        assert pb_msg_final.string_field == pb_msg.string_field
+        assert pb_msg_final.bool_field == pb_msg.bool_field
+        assert list(pb_msg_final.repeated_int32) == list(pb_msg.repeated_int32)
+        assert pb_msg_final.optional_string == pb_msg.optional_string
+
+    def test_static_pydantic_model_compatibility_with_dynamic(self):
+        """Test compatibility between static and dynamically generated Pydantic models."""
+        # Create protobuf message
+        pb_msg = basic_types_roundtrip_pb2.BasicTypesMessage()
+        pb_msg.int32_field = 100
+        pb_msg.int64_field = 1000000
+        pb_msg.string_field = "Compatibility test"
+        pb_msg.bool_field = True
+        pb_msg.float_field = 2.718
+        pb_msg.repeated_string.extend(["a", "b", "c"])
+        pb_msg.optional_int32 = 999
 
         # Convert protobuf to JSON
         proto_json = self._protobuf_to_json(pb_msg)
+
+        # Create static Pydantic model from protobuf JSON
+        static_model = basic_types_roundtrip_p2p.BasicTypesMessage.model_validate_json(
+            proto_json
+        )
 
         # Create dynamic Pydantic model from protobuf
         dynamic_model_class = self._create_pydantic_model(type(pb_msg))
         dynamic_model = self._json_to_pydantic(proto_json, dynamic_model_class)
 
         # Compare values between static and dynamic models
-        assert (
-            static_model.int32_field
-            == dynamic_model.int32_field
-            == pydantic_data["int32Field"]
-        )
+        assert static_model.int32_field == dynamic_model.int32_field == 100
+        assert static_model.int64_field == dynamic_model.int64_field == 1000000
         assert (
             static_model.string_field
             == dynamic_model.string_field
-            == pydantic_data["string_field"]
+            == "Compatibility test"
         )
-        assert static_model.bool_field == dynamic_model.bool_field
+        assert static_model.bool_field == dynamic_model.bool_field is True
         assert abs(static_model.float_field - dynamic_model.float_field) < 0.0001
-        assert static_model.repeated_string == dynamic_model.repeated_string
+        assert (
+            static_model.repeated_string
+            == dynamic_model.repeated_string
+            == ["a", "b", "c"]
+        )
+        assert static_model.optional_int32 == dynamic_model.optional_int32 == 999
 
     def test_cross_model_compatibility(self):
         """Test that dynamically generated and static Pydantic models can work together."""

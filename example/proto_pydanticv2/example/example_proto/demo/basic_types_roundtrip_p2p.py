@@ -5,10 +5,12 @@
 import typing
 
 from google.protobuf.message import Message  # type: ignore
-from pydantic import BaseModel, Field
+from pydantic import Field
+
+from example.populate_by_name_plugin_config import MyBaseSchema
 
 
-class BasicTypesMessage(BaseModel):
+class BasicTypesMessage(MyBaseSchema):
     """
     Message to test all basic protobuf types for round-trip conversion
     """
@@ -54,7 +56,7 @@ class BasicTypesMessage(BaseModel):
     optional_bool: typing.Optional[bool] = Field(default=False)
 
 
-class EdgeCasesMessage(BaseModel):
+class EdgeCasesMessage(MyBaseSchema):
     """
     Message for testing edge cases
     """
