@@ -300,10 +300,28 @@ class InvoiceItem2(BaseModel):
             output,
             """class AnOtherMessage(BaseModel):
     class SubMessage(BaseModel):
-        text: str = Field(default="")
+        model_config = ConfigDict(
+            alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
+            populate_by_name=True,
+            serialize_by_alias=True,
+            validate_by_alias=True,
+            validate_by_name=True,
+        )
 
-    field1: str = Field(default="")
-    field2: SubMessage = Field(default_factory=SubMessage)
+        text: str = Field(default="", alias_priority=1, validation_alias="text", serialization_alias="text")
+
+    model_config = ConfigDict(
+        alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
+        populate_by_name=True,
+        serialize_by_alias=True,
+        validate_by_alias=True,
+        validate_by_name=True,
+    )
+
+    field1: str = Field(default="", alias_priority=1, validation_alias="field1", serialization_alias="field1")
+    field2: SubMessage = Field(
+        default_factory=SubMessage, alias_priority=1, validation_alias="field2", serialization_alias="field2"
+    )
 
 
 class RootMessage(BaseModel):
@@ -316,14 +334,34 @@ class RootMessage(BaseModel):
         output = self._model_output(demo_pb2.TestSameName0)
         assert_expected_inline(
             output,
-            '''\
+            """\
 class TestSameName0(BaseModel):
     class Body(BaseModel):
-        input_model: str = Field(default="")
-        input_info: typing.Dict[str, str] = Field(default_factory=dict)
+        model_config = ConfigDict(
+            alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
+            populate_by_name=True,
+            serialize_by_alias=True,
+            validate_by_alias=True,
+            validate_by_name=True,
+        )
+
+        input_model: str = Field(
+            default="", alias_priority=1, validation_alias="inputModel", serialization_alias="inputModel"
+        )
+        input_info: typing.Dict[str, str] = Field(
+            default_factory=dict, alias_priority=1, validation_alias="inputInfo", serialization_alias="inputInfo"
+        )
+
+    model_config = ConfigDict(
+        alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
+        populate_by_name=True,
+        serialize_by_alias=True,
+        validate_by_alias=True,
+        validate_by_name=True,
+    )
 
     body: Body = Field(default_factory=Body)
-''',
+""",
         )
 
 
