@@ -4,8 +4,11 @@ from urllib import parse as urlparse
 from uuid import UUID
 
 from pydantic import AnyUrl, EmailStr, IPvAnyAddress
+import pydantic_core
 
-from protobuf_to_pydantic import _pydantic_adapter
+from pydantic.annotated_handlers import GetJsonSchemaHandler
+from pydantic.json_schema import JsonSchemaValue
+
 
 if TYPE_CHECKING:
     from pydantic.networks import CallableGenerator
@@ -28,7 +31,12 @@ def _validate_host_name(host: str) -> bool:
         if part[0] == "-" or part[-1] == "-":
             return False
         for r in part:
-            if (r < "A" or r > "Z") and (r < "a" or r > "z") and (r < "0" or r > "9") and r != "-":
+            if (
+                (r < "A" or r > "Z")
+                and (r < "a" or r > "z")
+                and (r < "0" or r > "9")
+                and r != "-"
+            ):
                 return False
     return True
 
@@ -56,8 +64,10 @@ class HostNameStr(str):
     ###############
     @classmethod
     def __get_pydantic_json_schema__(
-        cls, core_schema: _pydantic_adapter.CoreSchema, handler: _pydantic_adapter.GetJsonSchemaHandler  # type: ignore
-    ) -> _pydantic_adapter.JsonSchemaValue:  # type: ignore
+        cls,
+        core_schema: pydantic_core.CoreSchema,
+        handler: GetJsonSchemaHandler,  # type: ignore
+    ) -> JsonSchemaValue:  # type: ignore
         field_schema: dict = {}
         cls.__modify_schema__(field_schema)
         return field_schema
@@ -68,15 +78,17 @@ class HostNameStr(str):
         source: Type[Any],
         *args,
         **kwargs,  # fix https://github.com/pydantic/pydantic/issues/6506
-    ) -> _pydantic_adapter.CoreSchema:  # type: ignore[name-defined,valid-type]
+    ) -> pydantic_core.CoreSchema:  # type: ignore[name-defined,valid-type]
         def _validate(
-            __input_value: Any, _: _pydantic_adapter.core_schema.ValidationInfo  # type: ignore[name-defined]
+            __input_value: Any,
+            _: pydantic_core.core_schema.ValidationInfo,  # type: ignore[name-defined]
         ) -> str:
             return cls.validate(__input_value)
 
         # Why another change? The API of pydantic v2 is so fucked
-        return _pydantic_adapter.core_schema.general_plain_validator_function(  # type: ignore[attr-defined]
-            _validate, serialization=_pydantic_adapter.core_schema.to_string_ser_schema()  # type: ignore[attr-defined]
+        return pydantic_core.core_schema.with_info_plain_validator_function(  # type: ignore[attr-defined]
+            _validate,
+            serialization=pydantic_core.core_schema.to_string_ser_schema(),  # type: ignore[attr-defined]
         )
 
 
@@ -104,8 +116,10 @@ class UriRefStr(str):
     ###############
     @classmethod
     def __get_pydantic_json_schema__(
-        cls, core_schema: _pydantic_adapter.CoreSchema, handler: _pydantic_adapter.GetJsonSchemaHandler  # type: ignore
-    ) -> _pydantic_adapter.JsonSchemaValue:  # type: ignore[valid-type]
+        cls,
+        core_schema: pydantic_core.CoreSchema,
+        handler: GetJsonSchemaHandler,  # type: ignore
+    ) -> JsonSchemaValue:  # type: ignore[valid-type]
         field_schema: dict = {}
         cls.__modify_schema__(field_schema)
         return field_schema
@@ -116,14 +130,16 @@ class UriRefStr(str):
         source: Type[Any],
         *args,
         **kwargs,  # fix https://github.com/pydantic/pydantic/issues/6506
-    ) -> _pydantic_adapter.CoreSchema:  # type: ignore[name-defined,valid-type]
+    ) -> pydantic_core.CoreSchema:  # type: ignore[name-defined,valid-type]
         def _validate(
-            __input_value: Any, _: _pydantic_adapter.core_schema.ValidationInfo  # type: ignore[name-defined]
+            __input_value: Any,
+            _: pydantic_core.core_schema.ValidationInfo,  # type: ignore[name-defined]
         ) -> str:
             return cls.validate(__input_value)
 
-        return _pydantic_adapter.core_schema.general_plain_validator_function(  # type: ignore[attr-defined]
-            _validate, serialization=_pydantic_adapter.core_schema.to_string_ser_schema()  # type: ignore[attr-defined]
+        return pydantic_core.core_schema.with_info_plain_validator_function(  # type: ignore[attr-defined]
+            _validate,
+            serialization=pydantic_core.core_schema.to_string_ser_schema(),  # type: ignore[attr-defined]
         )
 
 

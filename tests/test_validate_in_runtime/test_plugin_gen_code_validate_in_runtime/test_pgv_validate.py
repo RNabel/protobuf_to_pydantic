@@ -3,18 +3,10 @@ from typing import Any, Callable, Type
 from google.protobuf import __version__
 from pydantic import BaseModel
 
-from protobuf_to_pydantic._pydantic_adapter import is_v1
-
 if __version__ > "4.0.0":
-    if is_v1:
-        from example.proto_pydanticv1.example.example_proto.validate import demo_p2p
-    else:
-        from example.proto_pydanticv2.example.example_proto.validate import demo_p2p
+    from example.proto_pydanticv2.example.example_proto.validate import demo_p2p
 else:
-    if is_v1:
-        from example.proto_3_20_pydanticv1.example.example_proto.validate import demo_p2p
-    else:
-        from example.proto_3_20_pydanticv2.example.example_proto.validate import demo_p2p
+    from example.proto_3_20_pydanticv2.example.example_proto.validate import demo_p2p
 
 from tests.test_validate_in_runtime.test_gen_model_validate_in_runtime.test_pgv_validate import (
     BaseTestPgvModelValidator,

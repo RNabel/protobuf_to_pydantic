@@ -5,22 +5,12 @@ from typing import Any
 from expecttest import assert_expected_inline
 from google.protobuf import __version__
 
-from protobuf_to_pydantic._pydantic_adapter import is_v1
-
 if __version__ > "4.0.0":
-    if is_v1:
-        from example.proto_pydanticv1.example.example_proto.demo import value_demo_pb2
-        from example.proto_pydanticv1.example.example_proto.demo import value_demo_p2p
-    else:
-        from example.proto_pydanticv2.example.example_proto.demo import value_demo_pb2  # type: ignore[no-redef]
-        from example.proto_pydanticv2.example.example_proto.demo import value_demo_p2p  # type: ignore[no-redef]
+    from example.proto_pydanticv2.example.example_proto.demo import value_demo_pb2
+    from example.proto_pydanticv2.example.example_proto.demo import value_demo_p2p
 else:
-    if is_v1:
-        from example.proto_3_20_pydanticv1.example.example_proto.demo import value_demo_pb2  # type: ignore[no-redef]
-        from example.proto_3_20_pydanticv1.example.example_proto.demo import value_demo_p2p  # type: ignore[no-redef]
-    else:
-        from example.proto_3_20_pydanticv2.example.example_proto.demo import value_demo_pb2  # type: ignore[no-redef]
-        from example.proto_3_20_pydanticv2.example.example_proto.demo import value_demo_p2p  # type: ignore[no-redef]
+    from example.proto_3_20_pydanticv2.example.example_proto.demo import value_demo_pb2  # type: ignore[no-redef]
+    from example.proto_3_20_pydanticv2.example.example_proto.demo import value_demo_p2p  # type: ignore[no-redef]
 
 from protobuf_to_pydantic import msg_to_pydantic_model, pydantic_model_to_py_code
 from protobuf_to_pydantic.gen_model import clear_create_model_cache
@@ -37,8 +27,7 @@ class TestValueField:
     def test_value_field_message(self) -> None:
         """Test that google.protobuf.Value fields are converted to typing.Any"""
         output = self._model_output(value_demo_pb2.ValueTestMessage)
-        assert_expected_inline(output, """\
-class ValueTestMessage(BaseModel):
+        assert_expected_inline(output, """class ValueTestMessage(BaseModel):
     id: str = Field(default="")
     dynamic_value: typing.Optional[typing.Any] = Field(default=None)
     value_list: typing.List[typing.Any] = Field(default_factory=list)

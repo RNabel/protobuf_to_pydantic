@@ -7,7 +7,19 @@ import sys
 from contextlib import contextmanager
 from dataclasses import MISSING
 from datetime import timedelta
-from typing import TYPE_CHECKING, Any, Callable, Dict, Generator, List, Optional, Set, Tuple, Type, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    Generator,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    Type,
+    Union,
+)
 
 from pydantic import BaseConfig, BaseModel, create_model
 
@@ -96,13 +108,17 @@ def get_dict_from_comment(comment_prefix: str, comment: str) -> dict:
                     _dict[key] = value
                 else:
                     if not isinstance(value, type(_dict[key])):
-                        raise TypeError(f"Two different types of values were detected for Key:{key}")
+                        raise TypeError(
+                            f"Two different types of values were detected for Key:{key}"
+                        )
                     elif isinstance(value, list):
                         _dict[key].extend(value)
                     elif isinstance(value, dict):
                         _dict[key].update(value)
                     else:
-                        raise TypeError(f"A key:{key} that does not support merging has been detected")
+                        raise TypeError(
+                            f"A key:{key} that does not support merging has been detected"
+                        )
         if "miss_default" in _dict:
             _dict["required"] = _dict.pop("miss_default")
     except Exception as e:
@@ -156,7 +172,9 @@ def format_content(content_str: str, pyproject_file_path: str = "") -> str:
     else:
         if p2p_format_dict.get("isort", True):
             if pyproject_file_path:
-                content_str = isort.code(content_str, config=isort.Config(settings_file=pyproject_file_path))
+                content_str = isort.code(
+                    content_str, config=isort.Config(settings_file=pyproject_file_path)
+                )
             else:
                 content_str = isort.code(content_str)
 
@@ -188,20 +206,30 @@ def format_content(content_str: str, pyproject_file_path: str = "") -> str:
     else:
         black_config_dict: dict = {}
         try:
-            black_config_dict = {k.replace("-", "_"): v for k, v in pyproject_dict["tool"]["black"].items()}
+            black_config_dict = {
+                k.replace("-", "_"): v
+                for k, v in pyproject_dict["tool"]["black"].items()
+            }
             # target_version param replace
             target_versions = {
-                getattr(black.TargetVersion, i.upper()) for i in black_config_dict.pop("target_version", [])
+                getattr(black.TargetVersion, i.upper())
+                for i in black_config_dict.pop("target_version", [])
             }
             if target_versions:
                 black_config_dict["target_versions"] = target_versions
 
-            black_config_dict = {k: v for k, v in black_config_dict.items() if k in black.Mode.__annotations__}
+            black_config_dict = {
+                k: v
+                for k, v in black_config_dict.items()
+                if k in black.Mode.__annotations__
+            }
         except KeyError:
             pass
         if p2p_format_dict.get("black", True):
             if black_config_dict:
-                content_str = black.format_str(content_str, mode=black.Mode(**black_config_dict))
+                content_str = black.format_str(
+                    content_str, mode=black.Mode(**black_config_dict)
+                )
             else:
                 content_str = black.format_str(content_str, mode=black.Mode())
     return content_str
@@ -214,7 +242,8 @@ def check_dict_one_of(desc_dict: dict, key_list: List[str]) -> bool:
             [
                 desc_dict.get(key, None)
                 for key in key_list
-                if desc_dict.get(key, None) and desc_dict[key].__class__ != MISSING.__class__
+                if desc_dict.get(key, None)
+                and desc_dict[key].__class__ != MISSING.__class__
             ]
         )
         > 1
@@ -240,7 +269,10 @@ def use_worker_dir_in_ctx(worker_dir: Optional[str] = None) -> Generator:
 
 
 def pydantic_allow_validation_field_handler(
-    field_name: str, field_alias_name: Optional[str], allow_field_set: Set[str], model_config_dict: dict
+    field_name: str,
+    field_alias_name: Optional[str],
+    allow_field_set: Set[str],
+    model_config_dict: dict,
 ) -> None:
     """
     fix issue: #74 https://github.com/so1n/protobuf_to_pydantic/issues/74
@@ -254,11 +286,6 @@ def pydantic_allow_validation_field_handler(
         allow_field_set.add(field_alias_name)
         if model_config_dict.get("populate_by_name") is not True:
             allow_field_set.remove(field_name)
-    if _pydantic_adapter.VERSION < "2.6.0":
-        alias_generator: Optional[Callable[[str], str]] = model_config_dict.get("alias_generator")
-        alias_generator_func: Optional[Callable] = alias_generator
-        if alias_generator:
-            allow_field_set.add(alias_generator(field_name))
     else:
         from pydantic import AliasGenerator
 

@@ -7,12 +7,6 @@ from pydantic.fields import FieldInfo, PydanticUndefined  # type: ignore
 from pydantic.functional_validators import FieldValidatorModes  # type: ignore
 from typing_extensions import Literal
 
-from pydantic._internal._schema_generation_shared import (  # isort:skip  type: ignore
-    GetJsonSchemaHandler,
-)
-from pydantic_core import CoreSchema, core_schema  # isort:skip  type: ignore
-from pydantic import GetCoreSchemaHandler  # isort:skip  type: ignore
-from pydantic.json_schema import JsonSchemaValue  # isort:skip  type: ignore
 
 NoArgAnyCallable = Callable[[], Any]
 PydanticUndefinedType = type(PydanticUndefined)
@@ -20,10 +14,6 @@ PydanticUndefinedType = type(PydanticUndefined)
 
 def get_model_config_value(model: Type[BaseModel], key: str) -> Any:
     return model.model_config.get(key)
-
-
-def get_model_config_dict(model: Type[BaseModel]) -> dict:
-    return model.model_config  # type: ignore
 
 
 def model_fields(model: Type[FieldInfo]) -> Dict[str, FieldInfo]:

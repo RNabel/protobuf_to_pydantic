@@ -5,23 +5,14 @@ from typing import Any
 from expecttest import assert_expected_inline
 from google.protobuf import __version__
 
-from protobuf_to_pydantic._pydantic_adapter import is_v1
 from tests.test_gen_code.test_helper import P2CNoHeader
 
 if __version__ > "4.0.0":
-    if is_v1:
-        from example.proto_pydanticv1.example.example_proto.validate import demo_pb2
-    else:
-        from example.proto_pydanticv2.example.example_proto.validate import demo_pb2  # type: ignore[no-redef]
+    from example.proto_pydanticv2.example.example_proto.validate import demo_pb2
 else:
-    if is_v1:
-        from example.proto_3_20_pydanticv1.example.example_proto.validate import (
-            demo_pb2,
-        )  # type: ignore[no-redef]
-    else:
-        from example.proto_3_20_pydanticv2.example.example_proto.validate import (
-            demo_pb2,
-        )  # type: ignore[no-redef]
+    from example.proto_3_20_pydanticv2.example.example_proto.validate import (
+        demo_pb2,
+    )
 
 from protobuf_to_pydantic import msg_to_pydantic_model, pydantic_model_to_py_code
 
@@ -40,10 +31,9 @@ class TestValidate:
 
     def test_string(self) -> None:
         output = self._model_output(demo_pb2.StringTest)
-        if not is_v1:
-            assert_expected_inline(
-                output,
-                """\
+        assert_expected_inline(
+            output,
+            """\
 class StringTest(BaseModel):
     const_test: typing.Literal["aaa"] = Field(default="")
     len_test: str = Field(default="", len=3)
@@ -79,50 +69,13 @@ class StringTest(BaseModel):
     in_test_in_validator = field_validator("in_test", mode="after", check_fields=None)(in_validator)
     not_in_test_not_in_validator = field_validator("not_in_test", mode="after", check_fields=None)(not_in_validator)
 """,
-            )
-        else:
-            assert_expected_inline(
-                output,
-                """
-class StringTest(BaseModel):
-    const_test: str = Field(default="aaa", const=True)
-    len_test: str = Field(default="", len=3)
-    s_range_len_test: str = Field(default="", min_length=1, max_length=3)
-    b_range_len_test: str = Field(default="")
-    pattern_test: str = Field(default="", regex="^test")
-    prefix_test: str = Field(default="", prefix="prefix")
-    suffix_test: str = Field(default="", suffix="suffix")
-    contains_test: str = Field(default="", contains="contains")
-    not_contains_test: str = Field(default="", not_contains="not_contains")
-    in_test: str = Field(default="", in_=["a", "b", "c"])
-    not_in_test: str = Field(default="", not_in=["a", "b", "c"])
-    email_test: EmailStr = Field(default="")
-    hostname_test: HostNameStr = Field(default="")
-    ip_test: IPvAnyAddress = Field(default="")
-    ipv4_test: IPv4Address = Field(default="")
-    ipv6_test: IPv6Address = Field(default="")
-    uri_test: AnyUrl = Field(default="")
-    uri_ref_test: UriRefStr = Field(default="")
-    address_test: IPvAnyAddress = Field(default="")
-    uuid_test: UUID = Field(default="")
-    ignore_test: str = Field(default="")
-
-    len_test_len_validator = validator("len_test", allow_reuse=True)(len_validator)
-    prefix_test_prefix_validator = validator("prefix_test", allow_reuse=True)(prefix_validator)
-    suffix_test_suffix_validator = validator("suffix_test", allow_reuse=True)(suffix_validator)
-    contains_test_contains_validator = validator("contains_test", allow_reuse=True)(contains_validator)
-    not_contains_test_not_contains_validator = validator("not_contains_test", allow_reuse=True)(not_contains_validator)
-    in_test_in_validator = validator("in_test", allow_reuse=True)(in_validator)
-    not_in_test_not_in_validator = validator("not_in_test", allow_reuse=True)(not_in_validator)
-""",
-            )
+        )
 
     def test_any(self) -> None:
         output = self._model_output(demo_pb2.AnyTest)
-        if not is_v1:
-            assert_expected_inline(
-                output,
-                """\
+        assert_expected_inline(
+            output,
+            """\
 class AnyTest(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
@@ -141,57 +94,24 @@ class AnyTest(BaseModel):
     )
     in_test_any_in_validator = field_validator("in_test", mode="after", check_fields=None)(any_in_validator)
 """,
-            )
-        else:
-            assert_expected_inline(
-                output,
-                """
-class AnyTest(BaseModel):
-    class Config:
-        arbitrary_types_allowed = True
-
-    required_test: Any = Field()
-    not_in_test: Any = Field(
-        default_factory=Any,
-        any_not_in=["type.googleapis.com/google.protobuf.Duration", "type.googleapis.com/google.protobuf.Timestamp"],
-    )
-    in_test: Any = Field(
-        default_factory=Any,
-        any_in=["type.googleapis.com/google.protobuf.Duration", "type.googleapis.com/google.protobuf.Timestamp"],
-    )
-
-    not_in_test_any_not_in_validator = validator("not_in_test", allow_reuse=True)(any_not_in_validator)
-    in_test_any_in_validator = validator("in_test", allow_reuse=True)(any_in_validator)
-""",
-            )
+        )
 
     def test_bool(self) -> None:
         output = self._model_output(demo_pb2.BoolTest)
-        if not is_v1:
-            assert_expected_inline(
-                output,
-                """\
+        assert_expected_inline(
+            output,
+            """\
 class BoolTest(BaseModel):
     bool_1_test: typing.Literal[True] = Field(default=False)
     bool_2_test: typing.Literal[False] = Field(default=False)
 """,
-            )
-        else:
-            assert_expected_inline(
-                output,
-                """
-class BoolTest(BaseModel):
-    bool_1_test: bool = Field(default=True, const=True)
-    bool_2_test: bool = Field(default=False, const=True)
-""",
-            )
+        )
 
     def test_bytes(self) -> None:
         output = self._model_output(demo_pb2.BytesTest)
-        if not is_v1:
-            assert_expected_inline(
-                output,
-                """\
+        assert_expected_inline(
+            output,
+            """\
 class BytesTest(BaseModel):
     const_test: typing.Literal[b"demo"] = Field(default=b"")
     len_test: bytes = Field(default=b"", len=4)
@@ -212,37 +132,13 @@ class BytesTest(BaseModel):
     in_test_in_validator = field_validator("in_test", mode="after", check_fields=None)(in_validator)
     not_in_test_not_in_validator = field_validator("not_in_test", mode="after", check_fields=None)(not_in_validator)
 """,
-            )
-        else:
-            assert_expected_inline(
-                output,
-                """
-class BytesTest(BaseModel):
-    const_test: bytes = Field(default=b"demo", const=True)
-    len_test: bytes = Field(default=b"", len=4)
-    range_len_test: bytes = Field(default=b"", min_length=1, max_length=4)
-    pattern_test: bytes = Field(default=b"")
-    prefix_test: bytes = Field(default=b"", prefix=b"prefix")
-    suffix_test: bytes = Field(default=b"", suffix=b"suffix")
-    contains_test: bytes = Field(default=b"", contains=b"contains")
-    in_test: bytes = Field(default=b"", in_=[b"a", b"b", b"c"])
-    not_in_test: bytes = Field(default=b"", not_in=[b"a", b"b", b"c"])
-
-    len_test_len_validator = validator("len_test", allow_reuse=True)(len_validator)
-    prefix_test_prefix_validator = validator("prefix_test", allow_reuse=True)(prefix_validator)
-    suffix_test_suffix_validator = validator("suffix_test", allow_reuse=True)(suffix_validator)
-    contains_test_contains_validator = validator("contains_test", allow_reuse=True)(contains_validator)
-    in_test_in_validator = validator("in_test", allow_reuse=True)(in_validator)
-    not_in_test_not_in_validator = validator("not_in_test", allow_reuse=True)(not_in_validator)
-""",
-            )
+        )
 
     def test_double(self) -> None:
         output = self._model_output(demo_pb2.DoubleTest)
-        if not is_v1:
-            assert_expected_inline(
-                output,
-                """\
+        assert_expected_inline(
+            output,
+            """\
 class DoubleTest(BaseModel):
     const_test: typing.Literal[1.0] = Field(default=0.0)
     range_e_test: float = Field(default=0.0, ge=1.0, le=10.0)
@@ -254,30 +150,13 @@ class DoubleTest(BaseModel):
     in_test_in_validator = field_validator("in_test", mode="after", check_fields=None)(in_validator)
     not_in_test_not_in_validator = field_validator("not_in_test", mode="after", check_fields=None)(not_in_validator)
 """,
-            )
-        else:
-            assert_expected_inline(
-                output,
-                """
-class DoubleTest(BaseModel):
-    const_test: float = Field(default=1.0, const=True)
-    range_e_test: float = Field(default=0.0, ge=1.0, le=10.0)
-    range_test: float = Field(default=0.0, gt=1.0, lt=10.0)
-    in_test: float = Field(default=0.0, in_=[1.0, 2.0, 3.0])
-    not_in_test: float = Field(default=0.0, not_in=[1.0, 2.0, 3.0])
-    ignore_test: float = Field(default=0.0)
-
-    in_test_in_validator = validator("in_test", allow_reuse=True)(in_validator)
-    not_in_test_not_in_validator = validator("not_in_test", allow_reuse=True)(not_in_validator)
-""",
-            )
+        )
 
     def test_duration(self) -> None:
         output = self._model_output(demo_pb2.DurationTest)
-        if not is_v1:
-            assert_expected_inline(
-                output,
-                """\
+        assert_expected_inline(
+            output,
+            """\
 class DurationTest(BaseModel):
     required_test: typing_extensions.Annotated[timedelta, BeforeValidator(func=Timedelta.validate)] = Field()
     const_test: typing_extensions.Annotated[timedelta, BeforeValidator(func=Timedelta.validate)] = Field(
@@ -322,51 +201,13 @@ class DurationTest(BaseModel):
         duration_not_in_validator
     )
 """,
-            )
-        else:
-            assert_expected_inline(
-                output,
-                """
-class DurationTest(BaseModel):
-    required_test: Timedelta = Field()
-    const_test: Timedelta = Field(
-        default_factory=Timedelta, duration_const=timedelta(seconds=1, microseconds=500000)
-    )
-    range_test: Timedelta = Field(
-        default_factory=Timedelta,
-        duration_lt=timedelta(seconds=10, microseconds=500000),
-        duration_gt=timedelta(seconds=5, microseconds=500000),
-    )
-    range_e_test: Timedelta = Field(
-        default_factory=Timedelta,
-        duration_le=timedelta(seconds=10, microseconds=500000),
-        duration_ge=timedelta(seconds=5, microseconds=500000),
-    )
-    in_test: Timedelta = Field(
-        default_factory=Timedelta,
-        duration_in=[timedelta(seconds=1, microseconds=500000), timedelta(seconds=3, microseconds=500000)],
-    )
-    not_in_test: Timedelta = Field(
-        default_factory=Timedelta,
-        duration_not_in=[timedelta(seconds=1, microseconds=500000), timedelta(seconds=3, microseconds=500000)],
-    )
-
-    const_test_duration_const_validator = validator("const_test", allow_reuse=True)(duration_const_validator)
-    range_test_duration_lt_validator = validator("range_test", allow_reuse=True)(duration_lt_validator)
-    range_test_duration_gt_validator = validator("range_test", allow_reuse=True)(duration_gt_validator)
-    range_e_test_duration_le_validator = validator("range_e_test", allow_reuse=True)(duration_le_validator)
-    range_e_test_duration_ge_validator = validator("range_e_test", allow_reuse=True)(duration_ge_validator)
-    in_test_duration_in_validator = validator("in_test", allow_reuse=True)(duration_in_validator)
-    not_in_test_duration_not_in_validator = validator("not_in_test", allow_reuse=True)(duration_not_in_validator)
-""",
-            )
+        )
 
     def test_enum(self) -> None:
         output = self._model_output(demo_pb2.EnumTest)
-        if not is_v1:
-            assert_expected_inline(
-                output,
-                """\
+        assert_expected_inline(
+            output,
+            """\
 class State(IntEnum):
     INACTIVE = 0
     PENDING = 1
@@ -384,37 +225,13 @@ class EnumTest(BaseModel):
     in_test_in_validator = field_validator("in_test", mode="after", check_fields=None)(in_validator)
     not_in_test_not_in_validator = field_validator("not_in_test", mode="after", check_fields=None)(not_in_validator)
 """,
-            )
-        else:
-            assert_expected_inline(
-                output,
-                """
-class State(IntEnum):
-    INACTIVE = 0
-    PENDING = 1
-    ACTIVE = 2
-
-
-class EnumTest(BaseModel):
-    class Config:
-        validate_all = True
-
-    const_test: State = Field(default=2, const=True)
-    defined_only_test: State = Field(default=0)
-    in_test: State = Field(default=0, in_=[0, 2])
-    not_in_test: State = Field(default=0, not_in=[0, 2])
-
-    in_test_in_validator = validator("in_test", allow_reuse=True)(in_validator)
-    not_in_test_not_in_validator = validator("not_in_test", allow_reuse=True)(not_in_validator)
-""",
-            )
+        )
 
     def test_fixed32(self) -> None:
         output = self._model_output(demo_pb2.Fixed32Test)
-        if not is_v1:
-            assert_expected_inline(
-                output,
-                """\
+        assert_expected_inline(
+            output,
+            """\
 class Fixed32Test(BaseModel):
     const_test: typing.Literal[1] = Field(default=0)
     range_e_test: float = Field(default=0, ge=1, le=10)
@@ -426,30 +243,13 @@ class Fixed32Test(BaseModel):
     in_test_in_validator = field_validator("in_test", mode="after", check_fields=None)(in_validator)
     not_in_test_not_in_validator = field_validator("not_in_test", mode="after", check_fields=None)(not_in_validator)
 """,
-            )
-        else:
-            assert_expected_inline(
-                output,
-                """
-class Fixed32Test(BaseModel):
-    const_test: float = Field(default=1, const=True)
-    range_e_test: float = Field(default=0, ge=1.0, le=10.0)
-    range_test: float = Field(default=0, gt=1.0, lt=10.0)
-    in_test: float = Field(default=0, in_=[1, 2, 3])
-    not_in_test: float = Field(default=0, not_in=[1, 2, 3])
-    ignore_test: float = Field(default=0)
-
-    in_test_in_validator = validator("in_test", allow_reuse=True)(in_validator)
-    not_in_test_not_in_validator = validator("not_in_test", allow_reuse=True)(not_in_validator)
-""",
-            )
+        )
 
     def test_fixed64(self) -> None:
         output = self._model_output(demo_pb2.Fixed64Test)
-        if not is_v1:
-            assert_expected_inline(
-                output,
-                """\
+        assert_expected_inline(
+            output,
+            """\
 class Fixed64Test(BaseModel):
     const_test: typing.Literal[1] = Field(default=0)
     range_e_test: float = Field(default=0, ge=1, le=10)
@@ -461,30 +261,13 @@ class Fixed64Test(BaseModel):
     in_test_in_validator = field_validator("in_test", mode="after", check_fields=None)(in_validator)
     not_in_test_not_in_validator = field_validator("not_in_test", mode="after", check_fields=None)(not_in_validator)
 """,
-            )
-        else:
-            assert_expected_inline(
-                output,
-                """
-class Fixed64Test(BaseModel):
-    const_test: float = Field(default=1, const=True)
-    range_e_test: float = Field(default=0, ge=1.0, le=10.0)
-    range_test: float = Field(default=0, gt=1.0, lt=10.0)
-    in_test: float = Field(default=0, in_=[1, 2, 3])
-    not_in_test: float = Field(default=0, not_in=[1, 2, 3])
-    ignore_test: float = Field(default=0)
-
-    in_test_in_validator = validator("in_test", allow_reuse=True)(in_validator)
-    not_in_test_not_in_validator = validator("not_in_test", allow_reuse=True)(not_in_validator)
-""",
-            )
+        )
 
     def test_float(self) -> None:
         output = self._model_output(demo_pb2.FloatTest)
-        if not is_v1:
-            assert_expected_inline(
-                output,
-                """\
+        assert_expected_inline(
+            output,
+            """\
 class FloatTest(BaseModel):
     const_test: typing.Literal[1.0] = Field(default=0.0)
     range_e_test: float = Field(default=0.0, ge=1.0, le=10.0)
@@ -496,30 +279,13 @@ class FloatTest(BaseModel):
     in_test_in_validator = field_validator("in_test", mode="after", check_fields=None)(in_validator)
     not_in_test_not_in_validator = field_validator("not_in_test", mode="after", check_fields=None)(not_in_validator)
 """,
-            )
-        else:
-            assert_expected_inline(
-                output,
-                """
-class FloatTest(BaseModel):
-    const_test: float = Field(default=1.0, const=True)
-    range_e_test: float = Field(default=0.0, ge=1.0, le=10.0)
-    range_test: float = Field(default=0.0, gt=1.0, lt=10.0)
-    in_test: float = Field(default=0.0, in_=[1.0, 2.0, 3.0])
-    not_in_test: float = Field(default=0.0, not_in=[1.0, 2.0, 3.0])
-    ignore_test: float = Field(default=0.0)
-
-    in_test_in_validator = validator("in_test", allow_reuse=True)(in_validator)
-    not_in_test_not_in_validator = validator("not_in_test", allow_reuse=True)(not_in_validator)
-""",
-            )
+        )
 
     def test_int32(self) -> None:
         output = self._model_output(demo_pb2.Int32Test)
-        if not is_v1:
-            assert_expected_inline(
-                output,
-                """\
+        assert_expected_inline(
+            output,
+            """\
 class Int32Test(BaseModel):
     const_test: typing.Literal[1] = Field(default=0)
     range_e_test: int = Field(default=0, ge=1, le=10)
@@ -531,30 +297,13 @@ class Int32Test(BaseModel):
     in_test_in_validator = field_validator("in_test", mode="after", check_fields=None)(in_validator)
     not_in_test_not_in_validator = field_validator("not_in_test", mode="after", check_fields=None)(not_in_validator)
 """,
-            )
-        else:
-            assert_expected_inline(
-                output,
-                """
-class Int32Test(BaseModel):
-    const_test: int = Field(default=1, const=True)
-    range_e_test: int = Field(default=0, ge=1.0, le=10.0)
-    range_test: int = Field(default=0, gt=1.0, lt=10.0)
-    in_test: int = Field(default=0, in_=[1, 2, 3])
-    not_in_test: int = Field(default=0, not_in=[1, 2, 3])
-    ignore_test: int = Field(default=0)
-
-    in_test_in_validator = validator("in_test", allow_reuse=True)(in_validator)
-    not_in_test_not_in_validator = validator("not_in_test", allow_reuse=True)(not_in_validator)
-""",
-            )
+        )
 
     def test_int64(self) -> None:
         output = self._model_output(demo_pb2.Int64Test)
-        if not is_v1:
-            assert_expected_inline(
-                output,
-                """\
+        assert_expected_inline(
+            output,
+            """\
 class Int64Test(BaseModel):
     const_test: typing.Literal[1] = Field(default=0)
     range_e_test: int = Field(default=0, ge=1, le=10)
@@ -566,30 +315,13 @@ class Int64Test(BaseModel):
     in_test_in_validator = field_validator("in_test", mode="after", check_fields=None)(in_validator)
     not_in_test_not_in_validator = field_validator("not_in_test", mode="after", check_fields=None)(not_in_validator)
 """,
-            )
-        else:
-            assert_expected_inline(
-                output,
-                """
-class Int64Test(BaseModel):
-    const_test: int = Field(default=1, const=True)
-    range_e_test: int = Field(default=0, ge=1.0, le=10.0)
-    range_test: int = Field(default=0, gt=1.0, lt=10.0)
-    in_test: int = Field(default=0, in_=[1, 2, 3])
-    not_in_test: int = Field(default=0, not_in=[1, 2, 3])
-    ignore_test: int = Field(default=0)
-
-    in_test_in_validator = validator("in_test", allow_reuse=True)(in_validator)
-    not_in_test_not_in_validator = validator("not_in_test", allow_reuse=True)(not_in_validator)
-""",
-            )
+        )
 
     def test_map(self) -> None:
         output = self._model_output(demo_pb2.MapTest)
-        if not is_v1:
-            assert_expected_inline(
-                output,
-                """\
+        assert_expected_inline(
+            output,
+            """\
 class MapTest(BaseModel):
     pair_test: typing.Dict[str, int] = Field(default_factory=dict, map_min_pairs=1, map_max_pairs=5)
     no_parse_test: typing.Dict[str, int] = Field(default_factory=dict)
@@ -610,25 +342,7 @@ class MapTest(BaseModel):
         map_max_pairs_validator
     )
 """,
-            )
-        else:
-            assert_expected_inline(
-                output,
-                """
-class MapTest(BaseModel):
-    pair_test: typing.Dict[str, int] = Field(default_factory=dict, map_min_pairs=1, map_max_pairs=5)
-    no_parse_test: typing.Dict[str, int] = Field(default_factory=dict)
-    keys_test: typing.Dict[constr(min_length=1, max_length=5), int] = Field(default_factory=dict)
-    values_test: typing.Dict[str, conint(ge=5, le=5)] = Field(default_factory=dict)
-    keys_values_test: typing.Dict[constr(min_length=1, max_length=5), contimestamp(timestamp_gt_now=True)] = Field(
-        default_factory=dict
-    )
-    ignore_test: typing.Dict[str, int] = Field(default_factory=dict)
-
-    pair_test_map_min_pairs_validator = validator("pair_test", allow_reuse=True)(map_min_pairs_validator)
-    pair_test_map_max_pairs_validator = validator("pair_test", allow_reuse=True)(map_max_pairs_validator)
-""",
-            )
+        )
 
     def test_message_disable(self) -> None:
         output = self._model_output(demo_pb2.MessageDisabledTest)
@@ -667,10 +381,9 @@ class MessageTest(BaseModel):
 
     def test_nested(self) -> None:
         output = self._model_output(demo_pb2.NestedMessage)
-        if not is_v1:
-            assert_expected_inline(
-                output,
-                """\
+        assert_expected_inline(
+            output,
+            """\
 class StringTest(BaseModel):
     const_test: typing.Literal["aaa"] = Field(default="")
     len_test: str = Field(default="", len=3)
@@ -755,90 +468,13 @@ class NestedMessage(BaseModel):
     empty: typing.Any = Field()
     after_refer: AfterReferMessage = Field(default_factory=AfterReferMessage)
 """,
-            )
-        else:
-            assert_expected_inline(
-                output,
-                """
-class StringTest(BaseModel):
-    const_test: str = Field(default="aaa", const=True)
-    len_test: str = Field(default="", len=3)
-    s_range_len_test: str = Field(default="", min_length=1, max_length=3)
-    b_range_len_test: str = Field(default="")
-    pattern_test: str = Field(default="", regex="^test")
-    prefix_test: str = Field(default="", prefix="prefix")
-    suffix_test: str = Field(default="", suffix="suffix")
-    contains_test: str = Field(default="", contains="contains")
-    not_contains_test: str = Field(default="", not_contains="not_contains")
-    in_test: str = Field(default="", in_=["a", "b", "c"])
-    not_in_test: str = Field(default="", not_in=["a", "b", "c"])
-    email_test: EmailStr = Field(default="")
-    hostname_test: HostNameStr = Field(default="")
-    ip_test: IPvAnyAddress = Field(default="")
-    ipv4_test: IPv4Address = Field(default="")
-    ipv6_test: IPv6Address = Field(default="")
-    uri_test: AnyUrl = Field(default="")
-    uri_ref_test: UriRefStr = Field(default="")
-    address_test: IPvAnyAddress = Field(default="")
-    uuid_test: UUID = Field(default="")
-    ignore_test: str = Field(default="")
-
-    len_test_len_validator = validator("len_test", allow_reuse=True)(len_validator)
-    prefix_test_prefix_validator = validator("prefix_test", allow_reuse=True)(prefix_validator)
-    suffix_test_suffix_validator = validator("suffix_test", allow_reuse=True)(suffix_validator)
-    contains_test_contains_validator = validator("contains_test", allow_reuse=True)(contains_validator)
-    not_contains_test_not_contains_validator = validator("not_contains_test", allow_reuse=True)(not_contains_validator)
-    in_test_in_validator = validator("in_test", allow_reuse=True)(in_validator)
-    not_in_test_not_in_validator = validator("not_in_test", allow_reuse=True)(not_in_validator)
-
-
-class MapTest(BaseModel):
-    pair_test: typing.Dict[str, int] = Field(default_factory=dict, map_min_pairs=1, map_max_pairs=5)
-    no_parse_test: typing.Dict[str, int] = Field(default_factory=dict)
-    keys_test: typing.Dict[constr(min_length=1, max_length=5), int] = Field(default_factory=dict)
-    values_test: typing.Dict[str, conint(ge=5, le=5)] = Field(default_factory=dict)
-    keys_values_test: typing.Dict[constr(min_length=1, max_length=5), contimestamp(timestamp_gt_now=True)] = Field(
-        default_factory=dict
-    )
-    ignore_test: typing.Dict[str, int] = Field(default_factory=dict)
-
-    pair_test_map_min_pairs_validator = validator("pair_test", allow_reuse=True)(map_min_pairs_validator)
-    pair_test_map_max_pairs_validator = validator("pair_test", allow_reuse=True)(map_max_pairs_validator)
-
-
-class AfterReferMessage(BaseModel):
-    uid: str = Field(default="", min_length=1)
-    age: int = Field(default=0, ge=0.0, lt=500.0)
-
-
-class NestedMessage(BaseModel):
-    class UserPayMessage(BaseModel):
-        bank_number: str = Field(default="", min_length=13, max_length=19)
-        exp: datetime = Field(default_factory=datetime.now, timestamp_gt_now=True)
-        uuid: UUID = Field(default="")
-
-        exp_timestamp_gt_now_validator = validator("exp", allow_reuse=True)(timestamp_gt_now_validator)
-
-    class NotEnableUserPayMessage(BaseModel):
-        bank_number: str = Field(default="")
-        exp: datetime = Field(default_factory=datetime.now)
-        uuid: str = Field(default="")
-
-    string_in_map_test: typing.Dict[str, StringTest] = Field(default_factory=dict)
-    map_in_map_test: typing.Dict[str, MapTest] = Field(default_factory=dict)
-    user_pay: UserPayMessage = Field(default_factory=UserPayMessage)
-    not_enable_user_pay: NotEnableUserPayMessage = Field(default_factory=NotEnableUserPayMessage)
-    empty: typing.Any = Field()
-    after_refer: AfterReferMessage = Field(default_factory=AfterReferMessage)
-""",
-            )
+        )
 
     def test_one_of_not(self) -> None:
         output = self._model_output(demo_pb2.OneOfNotTest)
-        if not is_v1:
-            assert_expected_inline(
-                output,
-                """\
+        assert_expected_inline(
+            output,
+            """\
 class OneOfNotTest(BaseModel):
     _one_of_dict = {"validate_test.OneOfNotTest.id": {"fields": {"x", "y"}, "required": False}}
 
@@ -848,28 +484,13 @@ class OneOfNotTest(BaseModel):
 
     one_of_validator = model_validator(mode="before")(check_one_of)
 """,
-            )
-        else:
-            assert_expected_inline(
-                output,
-                """
-class OneOfNotTest(BaseModel):
-    _one_of_dict = {"validate_test.OneOfNotTest.id": {"fields": {"x", "y"}, "required": False}}
-
-    header: str = Field(default="")
-    x: str = Field(default="")
-    y: int = Field(default=0)
-
-    one_of_validator = root_validator(pre=True, allow_reuse=True)(check_one_of)
-""",
-            )
+        )
 
     def test_one_of(self) -> None:
         output = self._model_output(demo_pb2.OneOfTest)
-        if not is_v1:
-            assert_expected_inline(
-                output,
-                """\
+        assert_expected_inline(
+            output,
+            """\
 class OneOfTest(BaseModel):
     _one_of_dict = {"validate_test.OneOfTest.id": {"fields": {"x", "y"}, "required": True}}
 
@@ -879,28 +500,13 @@ class OneOfTest(BaseModel):
 
     one_of_validator = model_validator(mode="before")(check_one_of)
 """,
-            )
-        else:
-            assert_expected_inline(
-                output,
-                """
-class OneOfTest(BaseModel):
-    _one_of_dict = {"validate_test.OneOfTest.id": {"fields": {"x", "y"}, "required": True}}
-
-    header: str = Field(default="")
-    x: str = Field(default="")
-    y: int = Field(default=0)
-
-    one_of_validator = root_validator(pre=True, allow_reuse=True)(check_one_of)
-""",
-            )
+        )
 
     def test_repeated(self) -> None:
         output = self._model_output(demo_pb2.RepeatedTest)
-        if not is_v1:
-            assert_expected_inline(
-                output,
-                """\
+        assert_expected_inline(
+            output,
+            """\
 class RepeatedTest(BaseModel):
     range_test: typing.List[str] = Field(default_factory=list, min_length=1, max_length=5)
     unique_test: typing.Set[str] = Field(default_factory=set)
@@ -924,42 +530,13 @@ class RepeatedTest(BaseModel):
     )
     ignore_test: typing.List[str] = Field(default_factory=list)
 """,
-            )
-        else:
-            assert_expected_inline(
-                output,
-                """
-class RepeatedTest(BaseModel):
-    range_test: typing.List[str] = Field(default_factory=list, min_items=1, max_items=5)
-    unique_test: typing.List[str] = Field(default_factory=list, unique_items=True)
-    items_string_test: conlist(item_type=constr(min_length=1, max_length=5), min_items=1, max_items=5) = Field(
-        default_factory=list
-    )
-    items_double_test: conlist(item_type=confloat(gt=1.0, lt=5.0), min_items=1, max_items=5) = Field(
-        default_factory=list
-    )
-    items_int32_test: conlist(item_type=conint(gt=1.0, lt=5.0), min_items=1, max_items=5) = Field(default_factory=list)
-    items_timestamp_test: conlist(
-        item_type=contimestamp(timestamp_gt=1600000000.0, timestamp_lt=1600000010.0), min_items=1, max_items=5
-    ) = Field(default_factory=list)
-    items_duration_test: conlist(
-        item_type=contimedelta(duration_gt=timedelta(seconds=10), duration_lt=timedelta(seconds=20)),
-        min_items=1,
-        max_items=5,
-    ) = Field(default_factory=list)
-    items_bytes_test: conlist(item_type=conbytes(min_length=1, max_length=5), min_items=1, max_items=5) = Field(
-        default_factory=list
-    )
-    ignore_test: typing.List[str] = Field(default_factory=list)
-""",
-            )
+        )
 
     def test_sfixed32(self) -> None:
         output = self._model_output(demo_pb2.Sfixed32Test)
-        if not is_v1:
-            assert_expected_inline(
-                output,
-                """\
+        assert_expected_inline(
+            output,
+            """\
 class Sfixed32Test(BaseModel):
     const_test: typing.Literal[1] = Field(default=0)
     range_e_test: float = Field(default=0, ge=1, le=10)
@@ -971,30 +548,13 @@ class Sfixed32Test(BaseModel):
     in_test_in_validator = field_validator("in_test", mode="after", check_fields=None)(in_validator)
     not_in_test_not_in_validator = field_validator("not_in_test", mode="after", check_fields=None)(not_in_validator)
 """,
-            )
-        else:
-            assert_expected_inline(
-                output,
-                """
-class Sfixed32Test(BaseModel):
-    const_test: float = Field(default=1, const=True)
-    range_e_test: float = Field(default=0, ge=1.0, le=10.0)
-    range_test: float = Field(default=0, gt=1.0, lt=10.0)
-    in_test: float = Field(default=0, in_=[1, 2, 3])
-    not_in_test: float = Field(default=0, not_in=[1, 2, 3])
-    ignore_test: float = Field(default=0)
-
-    in_test_in_validator = validator("in_test", allow_reuse=True)(in_validator)
-    not_in_test_not_in_validator = validator("not_in_test", allow_reuse=True)(not_in_validator)
-""",
-            )
+        )
 
     def test_sfixed64(self) -> None:
         output = self._model_output(demo_pb2.Sfixed64Test)
-        if not is_v1:
-            assert_expected_inline(
-                output,
-                """\
+        assert_expected_inline(
+            output,
+            """\
 class Sfixed64Test(BaseModel):
     const_test: typing.Literal[1] = Field(default=0)
     range_e_test: float = Field(default=0, ge=1, le=10)
@@ -1006,30 +566,13 @@ class Sfixed64Test(BaseModel):
     in_test_in_validator = field_validator("in_test", mode="after", check_fields=None)(in_validator)
     not_in_test_not_in_validator = field_validator("not_in_test", mode="after", check_fields=None)(not_in_validator)
 """,
-            )
-        else:
-            assert_expected_inline(
-                output,
-                """
-class Sfixed64Test(BaseModel):
-    const_test: float = Field(default=1, const=True)
-    range_e_test: float = Field(default=0, ge=1.0, le=10.0)
-    range_test: float = Field(default=0, gt=1.0, lt=10.0)
-    in_test: float = Field(default=0, in_=[1, 2, 3])
-    not_in_test: float = Field(default=0, not_in=[1, 2, 3])
-    ignore_test: float = Field(default=0)
-
-    in_test_in_validator = validator("in_test", allow_reuse=True)(in_validator)
-    not_in_test_not_in_validator = validator("not_in_test", allow_reuse=True)(not_in_validator)
-""",
-            )
+        )
 
     def test_sint64(self) -> None:
         output = self._model_output(demo_pb2.Sint64Test)
-        if not is_v1:
-            assert_expected_inline(
-                output,
-                """\
+        assert_expected_inline(
+            output,
+            """\
 class Sint64Test(BaseModel):
     const_test: typing.Literal[1] = Field(default=0)
     range_e_test: int = Field(default=0, ge=1, le=10)
@@ -1041,30 +584,13 @@ class Sint64Test(BaseModel):
     in_test_in_validator = field_validator("in_test", mode="after", check_fields=None)(in_validator)
     not_in_test_not_in_validator = field_validator("not_in_test", mode="after", check_fields=None)(not_in_validator)
 """,
-            )
-        else:
-            assert_expected_inline(
-                output,
-                """
-class Sint64Test(BaseModel):
-    const_test: int = Field(default=1, const=True)
-    range_e_test: int = Field(default=0, ge=1.0, le=10.0)
-    range_test: int = Field(default=0, gt=1.0, lt=10.0)
-    in_test: int = Field(default=0, in_=[1, 2, 3])
-    not_in_test: int = Field(default=0, not_in=[1, 2, 3])
-    ignore_test: int = Field(default=0)
-
-    in_test_in_validator = validator("in_test", allow_reuse=True)(in_validator)
-    not_in_test_not_in_validator = validator("not_in_test", allow_reuse=True)(not_in_validator)
-""",
-            )
+        )
 
     def test_timestamp(self) -> None:
         output = self._model_output(demo_pb2.TimestampTest)
-        if not is_v1:
-            assert_expected_inline(
-                output,
-                """\
+        assert_expected_inline(
+            output,
+            """\
 class TimestampTest(BaseModel):
     required_test: datetime = Field()
     const_test: datetime = Field(default_factory=datetime.now, timestamp_const=1600000000.0)
@@ -1108,48 +634,13 @@ class TimestampTest(BaseModel):
         "within_and_gt_now_test", mode="after", check_fields=None
     )(timestamp_within_validator)
 """,
-            )
-        else:
-            assert_expected_inline(
-                output,
-                """
-class TimestampTest(BaseModel):
-    required_test: datetime = Field()
-    const_test: datetime = Field(default_factory=datetime.now, timestamp_const=1600000000.0)
-    range_test: datetime = Field(default_factory=datetime.now, timestamp_lt=1600000010.0, timestamp_gt=1600000000.0)
-    range_e_test: datetime = Field(
-        default_factory=datetime.now, timestamp_le=1600000010.0, timestamp_ge=1600000000.0
-    )
-    lt_now_test: datetime = Field(default_factory=datetime.now, timestamp_lt_now=True)
-    gt_now_test: datetime = Field(default_factory=datetime.now, timestamp_gt_now=True)
-    within_test: datetime = Field(default_factory=datetime.now, timestamp_within=timedelta(seconds=1))
-    within_and_gt_now_test: datetime = Field(
-        default_factory=datetime.now, timestamp_gt_now=True, timestamp_within=timedelta(seconds=3600)
-    )
-
-    const_test_timestamp_const_validator = validator("const_test", allow_reuse=True)(timestamp_const_validator)
-    range_test_timestamp_lt_validator = validator("range_test", allow_reuse=True)(timestamp_lt_validator)
-    range_test_timestamp_gt_validator = validator("range_test", allow_reuse=True)(timestamp_gt_validator)
-    range_e_test_timestamp_le_validator = validator("range_e_test", allow_reuse=True)(timestamp_le_validator)
-    range_e_test_timestamp_ge_validator = validator("range_e_test", allow_reuse=True)(timestamp_ge_validator)
-    lt_now_test_timestamp_lt_now_validator = validator("lt_now_test", allow_reuse=True)(timestamp_lt_now_validator)
-    gt_now_test_timestamp_gt_now_validator = validator("gt_now_test", allow_reuse=True)(timestamp_gt_now_validator)
-    within_test_timestamp_within_validator = validator("within_test", allow_reuse=True)(timestamp_within_validator)
-    within_and_gt_now_test_timestamp_gt_now_validator = validator("within_and_gt_now_test", allow_reuse=True)(
-        timestamp_gt_now_validator
-    )
-    within_and_gt_now_test_timestamp_within_validator = validator("within_and_gt_now_test", allow_reuse=True)(
-        timestamp_within_validator
-    )
-""",
-            )
+        )
 
     def test_unit32(self) -> None:
         output = self._model_output(demo_pb2.Uint32Test)
-        if not is_v1:
-            assert_expected_inline(
-                output,
-                """\
+        assert_expected_inline(
+            output,
+            """\
 class Uint32Test(BaseModel):
     const_test: typing.Literal[1] = Field(default=0)
     range_e_test: int = Field(default=0, ge=1, le=10)
@@ -1161,30 +652,13 @@ class Uint32Test(BaseModel):
     in_test_in_validator = field_validator("in_test", mode="after", check_fields=None)(in_validator)
     not_in_test_not_in_validator = field_validator("not_in_test", mode="after", check_fields=None)(not_in_validator)
 """,
-            )
-        else:
-            assert_expected_inline(
-                output,
-                """
-class Uint32Test(BaseModel):
-    const_test: int = Field(default=1, const=True)
-    range_e_test: int = Field(default=0, ge=1.0, le=10.0)
-    range_test: int = Field(default=0, gt=1.0, lt=10.0)
-    in_test: int = Field(default=0, in_=[1, 2, 3])
-    not_in_test: int = Field(default=0, not_in=[1, 2, 3])
-    ignore_test: int = Field(default=0)
-
-    in_test_in_validator = validator("in_test", allow_reuse=True)(in_validator)
-    not_in_test_not_in_validator = validator("not_in_test", allow_reuse=True)(not_in_validator)
-""",
-            )
+        )
 
     def test_unit64(self) -> None:
         output = self._model_output(demo_pb2.Uint64Test)
-        if not is_v1:
-            assert_expected_inline(
-                output,
-                """\
+        assert_expected_inline(
+            output,
+            """\
 class Uint64Test(BaseModel):
     const_test: typing.Literal[1] = Field(default=0)
     range_e_test: int = Field(default=0, ge=1, le=10)
@@ -1196,20 +670,4 @@ class Uint64Test(BaseModel):
     in_test_in_validator = field_validator("in_test", mode="after", check_fields=None)(in_validator)
     not_in_test_not_in_validator = field_validator("not_in_test", mode="after", check_fields=None)(not_in_validator)
 """,
-            )
-        else:
-            assert_expected_inline(
-                output,
-                """
-class Uint64Test(BaseModel):
-    const_test: int = Field(default=1, const=True)
-    range_e_test: int = Field(default=0, ge=1.0, le=10.0)
-    range_test: int = Field(default=0, gt=1.0, lt=10.0)
-    in_test: int = Field(default=0, in_=[1, 2, 3])
-    not_in_test: int = Field(default=0, not_in=[1, 2, 3])
-    ignore_test: int = Field(default=0)
-
-    in_test_in_validator = validator("in_test", allow_reuse=True)(in_validator)
-    not_in_test_not_in_validator = validator("not_in_test", allow_reuse=True)(not_in_validator)
-""",
-            )
+        )

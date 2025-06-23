@@ -2,7 +2,6 @@ import pytest
 from google.protobuf import __version__
 from pydantic import ValidationError
 
-from protobuf_to_pydantic._pydantic_adapter import is_v1
 from tests.base.base_demo_validate import (
     BaseTestAliasDemoValidator,
     BaseTestAllFieldSetOptionalDemoValidator,
@@ -12,39 +11,21 @@ from tests.base.base_demo_validate import (
 )
 
 if __version__ > "4.0.0":
-    if is_v1:
-        from example.proto_pydanticv1.example.example_proto.demo import (  # type: ignore[no-redef]
-            alias_demo_p2p,
-            all_feidl_set_optional_demo_p2p,
-            custom_comment_handler_p2p,
-            demo_p2p,
-            single_config_p2p,
-        )
-    else:
-        from example.proto_pydanticv2.example.example_proto.demo import (  # type: ignore[no-redef]
-            alias_demo_p2p,
-            all_feidl_set_optional_demo_p2p,
-            custom_comment_handler_p2p,
-            demo_p2p,
-            single_config_p2p,
-        )
+    from example.proto_pydanticv2.example.example_proto.demo import (  # type: ignore[no-redef]
+        alias_demo_p2p,
+        all_feidl_set_optional_demo_p2p,
+        custom_comment_handler_p2p,
+        demo_p2p,
+        single_config_p2p,
+    )
 else:
-    if is_v1:
-        from example.proto_3_20_pydanticv1.example.example_proto.demo import (  # type: ignore[no-redef]
-            alias_demo_p2p,
-            all_feidl_set_optional_demo_p2p,
-            custom_comment_handler_p2p,
-            demo_p2p,
-            single_config_p2p,
-        )
-    else:
-        from example.proto_3_20_pydanticv2.example.example_proto.demo import (  # type: ignore[no-redef]
-            alias_demo_p2p,
-            all_feidl_set_optional_demo_p2p,
-            custom_comment_handler_p2p,
-            demo_p2p,
-            single_config_p2p,
-        )
+    from example.proto_3_20_pydanticv2.example.example_proto.demo import (  # type: ignore[no-redef]
+        alias_demo_p2p,
+        all_feidl_set_optional_demo_p2p,
+        custom_comment_handler_p2p,
+        demo_p2p,
+        single_config_p2p,
+    )
 
 class TestAliasDemoValidator(BaseTestAliasDemoValidator):
     def test_alias_demo(self) -> None:

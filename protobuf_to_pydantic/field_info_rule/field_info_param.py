@@ -94,12 +94,8 @@ def field_info_param_dict_handle(
     _const = field_info_param_dict.pop("const", MISSING)
     # PGV&P2P const handler
     if _const.__class__ != MISSING.__class__:
-        if _pydantic_adapter.is_v1:
-            field_info_param_dict["default"] = _const
-            field_info_param_dict["const"] = True
-        else:
-            # pydantic v2 not support const, only support Literal
-            field_info_param_dict["type_"] = Literal.__getitem__(_const)
+        # pydantic v2 not support const, only support Literal
+        field_info_param_dict["type_"] = Literal.__getitem__(_const)
 
     # required handler
     if field_info_param_dict.get("required", None) is True:
@@ -114,7 +110,7 @@ def field_info_param_dict_handle(
     field_info_param_dict.pop("required", None)
 
     # unique handler
-    if not _pydantic_adapter.is_v1 and field_info_param_dict.get("unique_items", None) is not None:
+    if field_info_param_dict.get("unique_items", None) is not None:
         # In pydantic v2, not support unique_items
         # only use the Set type instead of this feature
         if not field_type or get_origin(field_type) != list:
@@ -151,7 +147,7 @@ def field_info_param_dict_handle(
         # Parameters needed to extract `constrained-types`
         type_param_dict: dict = {}
 
-        if _pydantic_adapter.is_v1 or nested_call_count != 1:
+        if nested_call_count != 1:
             # In pydantic v2
             # If it is the first layer, all parameters need to be passed to Field, not Type
             for key in inspect.signature(field_type).parameters.keys():

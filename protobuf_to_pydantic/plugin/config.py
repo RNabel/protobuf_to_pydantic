@@ -136,13 +136,8 @@ class ConfigModel(BaseModel):
 
     @_pydantic_adapter.model_validator(mode="after")
     def after_init(cls, values: Any) -> Any:
-        if _pydantic_adapter.is_v1:
-            # values: Dict[str, Any]
-            values["template_instance"] = values["template"](values["local_dict"], values["comment_prefix"])
-            return values
-        else:
-            # values: "ConfigModel"
-            values.template_instance = values.template(values.local_dict, values.comment_prefix)
+        # values: "ConfigModel"
+        values.template_instance = values.template(values.local_dict, values.comment_prefix)
         return values
 
     @_pydantic_adapter.model_validator(mode="before")
