@@ -12,7 +12,7 @@ import typing_extensions
 from annotated_types import Ge, Gt, Interval, Le, Lt, MaxLen, MinLen
 from google.protobuf.any_pb2 import Any  # type: ignore
 from google.protobuf.message import Message  # type: ignore
-from pydantic import BaseModel, BeforeValidator, ConfigDict, Field, field_validator, model_validator
+from pydantic import BeforeValidator, ConfigDict, Field, field_validator, model_validator
 from pydantic.networks import AnyUrl, EmailStr, IPvAnyAddress
 from pydantic.types import StringConstraints
 from typing_extensions import Annotated
@@ -48,6 +48,7 @@ from protobuf_to_pydantic.customer_validator.v2 import (
     timestamp_lt_validator,
     timestamp_within_validator,
 )
+from protobuf_to_pydantic.default_base_model import ProtobufCompatibleBaseModel
 from protobuf_to_pydantic.field_info_rule.protobuf_option_to_field_info.types import HostNameStr, UriRefStr
 from protobuf_to_pydantic.util import Timedelta
 
@@ -58,7 +59,7 @@ class State(IntEnum):
     ACTIVE = 2
 
 
-class FloatTest(BaseModel):
+class FloatTest(ProtobufCompatibleBaseModel):
     const_test: typing.Literal[1.0] = Field(default=0.0)
     range_e_test: float = Field(default=0.0, ge=1.0, le=10.0)
     range_test: float = Field(default=0.0, gt=1.0, lt=10.0)
@@ -83,7 +84,7 @@ class FloatTest(BaseModel):
     not_in_test_not_in_validator = field_validator("not_in_test", mode="after", check_fields=None)(not_in_validator)
 
 
-class DoubleTest(BaseModel):
+class DoubleTest(ProtobufCompatibleBaseModel):
     const_test: typing.Literal[1.0] = Field(default=0.0)
     range_e_test: float = Field(default=0.0, ge=1.0, le=10.0)
     range_test: float = Field(default=0.0, gt=1.0, lt=10.0)
@@ -108,7 +109,7 @@ class DoubleTest(BaseModel):
     not_in_test_not_in_validator = field_validator("not_in_test", mode="after", check_fields=None)(not_in_validator)
 
 
-class Int32Test(BaseModel):
+class Int32Test(ProtobufCompatibleBaseModel):
     const_test: typing.Literal[1] = Field(default=0)
     range_e_test: int = Field(default=0, ge=1, le=10)
     range_test: int = Field(default=0, gt=1, lt=10)
@@ -133,7 +134,7 @@ class Int32Test(BaseModel):
     not_in_test_not_in_validator = field_validator("not_in_test", mode="after", check_fields=None)(not_in_validator)
 
 
-class Int64Test(BaseModel):
+class Int64Test(ProtobufCompatibleBaseModel):
     const_test: typing.Literal[1] = Field(default=0)
     range_e_test: int = Field(default=0, ge=1, le=10)
     range_test: int = Field(default=0, gt=1, lt=10)
@@ -158,32 +159,7 @@ class Int64Test(BaseModel):
     not_in_test_not_in_validator = field_validator("not_in_test", mode="after", check_fields=None)(not_in_validator)
 
 
-class Uint32Test(BaseModel):
-    const_test: typing.Literal[1] = Field(default=0)
-    range_e_test: int = Field(default=0, ge=1, le=10)
-    range_test: int = Field(default=0, gt=1, lt=10)
-    in_test: int = Field(default=0, in_=[1, 2, 3])
-    not_in_test: int = Field(default=0, not_in=[1, 2, 3])
-    default_test: int = Field(default=1.0)
-    default_template_test: int = Field(default=1600000000)
-    default_factory_test: int = Field(default_factory=int)
-    miss_default_test: int = Field()
-    required_test: int = Field()
-    alias_test: int = Field(default=0, alias="alias")
-    desc_test: int = Field(default=0, description="test desc")
-    multiple_of_test: int = Field(default=0, multiple_of=3)
-    example_test: int = Field(default=0, example=1.0)
-    example_factory: int = Field(default=0, example=int)
-    field_test: int = CustomerField(default=0)
-    type_test: typing_extensions.Annotated[int, None, Interval(), None] = Field(default=0)
-    title_test: int = Field(default=0, title="title_test")
-    extra_test: int = Field(default=0, customer_string="c1", customer_int=1)
-
-    in_test_in_validator = field_validator("in_test", mode="after", check_fields=None)(in_validator)
-    not_in_test_not_in_validator = field_validator("not_in_test", mode="after", check_fields=None)(not_in_validator)
-
-
-class Sint32Test(BaseModel):
+class Uint32Test(ProtobufCompatibleBaseModel):
     const_test: typing.Literal[1] = Field(default=0)
     range_e_test: int = Field(default=0, ge=1, le=10)
     range_test: int = Field(default=0, gt=1, lt=10)
@@ -208,7 +184,7 @@ class Sint32Test(BaseModel):
     not_in_test_not_in_validator = field_validator("not_in_test", mode="after", check_fields=None)(not_in_validator)
 
 
-class Uint64Test(BaseModel):
+class Sint32Test(ProtobufCompatibleBaseModel):
     const_test: typing.Literal[1] = Field(default=0)
     range_e_test: int = Field(default=0, ge=1, le=10)
     range_test: int = Field(default=0, gt=1, lt=10)
@@ -233,7 +209,7 @@ class Uint64Test(BaseModel):
     not_in_test_not_in_validator = field_validator("not_in_test", mode="after", check_fields=None)(not_in_validator)
 
 
-class Sint64Test(BaseModel):
+class Uint64Test(ProtobufCompatibleBaseModel):
     const_test: typing.Literal[1] = Field(default=0)
     range_e_test: int = Field(default=0, ge=1, le=10)
     range_test: int = Field(default=0, gt=1, lt=10)
@@ -258,7 +234,32 @@ class Sint64Test(BaseModel):
     not_in_test_not_in_validator = field_validator("not_in_test", mode="after", check_fields=None)(not_in_validator)
 
 
-class Fixed32Test(BaseModel):
+class Sint64Test(ProtobufCompatibleBaseModel):
+    const_test: typing.Literal[1] = Field(default=0)
+    range_e_test: int = Field(default=0, ge=1, le=10)
+    range_test: int = Field(default=0, gt=1, lt=10)
+    in_test: int = Field(default=0, in_=[1, 2, 3])
+    not_in_test: int = Field(default=0, not_in=[1, 2, 3])
+    default_test: int = Field(default=1.0)
+    default_template_test: int = Field(default=1600000000)
+    default_factory_test: int = Field(default_factory=int)
+    miss_default_test: int = Field()
+    required_test: int = Field()
+    alias_test: int = Field(default=0, alias="alias")
+    desc_test: int = Field(default=0, description="test desc")
+    multiple_of_test: int = Field(default=0, multiple_of=3)
+    example_test: int = Field(default=0, example=1.0)
+    example_factory: int = Field(default=0, example=int)
+    field_test: int = CustomerField(default=0)
+    type_test: typing_extensions.Annotated[int, None, Interval(), None] = Field(default=0)
+    title_test: int = Field(default=0, title="title_test")
+    extra_test: int = Field(default=0, customer_string="c1", customer_int=1)
+
+    in_test_in_validator = field_validator("in_test", mode="after", check_fields=None)(in_validator)
+    not_in_test_not_in_validator = field_validator("not_in_test", mode="after", check_fields=None)(not_in_validator)
+
+
+class Fixed32Test(ProtobufCompatibleBaseModel):
     const_test: typing.Literal[1] = Field(default=0)
     range_e_test: int = Field(default=0, ge=1, le=10)
     range_test: int = Field(default=0, gt=1, lt=10)
@@ -283,7 +284,7 @@ class Fixed32Test(BaseModel):
     not_in_test_not_in_validator = field_validator("not_in_test", mode="after", check_fields=None)(not_in_validator)
 
 
-class Fixed64Test(BaseModel):
+class Fixed64Test(ProtobufCompatibleBaseModel):
     const_test: typing.Literal[1] = Field(default=0)
     range_e_test: int = Field(default=0, ge=1, le=10)
     range_test: int = Field(default=0, gt=1, lt=10)
@@ -308,7 +309,7 @@ class Fixed64Test(BaseModel):
     not_in_test_not_in_validator = field_validator("not_in_test", mode="after", check_fields=None)(not_in_validator)
 
 
-class Sfixed32Test(BaseModel):
+class Sfixed32Test(ProtobufCompatibleBaseModel):
     const_test: typing.Literal[1] = Field(default=0)
     range_e_test: int = Field(default=0, ge=1, le=10)
     range_test: int = Field(default=0, gt=1, lt=10)
@@ -333,7 +334,7 @@ class Sfixed32Test(BaseModel):
     not_in_test_not_in_validator = field_validator("not_in_test", mode="after", check_fields=None)(not_in_validator)
 
 
-class Sfixed64Test(BaseModel):
+class Sfixed64Test(ProtobufCompatibleBaseModel):
     const_test: typing.Literal[1] = Field(default=0)
     range_e_test: int = Field(default=0, ge=1, le=10)
     range_test: int = Field(default=0, gt=1, lt=10)
@@ -358,7 +359,7 @@ class Sfixed64Test(BaseModel):
     not_in_test_not_in_validator = field_validator("not_in_test", mode="after", check_fields=None)(not_in_validator)
 
 
-class BoolTest(BaseModel):
+class BoolTest(ProtobufCompatibleBaseModel):
     bool_1_test: typing.Literal[True] = Field(default=False)
     bool_2_test: typing.Literal[False] = Field(default=False)
     default_test: bool = Field(default=True)
@@ -372,7 +373,7 @@ class BoolTest(BaseModel):
     extra_test: bool = Field(default=False, customer_string="c1", customer_int=1)
 
 
-class StringTest(BaseModel):
+class StringTest(ProtobufCompatibleBaseModel):
     const_test: typing.Literal["aaa"] = Field(default="")
     len_test: str = Field(default="", len=3)
     s_range_len_test: str = Field(default="", min_length=1, max_length=3)
@@ -419,7 +420,7 @@ class StringTest(BaseModel):
     not_in_test_not_in_validator = field_validator("not_in_test", mode="after", check_fields=None)(not_in_validator)
 
 
-class BytesTest(BaseModel):
+class BytesTest(ProtobufCompatibleBaseModel):
     const_test: typing.Literal[b"demo"] = Field(default=b"")
     range_len_test: bytes = Field(default=b"", min_length=1, max_length=4)
     prefix_test: bytes = Field(default=b"", prefix=b"prefix")
@@ -449,7 +450,7 @@ class BytesTest(BaseModel):
     not_in_test_not_in_validator = field_validator("not_in_test", mode="after", check_fields=None)(not_in_validator)
 
 
-class EnumTest(BaseModel):
+class EnumTest(ProtobufCompatibleBaseModel):
     model_config = ConfigDict(validate_default=True)
     const_test: typing.Literal[2] = Field(default=0)
     in_test: State = Field(default=0, in_=[0, 2])
@@ -468,7 +469,7 @@ class EnumTest(BaseModel):
     not_in_test_not_in_validator = field_validator("not_in_test", mode="after", check_fields=None)(not_in_validator)
 
 
-class MapTest(BaseModel):
+class MapTest(ProtobufCompatibleBaseModel):
     pair_test: "typing.Dict[str, int]" = Field(default_factory=dict, map_min_pairs=1, map_max_pairs=5)
     keys_test: typing.Dict[typing_extensions.Annotated[str, MinLen(min_length=1), MaxLen(max_length=5)], int] = Field(
         default_factory=dict
@@ -497,13 +498,13 @@ class MapTest(BaseModel):
     )
 
 
-class MessageTest(BaseModel):
+class MessageTest(ProtobufCompatibleBaseModel):
     skip_test: str = Field(default="")
     required_test: str = Field()
     extra_test: str = Field(default="", customer_string="c1", customer_int=1)
 
 
-class RepeatedTest(BaseModel):
+class RepeatedTest(ProtobufCompatibleBaseModel):
     range_test: typing.List[str] = Field(default_factory=list, min_length=1, max_length=5)
     unique_test: typing.Set[str] = Field(default_factory=set)
     items_string_test: typing.List[typing_extensions.Annotated[str, MinLen(min_length=1), MaxLen(max_length=5)]] = (
@@ -536,7 +537,7 @@ class RepeatedTest(BaseModel):
     extra_test: typing.List[str] = Field(default_factory=list, customer_string="c1", customer_int=1)
 
 
-class AnyTest(BaseModel):
+class AnyTest(ProtobufCompatibleBaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
     required_test: Any = Field()
     not_in_test: Any = Field(
@@ -567,7 +568,7 @@ class AnyTest(BaseModel):
     in_test_any_in_validator = field_validator("in_test", mode="after", check_fields=None)(any_in_validator)
 
 
-class DurationTest(BaseModel):
+class DurationTest(ProtobufCompatibleBaseModel):
     const_test: Annotated[timedelta, BeforeValidator(Timedelta.validate)] = Field(
         default_factory=timedelta, duration_const=timedelta(seconds=1, microseconds=500000)
     )
@@ -637,7 +638,7 @@ class DurationTest(BaseModel):
     )
 
 
-class TimestampTest(BaseModel):
+class TimestampTest(ProtobufCompatibleBaseModel):
     const_test: datetime = Field(default_factory=datetime.now, timestamp_const=1600000000.0)
     range_test: datetime = Field(default_factory=datetime.now, timestamp_lt=1600000010.0, timestamp_gt=1600000000.0)
     range_e_test: datetime = Field(default_factory=datetime.now, timestamp_le=1600000010.0, timestamp_ge=1600000000.0)
@@ -692,13 +693,13 @@ class TimestampTest(BaseModel):
     )(timestamp_within_validator)
 
 
-class MessageIgnoredTest(BaseModel):
+class MessageIgnoredTest(ProtobufCompatibleBaseModel):
     const_test: int = Field(default=0)
     range_e_test: int = Field(default=0)
     range_test: int = Field(default=0)
 
 
-class OneOfTest(BaseModel):
+class OneOfTest(ProtobufCompatibleBaseModel):
     _one_of_dict = {"OneOfTest.id": {"fields": {"x", "y"}, "required": True}}
     one_of_validator = model_validator(mode="before")(check_one_of)
     header: str = Field(default="")
@@ -706,7 +707,7 @@ class OneOfTest(BaseModel):
     y: int = Field(default=0)
 
 
-class OneOfNotTest(BaseModel):
+class OneOfNotTest(ProtobufCompatibleBaseModel):
     _one_of_dict = {"OneOfNotTest.id": {"fields": {"x", "y"}}}
     one_of_validator = model_validator(mode="before")(check_one_of)
     header: str = Field(default="")
@@ -714,7 +715,7 @@ class OneOfNotTest(BaseModel):
     y: int = Field(default=0)
 
 
-class OneOfOptionalTest(BaseModel):
+class OneOfOptionalTest(ProtobufCompatibleBaseModel):
     _one_of_dict = {"OneOfOptionalTest.id": {"fields": {"x", "y", "z"}, "required": True}}
     one_of_validator = model_validator(mode="before")(check_one_of)
     header: str = Field(default="")
@@ -727,17 +728,17 @@ class OneOfOptionalTest(BaseModel):
     int_map: "typing.Dict[str, int]" = Field(default_factory=dict)
 
 
-class AfterReferMessage(BaseModel):
+class AfterReferMessage(ProtobufCompatibleBaseModel):
     uid: str = Field(title="UID", description="user union id", example="10086")
     age: int = Field(default=0, title="use age", ge=0, example=18.0)
 
 
-class NestedMessage(BaseModel):
+class NestedMessage(ProtobufCompatibleBaseModel):
     """
     test nested message
     """
 
-    class UserPayMessage(BaseModel):
+    class UserPayMessage(ProtobufCompatibleBaseModel):
         bank_number: str = Field(default="", min_length=13, max_length=19)
         exp: datetime = Field(default_factory=datetime.now, timestamp_gt_now=True)
         uuid: UUID = Field(default="")
@@ -746,7 +747,7 @@ class NestedMessage(BaseModel):
             timestamp_gt_now_validator
         )
 
-    class NotEnableUserPayMessage(BaseModel):
+    class NotEnableUserPayMessage(ProtobufCompatibleBaseModel):
         bank_number: str = Field(default="")
         exp: datetime = Field(default_factory=datetime.now)
         uuid: str = Field(default="")
@@ -761,7 +762,7 @@ class NestedMessage(BaseModel):
     after_refer: AfterReferMessage = Field(default_factory=AfterReferMessage)
 
 
-class OptionalMessage(BaseModel):
+class OptionalMessage(ProtobufCompatibleBaseModel):
     # fix https://github.com/so1n/protobuf_to_pydantic/issues/82
     my_message1: typing.Optional[MessageIgnoredTest] = Field()
     # fix https://github.com/so1n/protobuf_to_pydantic/issues/85

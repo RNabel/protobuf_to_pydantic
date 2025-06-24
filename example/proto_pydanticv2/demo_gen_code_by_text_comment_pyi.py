@@ -11,19 +11,21 @@ from example.gen_text_comment_code import exp_time
 from google.protobuf.field_mask_pb2 import FieldMask  # type: ignore
 from google.protobuf.wrappers_pb2 import DoubleValue  # type: ignore
 from protobuf_to_pydantic.customer_validator.v2 import check_one_of
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from protobuf_to_pydantic.default_base_model import ProtobufCompatibleBaseModel
+from pydantic import ConfigDict, Field, model_validator
 from pydantic.alias_generators import to_camel
 from pydantic.aliases import AliasGenerator
 from pydantic.types import PaymentCardNumber
 
 
-class AfterReferMessage(BaseModel):
+class AfterReferMessage(ProtobufCompatibleBaseModel):
     model_config = ConfigDict(
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        serialize_by_alias=True,
     )
 
     uid: str = Field(
@@ -45,24 +47,26 @@ class AfterReferMessage(BaseModel):
     )
 
 
-class AnOtherMessage(BaseModel):
-    class SubMessage(BaseModel):
+class AnOtherMessage(ProtobufCompatibleBaseModel):
+    class SubMessage(ProtobufCompatibleBaseModel):
         model_config = ConfigDict(
+            ser_json_inf_nan="strings",
             alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
             populate_by_name=True,
-            serialize_by_alias=True,
             validate_by_alias=True,
             validate_by_name=True,
+            serialize_by_alias=True,
         )
 
         text: str = Field(default="", alias_priority=1, validation_alias="text", serialization_alias="text")
 
     model_config = ConfigDict(
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        serialize_by_alias=True,
     )
 
     field1: str = Field(default="", alias_priority=1, validation_alias="field1", serialization_alias="field1")
@@ -71,25 +75,27 @@ class AnOtherMessage(BaseModel):
     )
 
 
-class DemoState(BaseModel):
+class DemoState(ProtobufCompatibleBaseModel):
     model_config = ConfigDict(
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        serialize_by_alias=True,
     )
 
     paramsDID: int = Field(default=0, alias_priority=1, validation_alias="paramsDID", serialization_alias="paramsDID")
 
 
-class DemoResp(BaseModel):
+class DemoResp(ProtobufCompatibleBaseModel):
     model_config = ConfigDict(
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        serialize_by_alias=True,
     )
 
     demoState: typing.Dict[int, DemoState] = Field(
@@ -101,23 +107,25 @@ class DemoResp(BaseModel):
     )
 
 
-class EmptyMessage(BaseModel):
+class EmptyMessage(ProtobufCompatibleBaseModel):
     model_config = ConfigDict(
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        serialize_by_alias=True,
     )
 
 
-class InvoiceItem2(BaseModel):
+class InvoiceItem2(ProtobufCompatibleBaseModel):
     model_config = ConfigDict(
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        serialize_by_alias=True,
     )
 
     name: str = Field(default="", alias_priority=1, validation_alias="name", serialization_alias="name")
@@ -129,13 +137,14 @@ class InvoiceItem2(BaseModel):
     invoice: "Invoice3" = Field()
 
 
-class Invoice3(BaseModel):
+class Invoice3(ProtobufCompatibleBaseModel):
     model_config = ConfigDict(
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        serialize_by_alias=True,
     )
 
     name: str = Field(default="", alias_priority=1, validation_alias="name", serialization_alias="name")
@@ -146,13 +155,14 @@ class Invoice3(BaseModel):
     )
 
 
-class InvoiceItem(BaseModel):
+class InvoiceItem(ProtobufCompatibleBaseModel):
     model_config = ConfigDict(
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        serialize_by_alias=True,
     )
 
     name: str = Field(default="", alias_priority=1, validation_alias="name", serialization_alias="name")
@@ -177,16 +187,17 @@ class ExampleExampleProtoCommonSingleDemoEnum(IntEnum):
     two = 3
 
 
-class ExampleExampleProtoCommonSingleDemoMessage(BaseModel):
+class ExampleExampleProtoCommonSingleDemoMessage(ProtobufCompatibleBaseModel):
     """Note: The current class does not belong to the package
     ExampleExampleProtoCommonSingleDemoMessage protobuf path:example/example_proto/common/single.proto"""
 
     model_config = ConfigDict(
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        serialize_by_alias=True,
     )
 
     earth: str = Field(default="", alias_priority=1, validation_alias="earth", serialization_alias="earth")
@@ -194,14 +205,15 @@ class ExampleExampleProtoCommonSingleDemoMessage(BaseModel):
     mars: str = Field(default="", alias_priority=1, validation_alias="mars", serialization_alias="mars")
 
 
-class UserMessage(BaseModel):
+class UserMessage(ProtobufCompatibleBaseModel):
     model_config = ConfigDict(
-        validate_default=True,
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        validate_default=True,
+        serialize_by_alias=True,
     )
 
     uid: str = Field(
@@ -249,13 +261,14 @@ class UserMessage(BaseModel):
     )
 
 
-class MapMessage(BaseModel):
+class MapMessage(ProtobufCompatibleBaseModel):
     model_config = ConfigDict(
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        serialize_by_alias=True,
     )
 
     user_map: typing.Dict[str, UserMessage] = Field(
@@ -266,13 +279,14 @@ class MapMessage(BaseModel):
     )
 
 
-class RepeatedMessage(BaseModel):
+class RepeatedMessage(ProtobufCompatibleBaseModel):
     model_config = ConfigDict(
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        serialize_by_alias=True,
     )
 
     str_list: typing.List[str] = Field(
@@ -296,14 +310,15 @@ class RepeatedMessage(BaseModel):
     )
 
 
-class NestedMessage(BaseModel):
-    class UserPayMessage(BaseModel):
+class NestedMessage(ProtobufCompatibleBaseModel):
+    class UserPayMessage(ProtobufCompatibleBaseModel):
         model_config = ConfigDict(
+            ser_json_inf_nan="strings",
             alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
             populate_by_name=True,
-            serialize_by_alias=True,
             validate_by_alias=True,
             validate_by_name=True,
+            serialize_by_alias=True,
         )
 
         bank_number: PaymentCardNumber = Field(
@@ -320,12 +335,13 @@ class NestedMessage(BaseModel):
         two = 2
 
     model_config = ConfigDict(
-        validate_default=True,
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        validate_default=True,
+        serialize_by_alias=True,
     )
 
     user_list_map: typing.Dict[str, RepeatedMessage] = Field(
@@ -349,16 +365,17 @@ class NestedMessage(BaseModel):
     )
 
 
-class OptionalMessage(BaseModel):
+class OptionalMessage(ProtobufCompatibleBaseModel):
     model_config = ConfigDict(
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        serialize_by_alias=True,
     )
 
-    _one_of_dict = {"user.OptionalMessage.a": {"fields": {"x", "yy"}, "required": False}}
+    _one_of_dict = {"user.OptionalMessage.a": {"fields": {"x", "y", "yy"}, "required": False}}
 
     x: str = Field(default="", alias_priority=1, validation_alias="x", serialization_alias="x")
     y: int = Field(
@@ -394,14 +411,15 @@ class OptionalMessage(BaseModel):
     one_of_validator = model_validator(mode="before")(check_one_of)
 
 
-class OtherMessage(BaseModel):
+class OtherMessage(ProtobufCompatibleBaseModel):
     model_config = ConfigDict(
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
-        arbitrary_types_allowed=True,
         validate_by_alias=True,
         validate_by_name=True,
+        serialize_by_alias=True,
+        arbitrary_types_allowed=True,
     )
 
     metadata: typing.Dict[str, typing.Any] = Field(
@@ -415,13 +433,14 @@ class OtherMessage(BaseModel):
     )
 
 
-class RootMessage(BaseModel):
+class RootMessage(ProtobufCompatibleBaseModel):
     model_config = ConfigDict(
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        serialize_by_alias=True,
     )
 
     field1: str = Field(default="", alias_priority=1, validation_alias="field1", serialization_alias="field1")
@@ -430,14 +449,15 @@ class RootMessage(BaseModel):
     )
 
 
-class TestSameName0(BaseModel):
-    class Body(BaseModel):
+class TestSameName0(ProtobufCompatibleBaseModel):
+    class Body(ProtobufCompatibleBaseModel):
         model_config = ConfigDict(
+            ser_json_inf_nan="strings",
             alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
             populate_by_name=True,
-            serialize_by_alias=True,
             validate_by_alias=True,
             validate_by_name=True,
+            serialize_by_alias=True,
         )
 
         input_model: str = Field(
@@ -448,24 +468,26 @@ class TestSameName0(BaseModel):
         )
 
     model_config = ConfigDict(
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        serialize_by_alias=True,
     )
 
     body: Body = Field(default_factory=Body, alias_priority=1, validation_alias="body", serialization_alias="body")
 
 
-class TestSameName1(BaseModel):
-    class Body(BaseModel):
+class TestSameName1(ProtobufCompatibleBaseModel):
+    class Body(ProtobufCompatibleBaseModel):
         model_config = ConfigDict(
+            ser_json_inf_nan="strings",
             alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
             populate_by_name=True,
-            serialize_by_alias=True,
             validate_by_alias=True,
             validate_by_name=True,
+            serialize_by_alias=True,
         )
 
         output_model: str = Field(
@@ -476,11 +498,12 @@ class TestSameName1(BaseModel):
         )
 
     model_config = ConfigDict(
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        serialize_by_alias=True,
     )
 
     body: Body = Field(default_factory=Body, alias_priority=1, validation_alias="body", serialization_alias="body")
@@ -492,14 +515,15 @@ class OptionalEnum(IntEnum):
     BAZ = 2
 
 
-class WithOptionalEnumMsgEntry(BaseModel):
+class WithOptionalEnumMsgEntry(ProtobufCompatibleBaseModel):
     model_config = ConfigDict(
-        validate_default=True,
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        validate_default=True,
+        serialize_by_alias=True,
     )
 
     enum: typing.Optional[OptionalEnum] = Field(

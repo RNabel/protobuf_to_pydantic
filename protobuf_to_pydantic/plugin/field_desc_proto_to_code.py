@@ -614,9 +614,11 @@ class FileDescriptorProtoToCode(BaseP2C):
             model_config_dict = self.config.base_model_class.model_config
 
             for one_of_name, sub_one_of_dict in one_of_dict.items():
-                pydantic_allow_validation_field_handler(
-                    field.name, alias, sub_one_of_dict["fields"], model_config_dict
-                )
+                # Only process fields that are actually part of this oneof
+                if field.name in sub_one_of_dict["fields"]:
+                    pydantic_allow_validation_field_handler(
+                        field.name, alias, sub_one_of_dict["fields"], model_config_dict
+                    )
 
         field_info_str: str = (
             ", ".join(
@@ -793,7 +795,7 @@ class FileDescriptorProtoToCode(BaseP2C):
             #                         for one_of_optional_name in one_of_extend_value:
             #                             optional_dict[one_of_optional_name] = {"is_proto3_optional": True}
 
-            option_dict["fields"] = index_field_name_dict[index]
+            option_dict["fields"] = index_field_name_dict.get(index, set())
             if option_dict:
                 # Only when the rules are used, will the number of fields of one_of be checked to see if they match
                 one_of_dict[desc.name + "." + one_of_item.name] = option_dict

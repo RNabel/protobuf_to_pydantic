@@ -5,7 +5,9 @@
 from enum import IntEnum
 
 from google.protobuf.message import Message  # type: ignore
-from pydantic import BaseModel, Field
+from pydantic import Field
+
+from protobuf_to_pydantic.default_base_model import ProtobufCompatibleBaseModel
 
 
 class DemoEnum(IntEnum):
@@ -14,7 +16,7 @@ class DemoEnum(IntEnum):
     two = 3
 
 
-class DemoMessage(BaseModel):
+class DemoMessage(ProtobufCompatibleBaseModel):
     earth: str = Field(default="")
     mercury: str = Field(default="")
     mars: str = Field(default="")

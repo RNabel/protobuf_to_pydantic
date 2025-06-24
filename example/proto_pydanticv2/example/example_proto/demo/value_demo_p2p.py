@@ -5,10 +5,12 @@
 import typing
 
 from google.protobuf.message import Message  # type: ignore
-from pydantic import BaseModel, Field
+from pydantic import Field
+
+from protobuf_to_pydantic.default_base_model import ProtobufCompatibleBaseModel
 
 
-class ValueTestMessage(BaseModel):
+class ValueTestMessage(ProtobufCompatibleBaseModel):
     """
     Test message with google.protobuf.Value field
     """

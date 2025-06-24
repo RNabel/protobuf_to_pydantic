@@ -48,16 +48,17 @@ class ExampleExampleProtoCommonSingleDemoEnum(IntEnum):
     two = 3
 
 
-class ExampleExampleProtoCommonSingleDemoMessage(BaseModel):
+class ExampleExampleProtoCommonSingleDemoMessage(ProtobufCompatibleBaseModel):
     """Note: The current class does not belong to the package
     ExampleExampleProtoCommonSingleDemoMessage protobuf path:example/example_proto/common/single.proto"""
 
     model_config = ConfigDict(
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        serialize_by_alias=True,
     )
 
     earth: str = Field(default="", alias_priority=1, validation_alias="earth", serialization_alias="earth")
@@ -65,14 +66,15 @@ class ExampleExampleProtoCommonSingleDemoMessage(BaseModel):
     mars: str = Field(default="", alias_priority=1, validation_alias="mars", serialization_alias="mars")
 
 
-class UserMessage(BaseModel):
+class UserMessage(ProtobufCompatibleBaseModel):
     model_config = ConfigDict(
-        validate_default=True,
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        validate_default=True,
+        serialize_by_alias=True,
     )
 
     uid: str = Field(
@@ -126,14 +128,15 @@ class UserMessage(BaseModel):
         assert_expected_inline(
             output,
             """\
-class OtherMessage(BaseModel):
+class OtherMessage(ProtobufCompatibleBaseModel):
     model_config = ConfigDict(
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
-        arbitrary_types_allowed=True,
         validate_by_alias=True,
         validate_by_name=True,
+        serialize_by_alias=True,
+        arbitrary_types_allowed=True,
     )
 
     metadata: typing.Dict[str, typing.Any] = Field(
@@ -167,16 +170,17 @@ class ExampleExampleProtoCommonSingleDemoEnum(IntEnum):
     two = 3
 
 
-class ExampleExampleProtoCommonSingleDemoMessage(BaseModel):
+class ExampleExampleProtoCommonSingleDemoMessage(ProtobufCompatibleBaseModel):
     """Note: The current class does not belong to the package
     ExampleExampleProtoCommonSingleDemoMessage protobuf path:example/example_proto/common/single.proto"""
 
     model_config = ConfigDict(
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        serialize_by_alias=True,
     )
 
     earth: str = Field(default="", alias_priority=1, validation_alias="earth", serialization_alias="earth")
@@ -184,14 +188,15 @@ class ExampleExampleProtoCommonSingleDemoMessage(BaseModel):
     mars: str = Field(default="", alias_priority=1, validation_alias="mars", serialization_alias="mars")
 
 
-class UserMessage(BaseModel):
+class UserMessage(ProtobufCompatibleBaseModel):
     model_config = ConfigDict(
-        validate_default=True,
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        validate_default=True,
+        serialize_by_alias=True,
     )
 
     uid: str = Field(
@@ -239,13 +244,14 @@ class UserMessage(BaseModel):
     )
 
 
-class MapMessage(BaseModel):
+class MapMessage(ProtobufCompatibleBaseModel):
     model_config = ConfigDict(
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        serialize_by_alias=True,
     )
 
     user_map: typing.Dict[str, UserMessage] = Field(
@@ -276,16 +282,17 @@ class ExampleExampleProtoCommonSingleDemoEnum(IntEnum):
     two = 3
 
 
-class ExampleExampleProtoCommonSingleDemoMessage(BaseModel):
+class ExampleExampleProtoCommonSingleDemoMessage(ProtobufCompatibleBaseModel):
     \"\"\"Note: The current class does not belong to the package
     ExampleExampleProtoCommonSingleDemoMessage protobuf path:example/example_proto/common/single.proto\"\"\"
 
     model_config = ConfigDict(
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        serialize_by_alias=True,
     )
 
     earth: str = Field(default="", alias_priority=1, validation_alias="earth", serialization_alias="earth")
@@ -293,14 +300,15 @@ class ExampleExampleProtoCommonSingleDemoMessage(BaseModel):
     mars: str = Field(default="", alias_priority=1, validation_alias="mars", serialization_alias="mars")
 
 
-class UserMessage(BaseModel):
+class UserMessage(ProtobufCompatibleBaseModel):
     model_config = ConfigDict(
-        validate_default=True,
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        validate_default=True,
+        serialize_by_alias=True,
     )
 
     uid: str = Field(
@@ -348,13 +356,14 @@ class UserMessage(BaseModel):
     )
 
 
-class RepeatedMessage(BaseModel):
+class RepeatedMessage(ProtobufCompatibleBaseModel):
     model_config = ConfigDict(
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        serialize_by_alias=True,
     )
 
     str_list: typing.List[str] = Field(
@@ -398,16 +407,17 @@ class ExampleExampleProtoCommonSingleDemoEnum(IntEnum):
     two = 3
 
 
-class ExampleExampleProtoCommonSingleDemoMessage(BaseModel):
+class ExampleExampleProtoCommonSingleDemoMessage(ProtobufCompatibleBaseModel):
     \"\"\"Note: The current class does not belong to the package
     ExampleExampleProtoCommonSingleDemoMessage protobuf path:example/example_proto/common/single.proto\"\"\"
 
     model_config = ConfigDict(
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        serialize_by_alias=True,
     )
 
     earth: str = Field(default="", alias_priority=1, validation_alias="earth", serialization_alias="earth")
@@ -415,14 +425,15 @@ class ExampleExampleProtoCommonSingleDemoMessage(BaseModel):
     mars: str = Field(default="", alias_priority=1, validation_alias="mars", serialization_alias="mars")
 
 
-class UserMessage(BaseModel):
+class UserMessage(ProtobufCompatibleBaseModel):
     model_config = ConfigDict(
-        validate_default=True,
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        validate_default=True,
+        serialize_by_alias=True,
     )
 
     uid: str = Field(
@@ -470,13 +481,14 @@ class UserMessage(BaseModel):
     )
 
 
-class RepeatedMessage(BaseModel):
+class RepeatedMessage(ProtobufCompatibleBaseModel):
     model_config = ConfigDict(
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        serialize_by_alias=True,
     )
 
     str_list: typing.List[str] = Field(
@@ -500,13 +512,14 @@ class RepeatedMessage(BaseModel):
     )
 
 
-class MapMessage(BaseModel):
+class MapMessage(ProtobufCompatibleBaseModel):
     model_config = ConfigDict(
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        serialize_by_alias=True,
     )
 
     user_map: typing.Dict[str, UserMessage] = Field(
@@ -517,13 +530,14 @@ class MapMessage(BaseModel):
     )
 
 
-class AfterReferMessage(BaseModel):
+class AfterReferMessage(ProtobufCompatibleBaseModel):
     model_config = ConfigDict(
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        serialize_by_alias=True,
     )
 
     uid: str = Field(
@@ -545,14 +559,15 @@ class AfterReferMessage(BaseModel):
     )
 
 
-class NestedMessage(BaseModel):
-    class UserPayMessage(BaseModel):
+class NestedMessage(ProtobufCompatibleBaseModel):
+    class UserPayMessage(ProtobufCompatibleBaseModel):
         model_config = ConfigDict(
+            ser_json_inf_nan="strings",
             alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
             populate_by_name=True,
-            serialize_by_alias=True,
             validate_by_alias=True,
             validate_by_name=True,
+            serialize_by_alias=True,
         )
 
         bank_number: PaymentCardNumber = Field(
@@ -569,12 +584,13 @@ class NestedMessage(BaseModel):
         two = 2
 
     model_config = ConfigDict(
-        validate_default=True,
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        validate_default=True,
+        serialize_by_alias=True,
     )
 
     user_list_map: typing.Dict[str, RepeatedMessage] = Field(
@@ -604,13 +620,14 @@ class NestedMessage(BaseModel):
         assert_expected_inline(
             output,
             """\
-class InvoiceItem(BaseModel):
+class InvoiceItem(ProtobufCompatibleBaseModel):
     model_config = ConfigDict(
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        serialize_by_alias=True,
     )
 
     name: str = Field(default="", alias_priority=1, validation_alias="name", serialization_alias="name")
@@ -627,13 +644,14 @@ class InvoiceItem(BaseModel):
         assert_expected_inline(
             output,
             """\
-class Invoice3(BaseModel):
+class Invoice3(ProtobufCompatibleBaseModel):
     model_config = ConfigDict(
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        serialize_by_alias=True,
     )
 
     name: str = Field(default="", alias_priority=1, validation_alias="name", serialization_alias="name")
@@ -642,13 +660,14 @@ class Invoice3(BaseModel):
     items: typing.List["InvoiceItem2"] = Field(default_factory=list)
 
 
-class InvoiceItem2(BaseModel):
+class InvoiceItem2(ProtobufCompatibleBaseModel):
     model_config = ConfigDict(
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        serialize_by_alias=True,
     )
 
     name: str = Field(default="", alias_priority=1, validation_alias="name", serialization_alias="name")
@@ -668,24 +687,26 @@ class InvoiceItem2(BaseModel):
         assert_expected_inline(
             output,
             """\
-class AnOtherMessage(BaseModel):
-    class SubMessage(BaseModel):
+class AnOtherMessage(ProtobufCompatibleBaseModel):
+    class SubMessage(ProtobufCompatibleBaseModel):
         model_config = ConfigDict(
+            ser_json_inf_nan="strings",
             alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
             populate_by_name=True,
-            serialize_by_alias=True,
             validate_by_alias=True,
             validate_by_name=True,
+            serialize_by_alias=True,
         )
 
         text: str = Field(default="", alias_priority=1, validation_alias="text", serialization_alias="text")
 
     model_config = ConfigDict(
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        serialize_by_alias=True,
     )
 
     field1: str = Field(default="", alias_priority=1, validation_alias="field1", serialization_alias="field1")
@@ -694,13 +715,14 @@ class AnOtherMessage(BaseModel):
     )
 
 
-class RootMessage(BaseModel):
+class RootMessage(ProtobufCompatibleBaseModel):
     model_config = ConfigDict(
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        serialize_by_alias=True,
     )
 
     field1: str = Field(default="", alias_priority=1, validation_alias="field1", serialization_alias="field1")
@@ -715,14 +737,15 @@ class RootMessage(BaseModel):
         assert_expected_inline(
             output,
             """\
-class TestSameName0(BaseModel):
-    class Body(BaseModel):
+class TestSameName0(ProtobufCompatibleBaseModel):
+    class Body(ProtobufCompatibleBaseModel):
         model_config = ConfigDict(
+            ser_json_inf_nan="strings",
             alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
             populate_by_name=True,
-            serialize_by_alias=True,
             validate_by_alias=True,
             validate_by_name=True,
+            serialize_by_alias=True,
         )
 
         input_model: str = Field(
@@ -733,11 +756,12 @@ class TestSameName0(BaseModel):
         )
 
     model_config = ConfigDict(
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        serialize_by_alias=True,
     )
 
     body: Body = Field(default_factory=Body, alias_priority=1, validation_alias="body", serialization_alias="body")

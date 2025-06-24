@@ -10,11 +10,12 @@ from uuid import uuid4
 from google.protobuf.field_mask_pb2 import FieldMask  # type: ignore
 from google.protobuf.message import Message  # type: ignore
 from google.protobuf.wrappers_pb2 import DoubleValue  # type: ignore
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import ConfigDict, Field, model_validator
 from pydantic.types import PaymentCardNumber
 
 from example.plugin_config import exp_time
 from protobuf_to_pydantic.customer_validator.v2 import check_one_of
+from protobuf_to_pydantic.default_base_model import ProtobufCompatibleBaseModel
 
 from ..common.single_p2p import DemoEnum, DemoMessage
 
@@ -24,7 +25,7 @@ class SexType(IntEnum):
     women = 1
 
 
-class UserMessage(BaseModel):
+class UserMessage(ProtobufCompatibleBaseModel):
     """
     user info
     """
@@ -44,14 +45,14 @@ class UserMessage(BaseModel):
     )
 
 
-class OtherMessage(BaseModel):
+class OtherMessage(ProtobufCompatibleBaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
     metadata: typing.Optional[typing.Dict[str, typing.Any]] = Field(default_factory=dict)
     double_value: typing.Optional[DoubleValue] = Field(default_factory=DoubleValue)
     field_mask: typing.Optional[FieldMask] = Field(default_factory=FieldMask)
 
 
-class MapMessage(BaseModel):
+class MapMessage(ProtobufCompatibleBaseModel):
     """
     test map message and bad message
     """
@@ -60,7 +61,7 @@ class MapMessage(BaseModel):
     user_flag: typing.Optional["typing.Dict[str, bool]"] = Field(default_factory=dict)
 
 
-class RepeatedMessage(BaseModel):
+class RepeatedMessage(ProtobufCompatibleBaseModel):
     """
     test repeated msg
     """
@@ -70,17 +71,17 @@ class RepeatedMessage(BaseModel):
     user_list: typing.Optional[typing.List[UserMessage]] = Field(default_factory=list)
 
 
-class AfterReferMessage(BaseModel):
+class AfterReferMessage(ProtobufCompatibleBaseModel):
     uid: typing.Optional[str] = Field(title="UID", description="user union id", example="10086")
     age: typing.Optional[int] = Field(default=0, title="use age", ge=0, example=18)
 
 
-class NestedMessage(BaseModel):
+class NestedMessage(ProtobufCompatibleBaseModel):
     """
     test nested message
     """
 
-    class UserPayMessage(BaseModel):
+    class UserPayMessage(ProtobufCompatibleBaseModel):
         bank_number: typing.Optional[PaymentCardNumber] = Field(default="")
         exp: typing.Optional[datetime] = Field(default_factory=exp_time)
         uuid: typing.Optional[str] = Field(default_factory=uuid4)
@@ -101,7 +102,7 @@ class NestedMessage(BaseModel):
     after_refer: typing.Optional[AfterReferMessage] = Field(default_factory=AfterReferMessage)
 
 
-class InvoiceItem(BaseModel):
+class InvoiceItem(ProtobufCompatibleBaseModel):
     """
         Test self-referencing Messages
     from: https://github.com/so1n/protobuf_to_pydantic/issues/7#issuecomment-1490705932
@@ -113,11 +114,11 @@ class InvoiceItem(BaseModel):
     items: typing.Optional[typing.List["InvoiceItem"]] = Field(default_factory=list)
 
 
-class EmptyMessage(BaseModel):
+class EmptyMessage(ProtobufCompatibleBaseModel):
     pass
 
 
-class OptionalMessage(BaseModel):
+class OptionalMessage(ProtobufCompatibleBaseModel):
     _one_of_dict = {"OptionalMessage.a": {"fields": {"x", "y"}, "required": True}}
     one_of_validator = model_validator(mode="before")(check_one_of)
     x: typing.Optional[str] = Field(default="")
@@ -130,14 +131,14 @@ class OptionalMessage(BaseModel):
     default_template_test: typing.Optional[float] = Field(default=1600000000.0)
 
 
-class Invoice3(BaseModel):
+class Invoice3(ProtobufCompatibleBaseModel):
     name: typing.Optional[str] = Field(default="")
     amount: typing.Optional[int] = Field(default=0)
     quantity: typing.Optional[int] = Field(default=0)
     items: typing.Optional[typing.List["InvoiceItem2"]] = Field(default_factory=list)
 
 
-class InvoiceItem2(BaseModel):
+class InvoiceItem2(ProtobufCompatibleBaseModel):
     """
         Test Circular references
     from: https://github.com/so1n/protobuf_to_pydantic/issues/57
@@ -150,15 +151,15 @@ class InvoiceItem2(BaseModel):
     invoice: typing.Optional[Invoice3] = Field(default_factory=Invoice3)
 
 
-class AnOtherMessage(BaseModel):
-    class SubMessage(BaseModel):
+class AnOtherMessage(ProtobufCompatibleBaseModel):
+    class SubMessage(ProtobufCompatibleBaseModel):
         text: typing.Optional[str] = Field(default="")
 
     field1: typing.Optional[str] = Field(default="")
     field2: typing.Optional[SubMessage] = Field(default_factory=SubMessage)
 
 
-class RootMessage(BaseModel):
+class RootMessage(ProtobufCompatibleBaseModel):
     """
         Test Message references
     from: https://github.com/so1n/protobuf_to_pydantic/issues/64

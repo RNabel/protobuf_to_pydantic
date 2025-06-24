@@ -33,13 +33,14 @@ class TestValueField:
         assert_expected_inline(
             output,
             """\
-class ValueTestMessage(BaseModel):
+class ValueTestMessage(ProtobufCompatibleBaseModel):
     model_config = ConfigDict(
+        ser_json_inf_nan="strings",
         alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
         populate_by_name=True,
-        serialize_by_alias=True,
         validate_by_alias=True,
         validate_by_name=True,
+        serialize_by_alias=True,
     )
 
     id: str = Field(default="", alias_priority=1, validation_alias="id", serialization_alias="id")
