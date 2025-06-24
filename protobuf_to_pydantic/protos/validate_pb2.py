@@ -1,1 +1,0 @@
-from protobuf_to_pydantic.protos.protos.validate_pb2 import *  # isort:skip
