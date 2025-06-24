@@ -34,6 +34,7 @@ from typing import Any, Dict, List, Optional
 from google.protobuf import json_format, struct_pb2, __version__
 from google.protobuf.message import Message
 from pydantic import BaseModel
+from protobuf_to_pydantic.util import python_value_to_protobuf_value
 
 if __version__ > "4.0.0":
     from example.proto_pydanticv2.example.example_proto.demo import (
@@ -69,32 +70,6 @@ class TestWellKnownTypesRoundTrip:
         """Create a Pydantic model from a protobuf message class."""
         return msg_to_pydantic_model(msg_class, parse_msg_desc_method="ignore")
 
-    @staticmethod
-    def _python_value_to_protobuf_value(
-        python_value: Any, proto_value: struct_pb2.Value
-    ) -> None:
-        """Convert Python value to protobuf Value using proper API."""
-        if python_value is None:
-            proto_value.null_value = struct_pb2.NULL_VALUE
-        elif isinstance(python_value, bool):
-            proto_value.bool_value = python_value
-        elif isinstance(python_value, (int, float)):
-            proto_value.number_value = float(python_value)
-        elif isinstance(python_value, str):
-            proto_value.string_value = python_value
-        elif isinstance(python_value, dict):
-            proto_value.struct_value.Clear()
-            for key, value in python_value.items():
-                TestWellKnownTypesRoundTrip._python_value_to_protobuf_value(
-                    value, proto_value.struct_value.fields[key]
-                )
-        elif isinstance(python_value, (list, tuple)):
-            proto_value.list_value.Clear()
-            for item in python_value:
-                list_item = proto_value.list_value.values.add()
-                TestWellKnownTypesRoundTrip._python_value_to_protobuf_value(
-                    item, list_item
-                )
 
     @staticmethod
     def _protobuf_to_json(msg: Message) -> str:
@@ -148,9 +123,7 @@ class TestWellKnownTypesRoundTrip:
                             == "Value"
                         ):
                             # Map with Value values
-                            self._python_value_to_protobuf_value(
-                                map_value, map_field[key]
-                            )
+                            python_value_to_protobuf_value(map_value, map_field[key])
                         else:
                             # Regular map field
                             map_field[key] = map_value
@@ -163,7 +136,7 @@ class TestWellKnownTypesRoundTrip:
                         # For repeated Value fields, use add() method
                         for item in value:
                             proto_value = getattr(msg, field).add()
-                            self._python_value_to_protobuf_value(item, proto_value)
+                            python_value_to_protobuf_value(item, proto_value)
                     elif (
                         field_descriptor.message_type
                         and field_descriptor.message_type.name == "Timestamp"
@@ -189,7 +162,7 @@ class TestWellKnownTypesRoundTrip:
                 ):
                     # Handle Value fields using proper API
                     proto_value = getattr(msg, field)
-                    self._python_value_to_protobuf_value(value, proto_value)
+                    python_value_to_protobuf_value(value, proto_value)
                 elif (
                     field_descriptor.message_type
                     and field_descriptor.message_type.name == "Timestamp"
