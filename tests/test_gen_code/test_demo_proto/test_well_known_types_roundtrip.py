@@ -1,40 +1,10 @@
-"""
-Test round-trip conversion for well-known protobuf types:
-- google.protobuf.Duration (mapped to timedelta)
-- google.protobuf.Timestamp (mapped to datetime)
-- google.protobuf.Value (mapped to typing.Any)
-
-## Behavior Documentation:
-
-### Duration Fields:
-- Protobuf Duration is represented as seconds + nanoseconds
-- Pydantic maps to Python timedelta using custom Timedelta validator
-- JSON serialization: {"seconds": 3, "nanos": 500000000} for 3.5 seconds
-- Supports negative durations
-- Max duration: ±10,000 years (approximately ±315,576,000,000 seconds)
-
-### Timestamp Fields:
-- Protobuf Timestamp is represented as seconds + nanoseconds since Unix epoch
-- Pydantic maps to Python datetime
-- JSON serialization: ISO 8601 format string (e.g., "2023-01-01T12:00:00Z")
-- Valid range: 0001-01-01T00:00:00Z to 9999-12-31T23:59:59.999999999Z
-- Nanosecond precision may be lost in Python datetime (microsecond precision)
-
-### Value Fields:
-- google.protobuf.Value can hold: null, number, string, bool, struct, or list
-- Pydantic maps to typing.Any
-- JSON serialization depends on the actual value type
-- Supports nested structures and arrays
-"""
-
 import json
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
 
-from google.protobuf import json_format, struct_pb2, __version__
+from google.protobuf import json_format, __version__
 from google.protobuf.message import Message
 from pydantic import BaseModel
-from protobuf_to_pydantic.util import python_value_to_protobuf_value
 
 if __version__ > "4.0.0":
     from example.proto_pydanticv2.example.example_proto.demo import (
