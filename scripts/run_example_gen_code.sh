@@ -1,5 +1,6 @@
 #!/bin/bash
 # Executed at the root of the project
+set -euo pipefail
 
 echo "=====> run scripts/gen_example_proto.sh"
 bash scripts/gen_example_proto.sh
