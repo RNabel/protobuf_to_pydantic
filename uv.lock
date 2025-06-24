@@ -176,6 +176,15 @@ wheels = [
 ]
 
 [[package]]
+name = "expecttest"
+version = "0.3.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/22/0a/8868083a2b25c28811a88da6a4cb561f84feab0c9fa953c45820a3eb3a65/expecttest-0.3.0.tar.gz", hash = "sha256:6e8512fb86523ada1f94fd1b14e280f924e379064bb8a29ee399950e513eeccd", size = 7742, upload-time = "2024-12-11T15:32:15.72Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/27/fb/deeefea1ea549273817ca7bed3db2f39cc238a75a745a20e3651619f7335/expecttest-0.3.0-py3-none-any.whl", hash = "sha256:60f88103086e1754240b42175f622be83b6ffeac419434691ee5a5be819d0544", size = 8238, upload-time = "2024-12-11T15:32:13.523Z" },
+]
+
+[[package]]
 name = "filelock"
 version = "3.18.0"
 source = { registry = "https://pypi.org/simple" }
@@ -518,14 +527,26 @@ wheels = [
 name = "protobuf-to-pydantic"
 source = { editable = "." }
 dependencies = [
+    { name = "mypy-protobuf" },
     { name = "protobuf" },
     { name = "pydantic" },
 ]
 
-[package.optional-dependencies]
+[package.dev-dependencies]
 all = [
+    { name = "autoflake" },
+    { name = "black" },
+    { name = "coverage" },
+    { name = "email-validator" },
+    { name = "expecttest" },
+    { name = "flake8" },
+    { name = "grpcio-tools" },
+    { name = "importlib-metadata" },
+    { name = "isort" },
     { name = "lark" },
-    { name = "mypy-protobuf" },
+    { name = "mypy" },
+    { name = "pre-commit" },
+    { name = "pytest" },
     { name = "toml" },
 ]
 dev = [
@@ -533,20 +554,18 @@ dev = [
     { name = "black" },
     { name = "coverage" },
     { name = "email-validator" },
+    { name = "expecttest" },
     { name = "flake8" },
     { name = "grpcio-tools" },
     { name = "importlib-metadata" },
     { name = "isort" },
+    { name = "lark" },
     { name = "mypy" },
-    { name = "mypy-protobuf" },
     { name = "pre-commit" },
     { name = "pytest" },
 ]
 lark = [
     { name = "lark" },
-]
-mypy-protobuf = [
-    { name = "mypy-protobuf" },
 ]
 toml = [
     { name = "toml" },
@@ -554,28 +573,45 @@ toml = [
 
 [package.metadata]
 requires-dist = [
-    { name = "autoflake", marker = "extra == 'dev'", specifier = "==1.4" },
-    { name = "black", marker = "extra == 'dev'", specifier = ">=23.3.0" },
-    { name = "coverage", marker = "extra == 'dev'", specifier = "==5.5" },
-    { name = "email-validator", marker = "extra == 'dev'", specifier = "==2.0.0" },
-    { name = "flake8", marker = "extra == 'dev'", specifier = "==3.9.2" },
-    { name = "grpcio-tools", marker = "extra == 'dev'", specifier = ">=1.40.0" },
-    { name = "importlib-metadata", marker = "extra == 'dev'", specifier = "==4.11.4" },
-    { name = "isort", marker = "extra == 'dev'", specifier = "==5.6.4" },
-    { name = "lark", marker = "extra == 'all'", specifier = ">=1.1.2" },
-    { name = "lark", marker = "extra == 'lark'", specifier = ">=1.1.2" },
-    { name = "mypy", marker = "extra == 'dev'", specifier = "==1.0.0" },
-    { name = "mypy-protobuf", marker = "extra == 'all'", specifier = ">=3.2.0" },
-    { name = "mypy-protobuf", marker = "extra == 'dev'", specifier = "==3.2.0" },
-    { name = "mypy-protobuf", marker = "extra == 'mypy-protobuf'", specifier = ">=3.2.0" },
-    { name = "pre-commit", marker = "extra == 'dev'", specifier = "==2.14.0" },
+    { name = "mypy-protobuf", specifier = ">=3.2.0" },
     { name = "protobuf", specifier = ">=3.20.3" },
     { name = "pydantic", specifier = ">=2.6.0,!=2.9.0,<3.0.0" },
-    { name = "pytest", marker = "extra == 'dev'", specifier = "==6.2.5" },
-    { name = "toml", marker = "extra == 'all'", specifier = ">=0.10.2" },
-    { name = "toml", marker = "extra == 'toml'", specifier = ">=0.10.2" },
 ]
-provides-extras = ["all", "dev", "lark", "mypy-protobuf", "toml"]
+
+[package.metadata.requires-dev]
+all = [
+    { name = "autoflake", specifier = "==1.4" },
+    { name = "black", specifier = ">=23.3.0" },
+    { name = "coverage", specifier = "==5.5" },
+    { name = "email-validator", specifier = "==2.0.0" },
+    { name = "expecttest", specifier = ">=0.3.0" },
+    { name = "flake8", specifier = "==3.9.2" },
+    { name = "grpcio-tools", specifier = ">=1.40.0" },
+    { name = "importlib-metadata", specifier = "==4.11.4" },
+    { name = "isort", specifier = "==5.6.4" },
+    { name = "lark", specifier = ">=1.1.2" },
+    { name = "mypy", specifier = "==1.0.0" },
+    { name = "pre-commit", specifier = "==2.14.0" },
+    { name = "pytest", specifier = "==6.2.5" },
+    { name = "toml", specifier = ">=0.10.2" },
+]
+dev = [
+    { name = "autoflake", specifier = "==1.4" },
+    { name = "black", specifier = ">=23.3.0" },
+    { name = "coverage", specifier = "==5.5" },
+    { name = "email-validator", specifier = "==2.0.0" },
+    { name = "expecttest", specifier = ">=0.3.0" },
+    { name = "flake8", specifier = "==3.9.2" },
+    { name = "grpcio-tools", specifier = ">=1.40.0" },
+    { name = "importlib-metadata", specifier = "==4.11.4" },
+    { name = "isort", specifier = "==5.6.4" },
+    { name = "lark", specifier = ">=1.1.2" },
+    { name = "mypy", specifier = "==1.0.0" },
+    { name = "pre-commit", specifier = "==2.14.0" },
+    { name = "pytest", specifier = "==6.2.5" },
+]
+lark = [{ name = "lark", specifier = ">=1.1.2" }]
+toml = [{ name = "toml", specifier = ">=0.10.2" }]
 
 [[package]]
 name = "py"
