@@ -70,7 +70,6 @@ class TestWellKnownTypesRoundTrip:
         """Create a Pydantic model from a protobuf message class."""
         return msg_to_pydantic_model(msg_class, parse_msg_desc_method="ignore")
 
-
     @staticmethod
     def _protobuf_to_json(msg: Message) -> str:
         """Convert protobuf message to JSON string."""
@@ -97,119 +96,50 @@ class TestWellKnownTypesRoundTrip:
 
     def _test_roundtrip(self, msg: Message, test_data: Dict[str, Any]) -> None:
         """Test round-trip conversion for a message with test data."""
-        # Clear the message first
-        msg.Clear()
+        # Step 1: Convert test_data to JSON string
+        test_data_json = json.dumps(test_data)
 
-        # Set test data on protobuf message
-        for field, value in test_data.items():
-            if hasattr(msg, field):
-                field_descriptor = msg.DESCRIPTOR.fields_by_name[field]
-                # Check for map fields first (maps are technically repeated but need special handling)
-                if (
-                    field_descriptor.type == field_descriptor.TYPE_MESSAGE
-                    and hasattr(field_descriptor, "message_type")
-                    and field_descriptor.message_type.GetOptions().map_entry
-                ):
-                    # Handle map fields
-                    map_field = getattr(msg, field)
-                    for key, map_value in value.items():
-                        if (
-                            field_descriptor.message_type.fields_by_name[
-                                "value"
-                            ].message_type
-                            and field_descriptor.message_type.fields_by_name[
-                                "value"
-                            ].message_type.name
-                            == "Value"
-                        ):
-                            # Map with Value values
-                            python_value_to_protobuf_value(map_value, map_field[key])
-                        else:
-                            # Regular map field
-                            map_field[key] = map_value
-                elif field_descriptor.label == field_descriptor.LABEL_REPEATED:
-                    # Handle repeated fields
-                    if (
-                        field_descriptor.message_type
-                        and field_descriptor.message_type.name == "Value"
-                    ):
-                        # For repeated Value fields, use add() method
-                        for item in value:
-                            proto_value = getattr(msg, field).add()
-                            python_value_to_protobuf_value(item, proto_value)
-                    elif (
-                        field_descriptor.message_type
-                        and field_descriptor.message_type.name == "Timestamp"
-                    ):
-                        # For repeated Timestamp fields
-                        for ts in value:
-                            ts_msg = getattr(msg, field).add()
-                            ts_msg.FromDatetime(ts)
-                    elif (
-                        field_descriptor.message_type
-                        and field_descriptor.message_type.name == "Duration"
-                    ):
-                        # For repeated Duration fields
-                        for dur in value:
-                            dur_msg = getattr(msg, field).add()
-                            dur_msg.FromTimedelta(dur)
-                    else:
-                        # For other repeated fields, extend the list
-                        getattr(msg, field).extend(value)
-                elif (
-                    field_descriptor.message_type
-                    and field_descriptor.message_type.name == "Value"
-                ):
-                    # Handle Value fields using proper API
-                    proto_value = getattr(msg, field)
-                    python_value_to_protobuf_value(value, proto_value)
-                elif (
-                    field_descriptor.message_type
-                    and field_descriptor.message_type.name == "Timestamp"
-                ):
-                    # Handle Timestamp fields
-                    if isinstance(value, datetime):
-                        getattr(msg, field).FromDatetime(value)
-                    elif isinstance(value, (int, float)):
-                        getattr(msg, field).FromSeconds(value)
-                elif (
-                    field_descriptor.message_type
-                    and field_descriptor.message_type.name == "Duration"
-                ):
-                    # Handle Duration fields
-                    if isinstance(value, timedelta):
-                        getattr(msg, field).FromTimedelta(value)
-                    elif isinstance(value, (int, float)):
-                        getattr(msg, field).FromSeconds(value)
-                else:
-                    setattr(msg, field, value)
-
-        # Step 1: Protobuf -> JSON
-        proto_json = self._protobuf_to_json(msg)
-
-        # Step 2: Create Pydantic model and parse JSON
+        # Step 2: JSON string -> protobuf message AND JSON string -> pydantic model
+        proto_from_json = self._json_to_protobuf(test_data_json, type(msg))
         model_class = self._create_pydantic_model(type(msg))
-        pydantic_model = self._json_to_pydantic(proto_json, model_class)
+        pydantic_from_json = self._json_to_pydantic(test_data_json, model_class)
 
-        # Step 3: Pydantic -> JSON
-        original_dict = json.loads(proto_json)
-        pydantic_json = self._pydantic_to_json(pydantic_model)
+        # Step 3a: proto msg -> JSON -> pydantic
+        proto_to_json = self._protobuf_to_json(proto_from_json)
+        pydantic_from_proto = self._json_to_pydantic(proto_to_json, model_class)
 
-        # Step 4: JSON -> Protobuf
-        reconstructed_msg = self._json_to_protobuf(pydantic_json, type(msg))
+        # Step 3b: pydantic -> JSON -> proto msg
+        pydantic_to_json = self._pydantic_to_json(pydantic_from_json)
+        proto_from_pydantic = self._json_to_protobuf(pydantic_to_json, type(msg))
 
-        # Verify the round trip was successful
-        final_json = self._protobuf_to_json(reconstructed_msg)
+        # Step 4: Compare JSON serializations
+        # Get JSON from all paths
+        json_1 = self._protobuf_to_json(proto_from_json)
+        json_2 = self._protobuf_to_json(proto_from_pydantic)
+        json_3 = self._pydantic_to_json(pydantic_from_json)
+        json_4 = self._pydantic_to_json(pydantic_from_proto)
 
-        # Parse both JSONs to compare as dicts
-        final_dict = json.loads(final_json)
+        # Parse to dicts for comparison
+        dict_1 = json.loads(json_1)  # Proto from original JSON
+        dict_2 = json.loads(json_2)  # Proto from Pydantic
+        dict_3 = json.loads(json_3)  # Pydantic from original JSON
+        dict_4 = json.loads(json_4)  # Pydantic from Proto
 
-        # For timestamp/duration fields, the representation might differ slightly
-        # but should represent the same value
-        self._normalize_well_known_types(original_dict, final_dict, msg.DESCRIPTOR)
+        # Normalize for comparison
+        self._normalize_well_known_types(dict_1, dict_2, msg.DESCRIPTOR)
+        self._normalize_well_known_types(dict_3, dict_4, msg.DESCRIPTOR)
 
-        assert original_dict == final_dict, (
-            f"Round-trip failed:\\nOriginal: {original_dict}\\nFinal: {final_dict}"
+        # All should be equivalent
+        assert dict_1 == dict_2, (
+            f"Proto roundtrip failed:\\nFrom JSON: {dict_1}\\nFrom Pydantic: {dict_2}"
+        )
+        assert dict_3 == dict_4, (
+            f"Pydantic roundtrip failed:\\nFrom JSON: {dict_3}\\nFrom Proto: {dict_4}"
+        )
+
+        # Cross-check proto and pydantic produce same JSON
+        assert dict_1 == dict_3, (
+            f"Proto and Pydantic JSON differ:\\nProto: {dict_1}\\nPydantic: {dict_3}"
         )
 
     def _normalize_well_known_types(self, original: dict, final: dict, descriptor):
