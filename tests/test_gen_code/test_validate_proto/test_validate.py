@@ -1288,14 +1288,10 @@ class TimestampTest(ProtobufCompatibleBaseModel):
     )
 
     required_test: typing_extensions.Annotated[
-        datetime,
-        BeforeValidator(func=timestamp_validator),
-        PlainSerializer(func=timestamp_serializer, return_type=str, when_used="json"),
+        datetime, PlainSerializer(func=timestamp_serializer, return_type=str, when_used="json")
     ] = Field(alias_priority=1, validation_alias="requiredTest", serialization_alias="requiredTest")
     const_test: typing_extensions.Annotated[
-        datetime,
-        BeforeValidator(func=timestamp_validator),
-        PlainSerializer(func=timestamp_serializer, return_type=str, when_used="json"),
+        datetime, PlainSerializer(func=timestamp_serializer, return_type=str, when_used="json")
     ] = Field(
         default_factory=datetime_utc_now,
         alias_priority=1,
@@ -1304,9 +1300,7 @@ class TimestampTest(ProtobufCompatibleBaseModel):
         timestamp_const=1600000000.0,
     )
     range_test: typing_extensions.Annotated[
-        datetime,
-        BeforeValidator(func=timestamp_validator),
-        PlainSerializer(func=timestamp_serializer, return_type=str, when_used="json"),
+        datetime, PlainSerializer(func=timestamp_serializer, return_type=str, when_used="json")
     ] = Field(
         default_factory=datetime_utc_now,
         alias_priority=1,
@@ -1316,9 +1310,7 @@ class TimestampTest(ProtobufCompatibleBaseModel):
         timestamp_gt=1600000000.0,
     )
     range_e_test: typing_extensions.Annotated[
-        datetime,
-        BeforeValidator(func=timestamp_validator),
-        PlainSerializer(func=timestamp_serializer, return_type=str, when_used="json"),
+        datetime, PlainSerializer(func=timestamp_serializer, return_type=str, when_used="json")
     ] = Field(
         default_factory=datetime_utc_now,
         alias_priority=1,
@@ -1328,9 +1320,7 @@ class TimestampTest(ProtobufCompatibleBaseModel):
         timestamp_ge=1600000000.0,
     )
     lt_now_test: typing_extensions.Annotated[
-        datetime,
-        BeforeValidator(func=timestamp_validator),
-        PlainSerializer(func=timestamp_serializer, return_type=str, when_used="json"),
+        datetime, PlainSerializer(func=timestamp_serializer, return_type=str, when_used="json")
     ] = Field(
         default_factory=datetime_utc_now,
         alias_priority=1,
@@ -1339,9 +1329,7 @@ class TimestampTest(ProtobufCompatibleBaseModel):
         timestamp_lt_now=True,
     )
     gt_now_test: typing_extensions.Annotated[
-        datetime,
-        BeforeValidator(func=timestamp_validator),
-        PlainSerializer(func=timestamp_serializer, return_type=str, when_used="json"),
+        datetime, PlainSerializer(func=timestamp_serializer, return_type=str, when_used="json")
     ] = Field(
         default_factory=datetime_utc_now,
         alias_priority=1,
@@ -1350,9 +1338,7 @@ class TimestampTest(ProtobufCompatibleBaseModel):
         timestamp_gt_now=True,
     )
     within_test: typing_extensions.Annotated[
-        datetime,
-        BeforeValidator(func=timestamp_validator),
-        PlainSerializer(func=timestamp_serializer, return_type=str, when_used="json"),
+        datetime, PlainSerializer(func=timestamp_serializer, return_type=str, when_used="json")
     ] = Field(
         default_factory=datetime_utc_now,
         alias_priority=1,
@@ -1361,9 +1347,7 @@ class TimestampTest(ProtobufCompatibleBaseModel):
         timestamp_within=timedelta(seconds=1),
     )
     within_and_gt_now_test: typing_extensions.Annotated[
-        datetime,
-        BeforeValidator(func=timestamp_validator),
-        PlainSerializer(func=timestamp_serializer, return_type=str, when_used="json"),
+        datetime, PlainSerializer(func=timestamp_serializer, return_type=str, when_used="json")
     ] = Field(
         default_factory=datetime_utc_now,
         alias_priority=1,

@@ -13,12 +13,11 @@ from google.protobuf.field_mask_pb2 import FieldMask  # type: ignore
 from google.protobuf.wrappers_pb2 import DoubleValue  # type: ignore
 from protobuf_to_pydantic.customer_validator.v2 import check_one_of
 from protobuf_to_pydantic.default_base_model import ProtobufCompatibleBaseModel
-from protobuf_to_pydantic.util import timestamp_serializer, timestamp_validator
+from protobuf_to_pydantic.util import timestamp_serializer
 from pydantic import ConfigDict, Field, model_validator
 from pydantic.alias_generators import to_camel
 from pydantic.aliases import AliasGenerator
 from pydantic.functional_serializers import PlainSerializer
-from pydantic.functional_validators import BeforeValidator
 from pydantic.types import PaymentCardNumber
 
 
@@ -329,9 +328,7 @@ class NestedMessage(ProtobufCompatibleBaseModel):
             default="", alias_priority=1, validation_alias="bankNumber", serialization_alias="bankNumber"
         )
         exp: typing_extensions.Annotated[
-            datetime,
-            BeforeValidator(func=timestamp_validator),
-            PlainSerializer(func=timestamp_serializer, return_type=str, when_used="json"),
+            datetime, PlainSerializer(func=timestamp_serializer, return_type=str, when_used="json")
         ] = Field(default_factory=exp_time, alias_priority=1, validation_alias="exp", serialization_alias="exp")
         uuid: str = Field(default_factory=uuid4, alias_priority=1, validation_alias="uuid", serialization_alias="uuid")
 

@@ -22,7 +22,13 @@ from typing import (
     Union,
 )
 
-from pydantic import BaseConfig, BaseModel, create_model, BeforeValidator, PlainSerializer
+from pydantic import (
+    BaseConfig,
+    BaseModel,
+    create_model,
+    BeforeValidator,
+    PlainSerializer,
+)
 from typing_extensions import Annotated
 
 
@@ -51,17 +57,21 @@ class Timedelta(timedelta):
                     return timedelta(seconds=float(v[:-1]))
                 except ValueError:
                     pass
-            
+
             # Handle ISO 8601 duration format (e.g., "PT30S", "-PT30S", "PT1M30S")
             if v.startswith("PT") or v.startswith("-PT"):
                 import re
+
                 # Handle negative durations
                 negative = v.startswith("-")
                 if negative:
                     v = v[1:]  # Remove the leading "-"
-                
+
                 # Parse ISO 8601 duration
-                match = re.match(r'^PT(?:(\d+(?:\.\d+)?)H)?(?:(\d+(?:\.\d+)?)M)?(?:(\d+(?:\.\d+)?)S)?$', v)
+                match = re.match(
+                    r"^PT(?:(\d+(?:\.\d+)?)H)?(?:(\d+(?:\.\d+)?)M)?(?:(\d+(?:\.\d+)?)S)?$",
+                    v,
+                )
                 if match:
                     hours, minutes, seconds = match.groups()
                     total_seconds = 0
@@ -71,39 +81,39 @@ class Timedelta(timedelta):
                         total_seconds += float(minutes) * 60
                     if seconds:
                         total_seconds += float(seconds)
-                    
+
                     if negative:
                         total_seconds = -total_seconds
-                    
+
                     return timedelta(seconds=total_seconds)
-            
+
             # Try to parse as a plain number (seconds)
             try:
                 v = float(v)
             except ValueError:
                 raise ValueError(f"Invalid duration format: {v}")
-        
+
         return timedelta(seconds=v)
 
 
 def duration_serializer(td: timedelta) -> str:
     """Serialize timedelta to protobuf duration format."""
     total_seconds = td.total_seconds()
-    
+
     # Handle zero duration
     if total_seconds == 0:
         return "0s"
-    
+
     # Format with up to 9 decimal places (nanosecond precision)
     # Remove trailing zeros and decimal point if not needed
-    formatted = f"{total_seconds:.9f}".rstrip('0').rstrip('.')
+    formatted = f"{total_seconds:.9f}".rstrip("0").rstrip(".")
     return f"{formatted}s"
 
 
 DurationType = Annotated[
     timedelta,
     BeforeValidator(Timedelta.validate),
-    PlainSerializer(duration_serializer, return_type=str, when_used='json')
+    PlainSerializer(duration_serializer, return_type=str, when_used="json"),
 ]
 
 
@@ -117,36 +127,20 @@ def timestamp_serializer(dt: datetime) -> str:
     if dt.tzinfo is None:
         # If no timezone, assume UTC
         dt = dt.replace(tzinfo=timezone.utc)
-    
+
     # Format as RFC3339 with timezone
     # Use isoformat() which handles the timezone correctly
     iso_str = dt.isoformat()
-    
+
     # Replace +00:00 with Z for UTC (RFC3339 style)
-    if iso_str.endswith('+00:00'):
-        iso_str = iso_str[:-6] + 'Z'
-    
+    if iso_str.endswith("+00:00"):
+        iso_str = iso_str[:-6] + "Z"
+
     return iso_str
 
 
-def timestamp_validator(value: Any) -> datetime:
-    """Ensure datetime is timezone-aware (UTC)."""
-    # If it's already a datetime, ensure it's timezone-aware
-    if isinstance(value, datetime):
-        if value.tzinfo is None:
-            # If no timezone, assume UTC
-            return value.replace(tzinfo=timezone.utc)
-        return value
-    
-    # Otherwise, let Pydantic's default datetime parsing handle it
-    # This will handle strings, ints (timestamps), etc.
-    return value
-
-
 TimestampType = Annotated[
-    datetime,
-    BeforeValidator(timestamp_validator),
-    PlainSerializer(timestamp_serializer, return_type=str, when_used='json')
+    datetime, PlainSerializer(timestamp_serializer, return_type=str, when_used="json")
 ]
 
 
