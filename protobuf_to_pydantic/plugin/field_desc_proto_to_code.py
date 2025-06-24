@@ -1018,10 +1018,10 @@ class FileDescriptorProtoToCode(BaseP2C):
                 type_factory = dict
                 self._add_import_code("typing")
             elif _type_str == "Value":
-                py_type_str = "typing.Any"
+                py_type_str = "ValueType"
                 rule_type_str = "any"
                 type_factory = None
-                self._add_import_code("typing")
+                self._add_import_code("protobuf_to_pydantic.util", "ValueType")
             elif field.type_name.startswith(".google.protobuf"):
                 py_type_str = _type_str
                 rule_type_str = "any"

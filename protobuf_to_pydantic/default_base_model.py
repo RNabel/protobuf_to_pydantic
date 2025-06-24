@@ -1,8 +1,12 @@
 """Default base model for protobuf_to_pydantic generated models."""
 
-from pydantic import AliasGenerator, BaseModel, ConfigDict
+from typing import Any, TYPE_CHECKING
 
+from pydantic import AliasGenerator, BaseModel, ConfigDict
 from pydantic.alias_generators import to_camel
+
+if TYPE_CHECKING:
+    from google.protobuf import struct_pb2
 
 
 class ProtobufCompatibleBaseModel(BaseModel):
