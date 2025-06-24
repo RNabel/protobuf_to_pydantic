@@ -43,10 +43,11 @@ from protobuf_to_pydantic.customer_validator.v2 import (
 )
 from protobuf_to_pydantic.default_base_model import ProtobufCompatibleBaseModel
 from protobuf_to_pydantic.field_info_rule.protobuf_option_to_field_info.types import HostNameStr, UriRefStr
-from protobuf_to_pydantic.util import Timedelta
+from protobuf_to_pydantic.util import Timedelta, duration_serializer
 from pydantic import ConfigDict, Field, field_validator, model_validator
 from pydantic.alias_generators import to_camel
 from pydantic.aliases import AliasGenerator
+from pydantic.functional_serializers import PlainSerializer
 from pydantic.functional_validators import BeforeValidator
 from pydantic.networks import AnyUrl, EmailStr, IPvAnyAddress
 
@@ -224,17 +225,27 @@ class DurationTest(ProtobufCompatibleBaseModel):
         serialize_by_alias=True,
     )
 
-    required_test: typing_extensions.Annotated[timedelta, BeforeValidator(func=Timedelta.validate)] = Field(
-        alias_priority=1, validation_alias="requiredTest", serialization_alias="requiredTest"
-    )
-    const_test: typing_extensions.Annotated[timedelta, BeforeValidator(func=Timedelta.validate)] = Field(
+    required_test: typing_extensions.Annotated[
+        timedelta,
+        BeforeValidator(func=Timedelta.validate),
+        PlainSerializer(func=duration_serializer, return_type=str, when_used="json"),
+    ] = Field(alias_priority=1, validation_alias="requiredTest", serialization_alias="requiredTest")
+    const_test: typing_extensions.Annotated[
+        timedelta,
+        BeforeValidator(func=Timedelta.validate),
+        PlainSerializer(func=duration_serializer, return_type=str, when_used="json"),
+    ] = Field(
         default_factory=Timedelta,
         alias_priority=1,
         validation_alias="constTest",
         serialization_alias="constTest",
         duration_const=timedelta(seconds=1, microseconds=500000),
     )
-    range_test: typing_extensions.Annotated[timedelta, BeforeValidator(func=Timedelta.validate)] = Field(
+    range_test: typing_extensions.Annotated[
+        timedelta,
+        BeforeValidator(func=Timedelta.validate),
+        PlainSerializer(func=duration_serializer, return_type=str, when_used="json"),
+    ] = Field(
         default_factory=Timedelta,
         alias_priority=1,
         validation_alias="rangeTest",
@@ -242,7 +253,11 @@ class DurationTest(ProtobufCompatibleBaseModel):
         duration_lt=timedelta(seconds=10, microseconds=500000),
         duration_gt=timedelta(seconds=5, microseconds=500000),
     )
-    range_e_test: typing_extensions.Annotated[timedelta, BeforeValidator(func=Timedelta.validate)] = Field(
+    range_e_test: typing_extensions.Annotated[
+        timedelta,
+        BeforeValidator(func=Timedelta.validate),
+        PlainSerializer(func=duration_serializer, return_type=str, when_used="json"),
+    ] = Field(
         default_factory=Timedelta,
         alias_priority=1,
         validation_alias="rangeETest",
@@ -250,14 +265,22 @@ class DurationTest(ProtobufCompatibleBaseModel):
         duration_le=timedelta(seconds=10, microseconds=500000),
         duration_ge=timedelta(seconds=5, microseconds=500000),
     )
-    in_test: typing_extensions.Annotated[timedelta, BeforeValidator(func=Timedelta.validate)] = Field(
+    in_test: typing_extensions.Annotated[
+        timedelta,
+        BeforeValidator(func=Timedelta.validate),
+        PlainSerializer(func=duration_serializer, return_type=str, when_used="json"),
+    ] = Field(
         default_factory=Timedelta,
         alias_priority=1,
         validation_alias="inTest",
         serialization_alias="inTest",
         duration_in=[timedelta(seconds=1, microseconds=500000), timedelta(seconds=3, microseconds=500000)],
     )
-    not_in_test: typing_extensions.Annotated[timedelta, BeforeValidator(func=Timedelta.validate)] = Field(
+    not_in_test: typing_extensions.Annotated[
+        timedelta,
+        BeforeValidator(func=Timedelta.validate),
+        PlainSerializer(func=duration_serializer, return_type=str, when_used="json"),
+    ] = Field(
         default_factory=Timedelta,
         alias_priority=1,
         validation_alias="notInTest",

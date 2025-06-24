@@ -12,9 +12,8 @@ import typing_extensions
 from annotated_types import Ge, Gt, Le, Lt, MaxLen, MinLen
 from google.protobuf.any_pb2 import Any  # type: ignore
 from google.protobuf.message import Message  # type: ignore
-from pydantic import BeforeValidator, ConfigDict, Field, field_validator, model_validator
+from pydantic import ConfigDict, Field, field_validator, model_validator
 from pydantic.networks import AnyUrl, EmailStr, IPvAnyAddress
-from typing_extensions import Annotated
 
 from protobuf_to_pydantic.customer_con_type.v2 import DatetimeType, TimedeltaType, gt_now, t_gt, t_lt
 from protobuf_to_pydantic.customer_validator.v2 import (
@@ -48,7 +47,7 @@ from protobuf_to_pydantic.customer_validator.v2 import (
 )
 from protobuf_to_pydantic.default_base_model import ProtobufCompatibleBaseModel
 from protobuf_to_pydantic.field_info_rule.protobuf_option_to_field_info.types import HostNameStr, UriRefStr
-from protobuf_to_pydantic.util import Timedelta
+from protobuf_to_pydantic.util import DurationType
 
 
 class State(IntEnum):
@@ -343,25 +342,25 @@ class AnyTest(ProtobufCompatibleBaseModel):
 
 
 class DurationTest(ProtobufCompatibleBaseModel):
-    required_test: Annotated[timedelta, BeforeValidator(Timedelta.validate)] = Field()
-    const_test: Annotated[timedelta, BeforeValidator(Timedelta.validate)] = Field(
+    required_test: DurationType = Field()
+    const_test: DurationType = Field(
         default_factory=timedelta, duration_const=timedelta(seconds=1, microseconds=500000)
     )
-    range_test: Annotated[timedelta, BeforeValidator(Timedelta.validate)] = Field(
+    range_test: DurationType = Field(
         default_factory=timedelta,
         duration_lt=timedelta(seconds=10, microseconds=500000),
         duration_gt=timedelta(seconds=5, microseconds=500000),
     )
-    range_e_test: Annotated[timedelta, BeforeValidator(Timedelta.validate)] = Field(
+    range_e_test: DurationType = Field(
         default_factory=timedelta,
         duration_le=timedelta(seconds=10, microseconds=500000),
         duration_ge=timedelta(seconds=5, microseconds=500000),
     )
-    in_test: Annotated[timedelta, BeforeValidator(Timedelta.validate)] = Field(
+    in_test: DurationType = Field(
         default_factory=timedelta,
         duration_in=[timedelta(seconds=1, microseconds=500000), timedelta(seconds=3, microseconds=500000)],
     )
-    not_in_test: Annotated[timedelta, BeforeValidator(Timedelta.validate)] = Field(
+    not_in_test: DurationType = Field(
         default_factory=timedelta,
         duration_not_in=[timedelta(seconds=1, microseconds=500000), timedelta(seconds=3, microseconds=500000)],
     )

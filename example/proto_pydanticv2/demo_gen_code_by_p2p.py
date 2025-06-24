@@ -46,10 +46,11 @@ from protobuf_to_pydantic.customer_validator.v2 import (
 )
 from protobuf_to_pydantic.default_base_model import ProtobufCompatibleBaseModel
 from protobuf_to_pydantic.field_info_rule.protobuf_option_to_field_info.types import HostNameStr, UriRefStr
-from protobuf_to_pydantic.util import Timedelta
+from protobuf_to_pydantic.util import Timedelta, duration_serializer
 from pydantic import ConfigDict, Field, field_validator, model_validator
 from pydantic.alias_generators import to_camel
 from pydantic.aliases import AliasGenerator
+from pydantic.functional_serializers import PlainSerializer
 from pydantic.functional_validators import BeforeValidator
 from pydantic.networks import AnyUrl, EmailStr, IPvAnyAddress
 
@@ -447,14 +448,22 @@ class DurationTest(ProtobufCompatibleBaseModel):
         serialize_by_alias=True,
     )
 
-    const_test: typing_extensions.Annotated[timedelta, BeforeValidator(func=Timedelta.validate)] = Field(
+    const_test: typing_extensions.Annotated[
+        timedelta,
+        BeforeValidator(func=Timedelta.validate),
+        PlainSerializer(func=duration_serializer, return_type=str, when_used="json"),
+    ] = Field(
         default_factory=Timedelta,
         alias_priority=1,
         validation_alias="constTest",
         serialization_alias="constTest",
         duration_const=timedelta(seconds=1, microseconds=500000),
     )
-    range_test: typing_extensions.Annotated[timedelta, BeforeValidator(func=Timedelta.validate)] = Field(
+    range_test: typing_extensions.Annotated[
+        timedelta,
+        BeforeValidator(func=Timedelta.validate),
+        PlainSerializer(func=duration_serializer, return_type=str, when_used="json"),
+    ] = Field(
         default_factory=Timedelta,
         alias_priority=1,
         validation_alias="rangeTest",
@@ -462,7 +471,11 @@ class DurationTest(ProtobufCompatibleBaseModel):
         duration_lt=timedelta(seconds=10, microseconds=500000),
         duration_gt=timedelta(seconds=5, microseconds=500000),
     )
-    range_e_test: typing_extensions.Annotated[timedelta, BeforeValidator(func=Timedelta.validate)] = Field(
+    range_e_test: typing_extensions.Annotated[
+        timedelta,
+        BeforeValidator(func=Timedelta.validate),
+        PlainSerializer(func=duration_serializer, return_type=str, when_used="json"),
+    ] = Field(
         default_factory=Timedelta,
         alias_priority=1,
         validation_alias="rangeETest",
@@ -470,70 +483,114 @@ class DurationTest(ProtobufCompatibleBaseModel):
         duration_le=timedelta(seconds=10, microseconds=500000),
         duration_ge=timedelta(seconds=5, microseconds=500000),
     )
-    in_test: typing_extensions.Annotated[timedelta, BeforeValidator(func=Timedelta.validate)] = Field(
+    in_test: typing_extensions.Annotated[
+        timedelta,
+        BeforeValidator(func=Timedelta.validate),
+        PlainSerializer(func=duration_serializer, return_type=str, when_used="json"),
+    ] = Field(
         default_factory=Timedelta,
         alias_priority=1,
         validation_alias="inTest",
         serialization_alias="inTest",
         duration_in=[timedelta(seconds=1, microseconds=500000), timedelta(seconds=3, microseconds=500000)],
     )
-    not_in_test: typing_extensions.Annotated[timedelta, BeforeValidator(func=Timedelta.validate)] = Field(
+    not_in_test: typing_extensions.Annotated[
+        timedelta,
+        BeforeValidator(func=Timedelta.validate),
+        PlainSerializer(func=duration_serializer, return_type=str, when_used="json"),
+    ] = Field(
         default_factory=Timedelta,
         alias_priority=1,
         validation_alias="notInTest",
         serialization_alias="notInTest",
         duration_not_in=[timedelta(seconds=1, microseconds=500000), timedelta(seconds=3, microseconds=500000)],
     )
-    default_test: typing_extensions.Annotated[timedelta, BeforeValidator(func=Timedelta.validate)] = Field(
+    default_test: typing_extensions.Annotated[
+        timedelta,
+        BeforeValidator(func=Timedelta.validate),
+        PlainSerializer(func=duration_serializer, return_type=str, when_used="json"),
+    ] = Field(
         default=timedelta(seconds=1, microseconds=500000),
         alias_priority=1,
         validation_alias="defaultTest",
         serialization_alias="defaultTest",
     )
-    default_factory_test: typing_extensions.Annotated[timedelta, BeforeValidator(func=Timedelta.validate)] = Field(
+    default_factory_test: typing_extensions.Annotated[
+        timedelta,
+        BeforeValidator(func=Timedelta.validate),
+        PlainSerializer(func=duration_serializer, return_type=str, when_used="json"),
+    ] = Field(
         default_factory=timedelta,
         alias_priority=1,
         validation_alias="defaultFactoryTest",
         serialization_alias="defaultFactoryTest",
     )
-    miss_default_test: typing_extensions.Annotated[timedelta, BeforeValidator(func=Timedelta.validate)] = Field(
-        alias_priority=1, validation_alias="missDefaultTest", serialization_alias="missDefaultTest"
-    )
-    required_test: typing_extensions.Annotated[timedelta, BeforeValidator(func=Timedelta.validate)] = Field(
-        alias_priority=1, validation_alias="requiredTest", serialization_alias="requiredTest"
-    )
-    alias_test: typing_extensions.Annotated[timedelta, BeforeValidator(func=Timedelta.validate)] = Field(
+    miss_default_test: typing_extensions.Annotated[
+        timedelta,
+        BeforeValidator(func=Timedelta.validate),
+        PlainSerializer(func=duration_serializer, return_type=str, when_used="json"),
+    ] = Field(alias_priority=1, validation_alias="missDefaultTest", serialization_alias="missDefaultTest")
+    required_test: typing_extensions.Annotated[
+        timedelta,
+        BeforeValidator(func=Timedelta.validate),
+        PlainSerializer(func=duration_serializer, return_type=str, when_used="json"),
+    ] = Field(alias_priority=1, validation_alias="requiredTest", serialization_alias="requiredTest")
+    alias_test: typing_extensions.Annotated[
+        timedelta,
+        BeforeValidator(func=Timedelta.validate),
+        PlainSerializer(func=duration_serializer, return_type=str, when_used="json"),
+    ] = Field(
         default_factory=Timedelta,
         alias="alias",
         alias_priority=2,
         validation_alias="aliasTest",
         serialization_alias="aliasTest",
     )
-    desc_test: typing_extensions.Annotated[timedelta, BeforeValidator(func=Timedelta.validate)] = Field(
+    desc_test: typing_extensions.Annotated[
+        timedelta,
+        BeforeValidator(func=Timedelta.validate),
+        PlainSerializer(func=duration_serializer, return_type=str, when_used="json"),
+    ] = Field(
         default_factory=Timedelta,
         alias_priority=1,
         validation_alias="descTest",
         serialization_alias="descTest",
         description="test desc",
     )
-    example_test: typing_extensions.Annotated[timedelta, BeforeValidator(func=Timedelta.validate)] = Field(
+    example_test: typing_extensions.Annotated[
+        timedelta,
+        BeforeValidator(func=Timedelta.validate),
+        PlainSerializer(func=duration_serializer, return_type=str, when_used="json"),
+    ] = Field(
         default_factory=Timedelta,
         alias_priority=1,
         validation_alias="exampleTest",
         serialization_alias="exampleTest",
         example=timedelta(seconds=1, microseconds=500000),
     )
-    example_factory_test: typing_extensions.Annotated[timedelta, BeforeValidator(func=Timedelta.validate)] = Field(
+    example_factory_test: typing_extensions.Annotated[
+        timedelta,
+        BeforeValidator(func=Timedelta.validate),
+        PlainSerializer(func=duration_serializer, return_type=str, when_used="json"),
+    ] = Field(
         default_factory=Timedelta,
         alias_priority=1,
         validation_alias="exampleFactoryTest",
         serialization_alias="exampleFactoryTest",
         example=timedelta,
     )
-    field_test: typing_extensions.Annotated[timedelta, BeforeValidator(func=Timedelta.validate)] = CustomerField(
+    field_test: typing_extensions.Annotated[
+        timedelta,
+        BeforeValidator(func=Timedelta.validate),
+        PlainSerializer(func=duration_serializer, return_type=str, when_used="json"),
+    ] = CustomerField(
         default_factory=Timedelta, alias_priority=1, validation_alias="fieldTest", serialization_alias="fieldTest"
     )
-    title_test: typing_extensions.Annotated[timedelta, BeforeValidator(func=Timedelta.validate)] = Field(
+    title_test: typing_extensions.Annotated[
+        timedelta,
+        BeforeValidator(func=Timedelta.validate),
+        PlainSerializer(func=duration_serializer, return_type=str, when_used="json"),
+    ] = Field(
         default_factory=Timedelta,
         alias_priority=1,
         validation_alias="titleTest",
@@ -543,7 +600,11 @@ class DurationTest(ProtobufCompatibleBaseModel):
     type_test: timedelta = Field(
         default_factory=Timedelta, alias_priority=1, validation_alias="typeTest", serialization_alias="typeTest"
     )
-    extra_test: typing_extensions.Annotated[timedelta, BeforeValidator(func=Timedelta.validate)] = Field(
+    extra_test: typing_extensions.Annotated[
+        timedelta,
+        BeforeValidator(func=Timedelta.validate),
+        PlainSerializer(func=duration_serializer, return_type=str, when_used="json"),
+    ] = Field(
         default_factory=Timedelta,
         alias_priority=1,
         validation_alias="extraTest",
