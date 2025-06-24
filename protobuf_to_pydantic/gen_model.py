@@ -796,11 +796,7 @@ class M2P(object):
         # Ensure serialization uses aliases
         pydantic_model_config_dict["serialize_by_alias"] = True
 
-        # Create a deep copy of one_of_dict to preserve the original for setting on the model
-        original_one_of_dict = {}
         if one_of_dict:
-            import copy
-            original_one_of_dict = copy.deepcopy(one_of_dict)
             validators["one_of_validator"] = _pydantic_adapter.model_validator(
                 mode="before", allow_reuse=True
             )(check_one_of)
@@ -828,7 +824,7 @@ class M2P(object):
 
         CodeRefModel.set_to_model(
             pydantic_model,
-            one_of_dict=original_one_of_dict,
+            one_of_dict=one_of_dict,
             base_model=self._pydantic_base,
             # Facilitate the analysis of `gen code`
             nested_message_dict={
@@ -838,7 +834,7 @@ class M2P(object):
             },
             validators=validators,
         )
-        setattr(pydantic_model, "_one_of_dict", original_one_of_dict)
+        setattr(pydantic_model, "_one_of_dict", one_of_dict)
         if not is_same_pkg:
             class_doc = (
                 "Note: The current class does not belong to the package\n"
