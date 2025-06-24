@@ -2,106 +2,38 @@ import json
 import math
 from typing import Any, Dict
 
-from google.protobuf import json_format
-from google.protobuf.message import Message
-from pydantic import BaseModel
+from example.proto_pydanticv2.example.example_proto.demo import (
+    basic_types_roundtrip_pb2,
+    basic_types_roundtrip_p2p,
+)
+from .common.base_test import RoundTripTestBase
 
-from example.proto_pydanticv2.example.example_proto.demo import (         basic_types_roundtrip_pb2,     )
-from protobuf_to_pydantic import msg_to_pydantic_model
 
-# Import the pre-generated Pydantic models
-from example.proto_pydanticv2.example.example_proto.demo import (         basic_types_roundtrip_p2p,     )
-class TestBasicTypesRoundTrip:
+class TestBasicTypesRoundTrip(RoundTripTestBase):
     """Test round-trip conversion between Protobuf messages and Pydantic models for all basic types."""
 
-    @staticmethod
-    def _create_pydantic_model(msg_class: Any) -> type[BaseModel]:
-        """Create a Pydantic model from a protobuf message class."""
-        return msg_to_pydantic_model(msg_class, parse_msg_desc_method="ignore")
-
-    @staticmethod
-    def _protobuf_to_json(msg: Message) -> str:
-        """Convert protobuf message to JSON string."""
-        return json_format.MessageToJson(
-            msg, always_print_fields_with_no_presence=True, use_integers_for_enums=True
-        )
-
-    @staticmethod
-    def _json_to_protobuf(json_str: str, msg_class: Any) -> Message:
-        """Convert JSON string to protobuf message."""
-        msg = msg_class()
-        json_format.Parse(json_str, msg)
-        return msg
-
-    @staticmethod
-    def _pydantic_to_json(model: BaseModel) -> str:
-        """Convert Pydantic model to JSON string."""
-        return model.model_dump_json(by_alias=True)
-
-    @staticmethod
-    def _json_to_pydantic(json_str: str, model_class: type[BaseModel]) -> BaseModel:
-        """Convert JSON string to Pydantic model."""
-        return model_class.model_validate_json(json_str)
-
-    def _test_roundtrip(self, msg: Message, test_data: Dict[str, Any]) -> None:
+    def _test_roundtrip(self, proto_msg: Any, test_data: Dict[str, Any]) -> None:
         """Test round-trip conversion for a message with test data."""
         # Clear the message first
-        msg.Clear()
+        proto_msg.Clear()
 
         # Set test data on protobuf message
         for field, value in test_data.items():
-            if hasattr(msg, field):
-                field_descriptor = msg.DESCRIPTOR.fields_by_name[field]
+            if hasattr(proto_msg, field):
+                field_descriptor = proto_msg.DESCRIPTOR.fields_by_name[field]
                 if field_descriptor.label == field_descriptor.LABEL_REPEATED:
                     # For repeated fields, extend the list
-                    getattr(msg, field).extend(value)
+                    getattr(proto_msg, field).extend(value)
                 else:
-                    setattr(msg, field, value)
+                    setattr(proto_msg, field, value)
 
-        # Step 1: Protobuf -> JSON
-        proto_json = self._protobuf_to_json(msg)
-
-        # Step 2: Create Pydantic model and parse JSON
-        model_class = self._create_pydantic_model(type(msg))
-        pydantic_model = self._json_to_pydantic(proto_json, model_class)
-
-        # Step 3: Pydantic -> JSON
-        pydantic_json = self._pydantic_to_json(pydantic_model)
-
-        # Step 4: JSON -> Protobuf
-        reconstructed_msg = self._json_to_protobuf(pydantic_json, type(msg))
-
-        # Verify the round trip was successful
-        final_json = self._protobuf_to_json(reconstructed_msg)
-
-        # Parse both JSONs to compare as dicts (to ignore ordering differences)
-        original_dict = json.loads(proto_json)
-        final_dict = json.loads(final_json)
-
-        # For comparison, we need to handle optional fields properly
-        # The Pydantic model will include optional fields with their defaults,
-        # but the original protobuf might not have them set
-        # So we normalize by only comparing fields that were in the original
-        msg_descriptor = msg.DESCRIPTOR
-        optional_fields = set()
-
-        # Identify which fields are optional (have the optional label in proto3)
-        for field in msg_descriptor.fields:
-            if field.has_presence:
-                # Convert field name to camelCase for JSON comparison
-                json_name = (
-                    field.json_name if hasattr(field, "json_name") else field.name
-                )
-                optional_fields.add(json_name)
-
-        for key in list(final_dict.keys()):
-            if key not in original_dict and key in optional_fields:
-                # This is an optional field that wasn't set in the original
-                final_dict.pop(key)
-
-        assert original_dict == final_dict, (
-            f"Round-trip failed:\nOriginal: {original_dict}\nFinal: {final_dict}"
+        # Get the Pydantic model class dynamically based on the message type
+        pydantic_model_class = getattr(
+            basic_types_roundtrip_p2p, proto_msg.__class__.__name__
         )
+
+        # Use the base class method for roundtrip verification
+        self.verify_roundtrip(proto_msg, pydantic_model_class)
 
     def test_basic_int32(self):
         """Test int32 field round-trip."""

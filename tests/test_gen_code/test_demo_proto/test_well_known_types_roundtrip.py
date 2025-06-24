@@ -2,52 +2,17 @@ import json
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
 
-from google.protobuf import json_format
-from google.protobuf.message import Message
-from pydantic import BaseModel
-
 from example.proto_pydanticv2.example.example_proto.demo import (
     well_known_types_roundtrip_pb2,
-    value_demo_pb2,
-)
-
-from protobuf_to_pydantic import msg_to_pydantic_model
-
-# Import the pre-generated Pydantic models
-from example.proto_pydanticv2.example.example_proto.demo import (
     well_known_types_roundtrip_p2p,
+    value_demo_pb2,
     value_demo_p2p,
 )
+from .common.base_test import RoundTripTestBase
 
-class TestWellKnownTypesRoundTrip:
+
+class TestWellKnownTypesRoundTrip(RoundTripTestBase):
     """Test round-trip conversion for well-known protobuf types."""
-
-    @staticmethod
-    def _create_pydantic_model(msg_class: Any) -> type[BaseModel]:
-        """Create a Pydantic model from a protobuf message class."""
-        return msg_to_pydantic_model(msg_class, parse_msg_desc_method="ignore")
-
-    @staticmethod
-    def _protobuf_to_json(msg: Message) -> str:
-        """Convert protobuf message to JSON string."""
-        return json_format.MessageToJson(
-            msg, always_print_fields_with_no_presence=True, use_integers_for_enums=True
-        )
-
-    @staticmethod
-    def _json_to_protobuf(json_str: str, msg_class: Any) -> Message:
-        """Convert JSON string to protobuf message."""
-        msg = msg_class()
-        json_format.Parse(json_str, msg)
-        return msg
-
-    @staticmethod
-    def _pydantic_to_json(model: BaseModel) -> str:
-        """Convert Pydantic model to JSON string."""
-        return model.model_dump_json(by_alias=True)
-
-    @staticmethod
-    def _json_to_pydantic(json_str: str, model_class: type[BaseModel]) -> BaseModel:
         """Convert JSON string to Pydantic model."""
         return model_class.model_validate_json(json_str)
 
