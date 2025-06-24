@@ -1,0 +1,50 @@
+syntax = "proto3";
+package roundtrip;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/duration.proto";
+
+// Message to test well-known protobuf types for round-trip conversion
+message WellKnownTypesMessage {
+  // Timestamp fields
+  google.protobuf.Timestamp created_at = 1;
+  google.protobuf.Timestamp updated_at = 2;
+  google.protobuf.Timestamp expires_at = 3;
+  
+  // Duration fields
+  google.protobuf.Duration timeout = 4;
+  google.protobuf.Duration processing_time = 5;
+  google.protobuf.Duration ttl = 6;
+  
+  // Optional well-known types
+  optional google.protobuf.Timestamp optional_timestamp = 7;
+  optional google.protobuf.Duration optional_duration = 8;
+  
+  // Repeated well-known types
+  repeated google.protobuf.Timestamp event_timestamps = 9;
+  repeated google.protobuf.Duration intervals = 10;
+  
+  // Map with well-known types as values
+  map<string, google.protobuf.Timestamp> timestamp_map = 11;
+  map<string, google.protobuf.Duration> duration_map = 12;
+}
+
+// Edge cases for well-known types
+message WellKnownEdgeCasesMessage {
+  // Zero values
+  google.protobuf.Timestamp zero_timestamp = 1;
+  google.protobuf.Duration zero_duration = 2;
+  
+  // Max values
+  google.protobuf.Timestamp max_timestamp = 3;
+  google.protobuf.Duration max_duration = 4;
+  
+  // Negative duration (durations can be negative)
+  google.protobuf.Duration negative_duration = 5;
+  
+  // Timestamp with nanosecond precision
+  google.protobuf.Timestamp precise_timestamp = 6;
+  
+  // Duration with nanosecond precision
+  google.protobuf.Duration precise_duration = 7;
+}
