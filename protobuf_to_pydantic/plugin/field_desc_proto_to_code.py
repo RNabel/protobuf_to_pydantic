@@ -1,7 +1,7 @@
 import importlib
 import inspect
 import logging
-from datetime import datetime, timedelta
+from datetime import timedelta
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Set, Tuple, Type
 
@@ -995,21 +995,17 @@ class FileDescriptorProtoToCode(BaseP2C):
                 py_type_str = "None"
                 rule_type_str = ""
             elif _type_str == "Timestamp":
-                py_type_str = "datetime"
+                py_type_str = "TimestampType"
                 rule_type_str = "timestamp"
-                type_factory = datetime.now
-                self._add_import_code("datetime", "datetime")
+                type_factory = FormatContainer("datetime_utc_now")
+                self._add_import_code("protobuf_to_pydantic.util", "TimestampType")
+                self._add_import_code("protobuf_to_pydantic.util", "datetime_utc_now")
             elif _type_str == "Duration":
                 rule_type_str = "duration"
                 type_factory = timedelta
-                py_type_str = (
-                    "Annotated[timedelta, BeforeValidator(Timedelta.validate)]"
-                )
+                py_type_str = "DurationType"
 
-                self._add_import_code("pydantic", "BeforeValidator")
-                self._add_import_code("typing_extensions", "Annotated")
-                self._add_import_code("datetime", "timedelta")
-                self._add_import_code("protobuf_to_pydantic.util", "Timedelta")
+                self._add_import_code("protobuf_to_pydantic.util", "DurationType")
             elif _type_str == "Any":
                 py_type_str = "Any"
                 rule_type_str = "any"

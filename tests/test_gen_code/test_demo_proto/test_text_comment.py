@@ -573,9 +573,9 @@ class NestedMessage(ProtobufCompatibleBaseModel):
         bank_number: PaymentCardNumber = Field(
             default="", alias_priority=1, validation_alias="bankNumber", serialization_alias="bankNumber"
         )
-        exp: datetime = Field(
-            default_factory=exp_time, alias_priority=1, validation_alias="exp", serialization_alias="exp"
-        )
+        exp: typing_extensions.Annotated[
+            datetime, PlainSerializer(func=timestamp_serializer, return_type=str, when_used="json")
+        ] = Field(default_factory=exp_time, alias_priority=1, validation_alias="exp", serialization_alias="exp")
         uuid: str = Field(default_factory=uuid4, alias_priority=1, validation_alias="uuid", serialization_alias="uuid")
 
     class IncludeEnum(IntEnum):

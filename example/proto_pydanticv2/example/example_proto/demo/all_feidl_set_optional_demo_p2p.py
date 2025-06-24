@@ -3,7 +3,6 @@
 # Protobuf Version: 6.31.1
 # Pydantic Version: 2.11.7
 import typing
-from datetime import datetime
 from enum import IntEnum
 from uuid import uuid4
 
@@ -16,6 +15,7 @@ from pydantic.types import PaymentCardNumber
 from example.plugin_config import exp_time
 from protobuf_to_pydantic.customer_validator.v2 import check_one_of
 from protobuf_to_pydantic.default_base_model import ProtobufCompatibleBaseModel
+from protobuf_to_pydantic.util import TimestampType
 
 from ..common.single_p2p import DemoEnum, DemoMessage
 
@@ -83,7 +83,7 @@ class NestedMessage(ProtobufCompatibleBaseModel):
 
     class UserPayMessage(ProtobufCompatibleBaseModel):
         bank_number: typing.Optional[PaymentCardNumber] = Field(default="")
-        exp: typing.Optional[datetime] = Field(default_factory=exp_time)
+        exp: typing.Optional[TimestampType] = Field(default_factory=exp_time)
         uuid: typing.Optional[str] = Field(default_factory=uuid4)
 
     class IncludeEnum(IntEnum):

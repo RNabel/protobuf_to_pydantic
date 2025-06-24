@@ -3,7 +3,7 @@
 # Protobuf Version: 6.31.1
 # Pydantic Version: 2.11.7
 import typing
-from datetime import datetime, timedelta
+from datetime import timedelta
 from enum import IntEnum
 from ipaddress import IPv4Address, IPv6Address
 from uuid import UUID
@@ -12,9 +12,8 @@ import typing_extensions
 from annotated_types import Ge, Gt, Le, Lt, MaxLen, MinLen
 from google.protobuf.any_pb2 import Any  # type: ignore
 from google.protobuf.message import Message  # type: ignore
-from pydantic import BeforeValidator, ConfigDict, Field, field_validator, model_validator
+from pydantic import ConfigDict, Field, field_validator, model_validator
 from pydantic.networks import AnyUrl, EmailStr, IPvAnyAddress
-from typing_extensions import Annotated
 
 from protobuf_to_pydantic.customer_con_type.v2 import DatetimeType, TimedeltaType, gt_now, t_gt, t_lt
 from protobuf_to_pydantic.customer_validator.v2 import (
@@ -48,7 +47,7 @@ from protobuf_to_pydantic.customer_validator.v2 import (
 )
 from protobuf_to_pydantic.default_base_model import ProtobufCompatibleBaseModel
 from protobuf_to_pydantic.field_info_rule.protobuf_option_to_field_info.types import HostNameStr, UriRefStr
-from protobuf_to_pydantic.util import Timedelta
+from protobuf_to_pydantic.util import DurationType, TimestampType, datetime_utc_now
 
 
 class State(IntEnum):
@@ -343,25 +342,25 @@ class AnyTest(ProtobufCompatibleBaseModel):
 
 
 class DurationTest(ProtobufCompatibleBaseModel):
-    required_test: Annotated[timedelta, BeforeValidator(Timedelta.validate)] = Field()
-    const_test: Annotated[timedelta, BeforeValidator(Timedelta.validate)] = Field(
+    required_test: DurationType = Field()
+    const_test: DurationType = Field(
         default_factory=timedelta, duration_const=timedelta(seconds=1, microseconds=500000)
     )
-    range_test: Annotated[timedelta, BeforeValidator(Timedelta.validate)] = Field(
+    range_test: DurationType = Field(
         default_factory=timedelta,
         duration_lt=timedelta(seconds=10, microseconds=500000),
         duration_gt=timedelta(seconds=5, microseconds=500000),
     )
-    range_e_test: Annotated[timedelta, BeforeValidator(Timedelta.validate)] = Field(
+    range_e_test: DurationType = Field(
         default_factory=timedelta,
         duration_le=timedelta(seconds=10, microseconds=500000),
         duration_ge=timedelta(seconds=5, microseconds=500000),
     )
-    in_test: Annotated[timedelta, BeforeValidator(Timedelta.validate)] = Field(
+    in_test: DurationType = Field(
         default_factory=timedelta,
         duration_in=[timedelta(seconds=1, microseconds=500000), timedelta(seconds=3, microseconds=500000)],
     )
-    not_in_test: Annotated[timedelta, BeforeValidator(Timedelta.validate)] = Field(
+    not_in_test: DurationType = Field(
         default_factory=timedelta,
         duration_not_in=[timedelta(seconds=1, microseconds=500000), timedelta(seconds=3, microseconds=500000)],
     )
@@ -388,15 +387,19 @@ class DurationTest(ProtobufCompatibleBaseModel):
 
 
 class TimestampTest(ProtobufCompatibleBaseModel):
-    required_test: datetime = Field()
-    const_test: datetime = Field(default_factory=datetime.now, timestamp_const=1600000000.0)
-    range_test: datetime = Field(default_factory=datetime.now, timestamp_lt=1600000010.0, timestamp_gt=1600000000.0)
-    range_e_test: datetime = Field(default_factory=datetime.now, timestamp_le=1600000010.0, timestamp_ge=1600000000.0)
-    lt_now_test: datetime = Field(default_factory=datetime.now, timestamp_lt_now=True)
-    gt_now_test: datetime = Field(default_factory=datetime.now, timestamp_gt_now=True)
-    within_test: datetime = Field(default_factory=datetime.now, timestamp_within=timedelta(seconds=1))
-    within_and_gt_now_test: datetime = Field(
-        default_factory=datetime.now, timestamp_gt_now=True, timestamp_within=timedelta(seconds=3600)
+    required_test: TimestampType = Field()
+    const_test: TimestampType = Field(default_factory=datetime_utc_now, timestamp_const=1600000000.0)
+    range_test: TimestampType = Field(
+        default_factory=datetime_utc_now, timestamp_lt=1600000010.0, timestamp_gt=1600000000.0
+    )
+    range_e_test: TimestampType = Field(
+        default_factory=datetime_utc_now, timestamp_le=1600000010.0, timestamp_ge=1600000000.0
+    )
+    lt_now_test: TimestampType = Field(default_factory=datetime_utc_now, timestamp_lt_now=True)
+    gt_now_test: TimestampType = Field(default_factory=datetime_utc_now, timestamp_gt_now=True)
+    within_test: TimestampType = Field(default_factory=datetime_utc_now, timestamp_within=timedelta(seconds=1))
+    within_and_gt_now_test: TimestampType = Field(
+        default_factory=datetime_utc_now, timestamp_gt_now=True, timestamp_within=timedelta(seconds=3600)
     )
 
     const_test_timestamp_const_validator = field_validator("const_test", mode="after", check_fields=None)(
@@ -471,7 +474,7 @@ class NestedMessage(ProtobufCompatibleBaseModel):
 
     class UserPayMessage(ProtobufCompatibleBaseModel):
         bank_number: str = Field(default="", min_length=13, max_length=19)
-        exp: datetime = Field(default_factory=datetime.now, timestamp_gt_now=True)
+        exp: TimestampType = Field(default_factory=datetime_utc_now, timestamp_gt_now=True)
         uuid: UUID = Field(default="")
 
         exp_timestamp_gt_now_validator = field_validator("exp", mode="after", check_fields=None)(
@@ -480,7 +483,7 @@ class NestedMessage(ProtobufCompatibleBaseModel):
 
     class NotEnableUserPayMessage(ProtobufCompatibleBaseModel):
         bank_number: str = Field(default="")
-        exp: datetime = Field(default_factory=datetime.now)
+        exp: TimestampType = Field(default_factory=datetime_utc_now)
         uuid: str = Field(default="")
 
     string_in_map_test: "typing.Dict[str, StringTest]" = Field(default_factory=dict)

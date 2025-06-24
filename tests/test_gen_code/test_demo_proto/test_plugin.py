@@ -84,7 +84,7 @@ class NestedMessage(ProtobufCompatibleBaseModel):
 
     class UserPayMessage(ProtobufCompatibleBaseModel):
         bank_number: PaymentCardNumber = Field(default="")
-        exp: datetime = Field(default_factory=exp_time)
+        exp: TimestampType = Field(default_factory=exp_time)
         uuid: str = Field(default_factory=uuid4)
 
     class IncludeEnum(IntEnum):
