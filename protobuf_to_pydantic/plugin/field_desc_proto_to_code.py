@@ -803,33 +803,8 @@ class FileDescriptorProtoToCode(BaseP2C):
             #                         for one_of_optional_name in one_of_extend_value:
             #                             optional_dict[one_of_optional_name] = {"is_proto3_optional": True}
 
-            # Find the correct index for this oneof by matching field names
-            # The issue was using 'index' from enumerate instead of the actual oneof_index
-            # correct_index = None
-            # for idx, field_names in index_field_name_dict.items():
-            #     if any(
-            #         field.name in field_names
-            #         for field in desc.field
-            #         if field.HasField("oneof_index")
-            #         and desc.oneof_decl[field.oneof_index].name == one_of_item.name
-            #     ):
-            #         correct_index = idx
-            #         break
-
-            # option_dict["fields"] = (
-            #     index_field_name_dict.get(correct_index, set())
-            #     if correct_index is not None
-            #     else set()
-            # )
             option_dict["fields"] = index_field_name_dict.get(index, set())
             if option_dict:
-                # Debug for OneOfOptionalTest
-                if desc.name == "OneOfOptionalTest" and one_of_item.name == "id":
-                    import sys
-                    print(f"DEBUG: About to store in one_of_dict", file=sys.stderr)
-                    print(f"  Key: {desc.name + '.' + one_of_item.name}", file=sys.stderr)
-                    print(f"  option_dict: {option_dict}", file=sys.stderr)
-                    print(f"  option_dict['fields']: {option_dict.get('fields', 'NOT SET')}", file=sys.stderr)
                 # Only when the rules are used, will the number of fields of one_of be checked to see if they match
                 one_of_dict[desc.name + "." + one_of_item.name] = option_dict
         return one_of_dict, optional_dict
@@ -936,17 +911,6 @@ class FileDescriptorProtoToCode(BaseP2C):
             )
 
         if one_of_dict:
-            # Debug for OneOfOptionalTest
-            if class_name == "OneOfOptionalTest":
-                import sys
-                print(f"DEBUG: Converting one_of_dict to code for {class_name}", file=sys.stderr)
-                print(f"  one_of_dict: {one_of_dict}", file=sys.stderr)
-                for key, value in one_of_dict.items():
-                    if 'fields' in value:
-                        print(f"  {key} fields: {value['fields']} (type: {type(value['fields'])})", file=sys.stderr)
-                code_str = self._get_value_code(one_of_dict)
-                print(f"  Generated code: {code_str[:200]}...", file=sys.stderr)
-            
             class_var_str_list.append(
                 f"{' ' * (indent + self.code_indent)}_one_of_dict = {self._get_value_code(one_of_dict)}"
             )
