@@ -31,7 +31,7 @@ import json
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
 
-from google.protobuf import json_format, __version__
+from google.protobuf import json_format, struct_pb2, __version__
 from google.protobuf.message import Message
 from pydantic import BaseModel
 
@@ -70,6 +70,33 @@ class TestWellKnownTypesRoundTrip:
         return msg_to_pydantic_model(msg_class, parse_msg_desc_method="ignore")
 
     @staticmethod
+    def _python_value_to_protobuf_value(
+        python_value: Any, proto_value: struct_pb2.Value
+    ) -> None:
+        """Convert Python value to protobuf Value using proper API."""
+        if python_value is None:
+            proto_value.null_value = struct_pb2.NULL_VALUE
+        elif isinstance(python_value, bool):
+            proto_value.bool_value = python_value
+        elif isinstance(python_value, (int, float)):
+            proto_value.number_value = float(python_value)
+        elif isinstance(python_value, str):
+            proto_value.string_value = python_value
+        elif isinstance(python_value, dict):
+            proto_value.struct_value.Clear()
+            for key, value in python_value.items():
+                TestWellKnownTypesRoundTrip._python_value_to_protobuf_value(
+                    value, proto_value.struct_value.fields[key]
+                )
+        elif isinstance(python_value, (list, tuple)):
+            proto_value.list_value.Clear()
+            for item in python_value:
+                list_item = proto_value.list_value.values.add()
+                TestWellKnownTypesRoundTrip._python_value_to_protobuf_value(
+                    item, list_item
+                )
+
+    @staticmethod
     def _protobuf_to_json(msg: Message) -> str:
         """Convert protobuf message to JSON string."""
         return json_format.MessageToJson(
@@ -102,9 +129,67 @@ class TestWellKnownTypesRoundTrip:
         for field, value in test_data.items():
             if hasattr(msg, field):
                 field_descriptor = msg.DESCRIPTOR.fields_by_name[field]
-                if field_descriptor.label == field_descriptor.LABEL_REPEATED:
-                    # For repeated fields, extend the list
-                    getattr(msg, field).extend(value)
+                # Check for map fields first (maps are technically repeated but need special handling)
+                if (
+                    field_descriptor.type == field_descriptor.TYPE_MESSAGE
+                    and hasattr(field_descriptor, "message_type")
+                    and field_descriptor.message_type.GetOptions().map_entry
+                ):
+                    # Handle map fields
+                    map_field = getattr(msg, field)
+                    for key, map_value in value.items():
+                        if (
+                            field_descriptor.message_type.fields_by_name[
+                                "value"
+                            ].message_type
+                            and field_descriptor.message_type.fields_by_name[
+                                "value"
+                            ].message_type.name
+                            == "Value"
+                        ):
+                            # Map with Value values
+                            self._python_value_to_protobuf_value(
+                                map_value, map_field[key]
+                            )
+                        else:
+                            # Regular map field
+                            map_field[key] = map_value
+                elif field_descriptor.label == field_descriptor.LABEL_REPEATED:
+                    # Handle repeated fields
+                    if (
+                        field_descriptor.message_type
+                        and field_descriptor.message_type.name == "Value"
+                    ):
+                        # For repeated Value fields, use add() method
+                        for item in value:
+                            proto_value = getattr(msg, field).add()
+                            self._python_value_to_protobuf_value(item, proto_value)
+                    elif (
+                        field_descriptor.message_type
+                        and field_descriptor.message_type.name == "Timestamp"
+                    ):
+                        # For repeated Timestamp fields
+                        for ts in value:
+                            ts_msg = getattr(msg, field).add()
+                            ts_msg.FromDatetime(ts)
+                    elif (
+                        field_descriptor.message_type
+                        and field_descriptor.message_type.name == "Duration"
+                    ):
+                        # For repeated Duration fields
+                        for dur in value:
+                            dur_msg = getattr(msg, field).add()
+                            dur_msg.FromTimedelta(dur)
+                    else:
+                        # For other repeated fields, extend the list
+                        getattr(msg, field).extend(value)
+                elif (
+                    field_descriptor.message_type
+                    and field_descriptor.message_type.name == "Value"
+                ):
+                    # Handle Value fields using proper API
+                    proto_value = getattr(msg, field)
+                    self._python_value_to_protobuf_value(value, proto_value)
                 elif (
                     field_descriptor.message_type
                     and field_descriptor.message_type.name == "Timestamp"
@@ -134,6 +219,7 @@ class TestWellKnownTypesRoundTrip:
         pydantic_model = self._json_to_pydantic(proto_json, model_class)
 
         # Step 3: Pydantic -> JSON
+        original_dict = json.loads(proto_json)
         pydantic_json = self._pydantic_to_json(pydantic_model)
 
         # Step 4: JSON -> Protobuf
@@ -143,7 +229,6 @@ class TestWellKnownTypesRoundTrip:
         final_json = self._protobuf_to_json(reconstructed_msg)
 
         # Parse both JSONs to compare as dicts
-        original_dict = json.loads(proto_json)
         final_dict = json.loads(final_json)
 
         # For timestamp/duration fields, the representation might differ slightly
@@ -175,11 +260,11 @@ class TestWellKnownTypesRoundTrip:
         # TODO: This test currently fails due to default_factory behavior in generated models
         # Expected: Only the explicitly set 'created_at' field should be serialized
         # Actual: All timestamp/duration fields get serialized with default values due to default_factory
-        # This is related to Proto3 presence tracking - fields without explicit presence 
+        # This is related to Proto3 presence tracking - fields without explicit presence
         # should not serialize default values, but current implementation uses default_factory
         # which always generates values for optional fields
         return  # Skip for now
-        
+
         msg = well_known_types_roundtrip_pb2.WellKnownTypesMessage()
 
         # Test various timestamp values
@@ -204,7 +289,7 @@ class TestWellKnownTypesRoundTrip:
         # Actual: All timestamp/duration fields get serialized with default values due to default_factory
         # This is the same issue as test_basic_timestamp - Proto3 presence tracking problem
         return  # Skip for now
-        
+
         msg = well_known_types_roundtrip_pb2.WellKnownTypesMessage()
 
         test_cases = [
@@ -231,7 +316,7 @@ class TestWellKnownTypesRoundTrip:
         # This is related to Proto3 optional field presence tracking - optional fields should
         # only be serialized when explicitly set, not when default_factory creates values
         return  # Skip for now
-        
+
         msg = well_known_types_roundtrip_pb2.WellKnownTypesMessage()
 
         test_cases = [
@@ -261,7 +346,7 @@ class TestWellKnownTypesRoundTrip:
         # Actual: All fields get serialized due to default_factory creating values for unset fields
         # This is the same Proto3 presence tracking issue affecting other tests
         return  # Skip for now
-        
+
         msg = well_known_types_roundtrip_pb2.WellKnownTypesMessage()
 
         test_cases = [
@@ -403,34 +488,41 @@ class TestWellKnownTypesRoundTrip:
                 f"Duration mismatch for {test_data['timeout']}: got {reconstructed_msg.timeout.ToTimedelta()}"
             )
 
+    # TODO: All fields are supplied as pydantic model will construct default values for missing fields.
+    #       This will be fixed when full proto3 support is implemented.
     def test_value_field_basic(self):
         """Test basic google.protobuf.Value field round-trip."""
-        # TODO: This test should pass but currently fails because google.protobuf.Value
-        # fields require special handling - they cannot be set directly with setattr.
-        # Expected: Value fields should be settable via the test helper methods
-        # Actual: The test infrastructure doesn't properly handle Value field assignment
-        # The test needs to be updated to use proper protobuf API for Value fields
-        # (e.g., CopyFrom() or specific value type setters like string_value, number_value, etc.)
-        return  # Skip for now
 
         msg = value_demo_pb2.ValueTestMessage()
 
         # Test different value types
         test_cases = [
             # Null value
-            {"id": "test1", "dynamic_value": None},
+            {"id": "test1", "dynamic_value": None, "value_list": [], "value_map": {}},
             # Number value
-            {"id": "test2", "dynamic_value": 42.5},
+            {"id": "test2", "dynamic_value": 42.5, "value_list": [], "value_map": {}},
             # String value
-            {"id": "test3", "dynamic_value": "hello world"},
+            {
+                "id": "test3",
+                "dynamic_value": "hello world",
+                "value_list": [],
+                "value_map": {},
+            },
             # Boolean value
-            {"id": "test4", "dynamic_value": True},
+            {"id": "test4", "dynamic_value": True, "value_list": [], "value_map": {}},
             # List value
-            {"id": "test5", "dynamic_value": [1, "two", 3.0, True, None]},
+            {
+                "id": "test5",
+                "dynamic_value": [1, "two", 3.0, True, None],
+                "value_list": [],
+                "value_map": {},
+            },
             # Struct value (dict)
             {
                 "id": "test6",
                 "dynamic_value": {"name": "John", "age": 30, "active": True},
+                "value_list": [],
+                "value_map": {},
             },
             # Nested structures
             {
@@ -442,28 +534,26 @@ class TestWellKnownTypesRoundTrip:
                         "tags": ["python", "protobuf"],
                     },
                 },
+                "value_list": [],
+                "value_map": {},
             },
         ]
 
         for test_data in test_cases:
             self._test_roundtrip(msg, test_data)
 
+    # TODO: All fields are supplied as pydantic model will construct default values for missing fields.
+    #       This will be fixed when full proto3 support is implemented.
     def test_value_field_collections(self):
         """Test Value fields in collections (repeated and map)."""
-        # TODO: This test should pass but currently fails because google.protobuf.Value
-        # fields in collections require special handling - they cannot be set directly.
-        # Expected: Value fields in repeated/map should be settable via proper API calls
-        # Actual: The test tries to use extend() and direct assignment which doesn't work for Value fields
-        # The test needs to be updated to use proper protobuf API for Value collections
-        # (e.g., msg.value_list.add().CopyFrom(value) for repeated fields)
-        return  # Skip for now
 
         msg = value_demo_pb2.ValueTestMessage()
 
-        # Test repeated Value field
-        msg.id = "collection_test"
-        msg.value_list.extend(
-            [
+        # Test case with repeated Value field and map with Value values
+        test_data = {
+            "id": "collection_test",
+            "dynamic_value": None,
+            "value_list": [
                 # Different types in the list
                 42,
                 "string value",
@@ -471,27 +561,18 @@ class TestWellKnownTypesRoundTrip:
                 None,
                 {"nested": "object"},
                 [1, 2, 3],
-            ]
-        )
+            ],
+            "value_map": {
+                "number": 123,
+                "string": "test string",
+                "bool": False,
+                "null": None,
+                "object": {"key": "value"},
+                "array": ["a", "b", "c"],
+            },
+        }
 
-        # Test map with Value values
-        msg.value_map["number"] = 123
-        msg.value_map["string"] = "test string"
-        msg.value_map["bool"] = False
-        msg.value_map["null"] = None
-        msg.value_map["object"] = {"key": "value"}
-        msg.value_map["array"] = ["a", "b", "c"]
-
-        # Test the round trip
-        proto_json = self._protobuf_to_json(msg)
-        model_class = self._create_pydantic_model(type(msg))
-        pydantic_model = self._json_to_pydantic(proto_json, model_class)
-        pydantic_json = self._pydantic_to_json(pydantic_model)
-        reconstructed_msg = self._json_to_protobuf(pydantic_json, type(msg))
-
-        # Verify collections are preserved
-        assert len(reconstructed_msg.value_list) == 6
-        assert len(reconstructed_msg.value_map) == 6
+        self._test_roundtrip(msg, test_data)
 
     def test_combined_well_known_types(self):
         """Test message with all well-known types together."""

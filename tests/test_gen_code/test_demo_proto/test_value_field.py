@@ -44,13 +44,13 @@ class ValueTestMessage(ProtobufCompatibleBaseModel):
     )
 
     id: str = Field(default="", alias_priority=1, validation_alias="id", serialization_alias="id")
-    dynamic_value: typing.Optional[typing.Any] = Field(
-        default=None, alias_priority=1, validation_alias="dynamicValue", serialization_alias="dynamicValue"
+    dynamic_value: typing.Optional[typing_extensions.Annotated[typing.Any, BeforeValidator(func=value_validator)]] = (
+        Field(default=None, alias_priority=1, validation_alias="dynamicValue", serialization_alias="dynamicValue")
     )
-    value_list: typing.List[typing.Any] = Field(
+    value_list: typing.List[typing_extensions.Annotated[typing.Any, BeforeValidator(func=value_validator)]] = Field(
         default_factory=list, alias_priority=1, validation_alias="valueList", serialization_alias="valueList"
     )
-    value_map: typing.Dict[str, typing.Any] = Field(
+    value_map: typing.Dict[str, typing_extensions.Annotated[typing.Any, BeforeValidator(func=value_validator)]] = Field(
         default_factory=dict, alias_priority=1, validation_alias="valueMap", serialization_alias="valueMap"
     )
 """,

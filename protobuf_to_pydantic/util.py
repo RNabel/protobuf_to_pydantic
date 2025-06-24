@@ -144,6 +144,38 @@ TimestampType = Annotated[
 ]
 
 
+def value_validator(v: Any) -> Any:
+    """Validate google.protobuf.Value field - accepts any JSON-serializable value."""
+    # google.protobuf.Value supports: null, number, string, bool, struct (dict), list
+    if v is None:
+        return None
+    elif isinstance(v, (bool, int, float, str)):
+        return v
+    elif isinstance(v, dict):
+        # Recursively validate dict values
+        return {key: value_validator(val) for key, val in v.items()}
+    elif isinstance(v, (list, tuple)):
+        # Recursively validate list items
+        return [value_validator(item) for item in v]
+    else:
+        # For other types, try to convert to a JSON-serializable format
+        try:
+            import json
+
+            # Test if it's JSON serializable
+            json.dumps(v)
+            return v
+        except (TypeError, ValueError):
+            # If not JSON serializable, convert to string representation
+            return str(v)
+
+
+ValueType = Annotated[
+    Any,
+    BeforeValidator(value_validator),
+]
+
+
 def camel_to_snake(name: str) -> str:
     s1 = re.sub("(.)([A-Z][a-z]+)", r"\1_\2", name)
     return re.sub("([a-z0-9])([A-Z])", r"\1_\2", s1).lower()

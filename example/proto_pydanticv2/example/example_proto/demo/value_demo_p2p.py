@@ -8,6 +8,7 @@ from google.protobuf.message import Message  # type: ignore
 from pydantic import Field
 
 from protobuf_to_pydantic.default_base_model import ProtobufCompatibleBaseModel
+from protobuf_to_pydantic.util import ValueType
 
 
 class ValueTestMessage(ProtobufCompatibleBaseModel):
@@ -16,6 +17,6 @@ class ValueTestMessage(ProtobufCompatibleBaseModel):
     """
 
     id: str = Field(default="")
-    dynamic_value: typing.Optional[typing.Any] = Field(default=None)
-    value_list: typing.List[typing.Any] = Field(default_factory=list)
-    value_map: "typing.Dict[str, typing.Any]" = Field(default_factory=dict)
+    dynamic_value: typing.Optional[ValueType] = Field(default=None)
+    value_list: typing.List[ValueType] = Field(default_factory=list)
+    value_map: "typing.Dict[str, ValueType]" = Field(default_factory=dict)
