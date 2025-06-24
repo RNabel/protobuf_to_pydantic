@@ -720,9 +720,7 @@ class OneOfOptionalTest(ProtobufCompatibleBaseModel):
     Annotations are used in runtime mode
     """
 
-    _one_of_dict = {
-        "OneOfOptionalTest.id": {"fields": {"x", "y", "z"}, "optional_fields": {"x", "y"}, "required": True}
-    }
+    _one_of_dict = {"OneOfOptionalTest.id": {"fields": {"x", "y", "z"}, "required": True}}
     one_of_validator = model_validator(mode="before")(check_one_of)
     header: str = Field(default="")
     x: typing.Optional[str] = Field(default="")

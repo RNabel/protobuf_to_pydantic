@@ -24,11 +24,7 @@ class ReportData(ProtobufCompatibleBaseModel):
     """
 
     _one_of_dict = {
-        "ReportData.data": {
-            "fields": {"locationValue", "location_value", "timeValue", "time_value"},
-            "optional_fields": {"location_value"},
-            "required": True,
-        }
+        "ReportData.data": {"fields": {"locationValue", "location_value", "timeValue", "time_value"}, "required": True}
     }
     one_of_validator = model_validator(mode="before")(check_one_of)
     location_value: typing.Optional[GeoLocation] = Field(default_factory=GeoLocation)

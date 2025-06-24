@@ -746,11 +746,7 @@ class FileDescriptorProtoToCode(BaseP2C):
                         result,
                     ) in option_value.ListFields():
                         if one_of_extend_field_descriptor.name == "optional":
-                            # Store optional fields in the option_dict
-                            if "optional_fields" not in option_dict:
-                                option_dict["optional_fields"] = set()
                             for one_of_optional_name in result:
-                                option_dict["optional_fields"].add(one_of_optional_name)
                                 optional_dict[one_of_optional_name] = {
                                     "is_proto3_optional": True
                                 }
@@ -780,11 +776,7 @@ class FileDescriptorProtoToCode(BaseP2C):
                         one_of_extend_value,
                     ) in one_of_comment_option_value.items():
                         if one_of_extend_key == "optional":
-                            # Store optional fields in the option_dict
-                            if "optional_fields" not in option_dict:
-                                option_dict["optional_fields"] = set()
                             for one_of_optional_name in one_of_extend_value:
-                                option_dict["optional_fields"].add(one_of_optional_name)
                                 optional_dict[one_of_optional_name] = {
                                     "is_proto3_optional": True
                                 }
