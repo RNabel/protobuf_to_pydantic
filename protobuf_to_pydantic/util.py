@@ -7,7 +7,7 @@ import sys
 from pydantic import AliasGenerator
 from contextlib import contextmanager
 from dataclasses import MISSING
-from datetime import timedelta
+from datetime import datetime, timedelta, timezone
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -104,6 +104,49 @@ DurationType = Annotated[
     timedelta,
     BeforeValidator(Timedelta.validate),
     PlainSerializer(duration_serializer, return_type=str, when_used='json')
+]
+
+
+def datetime_utc_now() -> datetime:
+    """Return current UTC time with timezone info."""
+    return datetime.now(timezone.utc)
+
+
+def timestamp_serializer(dt: datetime) -> str:
+    """Serialize datetime to protobuf timestamp format (RFC3339)."""
+    if dt.tzinfo is None:
+        # If no timezone, assume UTC
+        dt = dt.replace(tzinfo=timezone.utc)
+    
+    # Format as RFC3339 with timezone
+    # Use isoformat() which handles the timezone correctly
+    iso_str = dt.isoformat()
+    
+    # Replace +00:00 with Z for UTC (RFC3339 style)
+    if iso_str.endswith('+00:00'):
+        iso_str = iso_str[:-6] + 'Z'
+    
+    return iso_str
+
+
+def timestamp_validator(value: Any) -> datetime:
+    """Ensure datetime is timezone-aware (UTC)."""
+    # If it's already a datetime, ensure it's timezone-aware
+    if isinstance(value, datetime):
+        if value.tzinfo is None:
+            # If no timezone, assume UTC
+            return value.replace(tzinfo=timezone.utc)
+        return value
+    
+    # Otherwise, let Pydantic's default datetime parsing handle it
+    # This will handle strings, ints (timestamps), etc.
+    return value
+
+
+TimestampType = Annotated[
+    datetime,
+    BeforeValidator(timestamp_validator),
+    PlainSerializer(timestamp_serializer, return_type=str, when_used='json')
 ]
 
 

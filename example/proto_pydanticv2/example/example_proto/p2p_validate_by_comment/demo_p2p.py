@@ -49,7 +49,7 @@ from protobuf_to_pydantic.customer_validator.v2 import (
 )
 from protobuf_to_pydantic.default_base_model import ProtobufCompatibleBaseModel
 from protobuf_to_pydantic.field_info_rule.protobuf_option_to_field_info.types import HostNameStr, UriRefStr
-from protobuf_to_pydantic.util import DurationType
+from protobuf_to_pydantic.util import DurationType, TimestampType, datetime_utc_now
 
 
 class State(IntEnum):
@@ -624,27 +624,31 @@ class DurationTest(ProtobufCompatibleBaseModel):
 
 
 class TimestampTest(ProtobufCompatibleBaseModel):
-    const_test: datetime = Field(default_factory=datetime.now, timestamp_const=1600000000.0)
-    range_test: datetime = Field(default_factory=datetime.now, timestamp_gt=1600000000.0, timestamp_lt=1600000010.0)
-    range_e_test: datetime = Field(default_factory=datetime.now, timestamp_ge=1600000000.0, timestamp_le=1600000010.0)
-    lt_now_test: datetime = Field(default_factory=datetime.now, timestamp_lt_now=True)
-    gt_now_test: datetime = Field(default_factory=datetime.now, timestamp_gt_now=True)
-    within_test: datetime = Field(default_factory=datetime.now, timestamp_within=timedelta(seconds=1))
-    within_and_gt_now_test: datetime = Field(
-        default_factory=datetime.now, timestamp_gt_now=True, timestamp_within=timedelta(seconds=3600)
+    const_test: TimestampType = Field(default_factory=datetime_utc_now, timestamp_const=1600000000.0)
+    range_test: TimestampType = Field(
+        default_factory=datetime_utc_now, timestamp_gt=1600000000.0, timestamp_lt=1600000010.0
     )
-    default_test: datetime = Field(default=1.5)
-    default_factory_test: datetime = Field(default_factory=datetime.now)
-    miss_default_test: datetime = Field()
-    required_test: datetime = Field()
-    alias_test: datetime = Field(default_factory=datetime.now, alias="alias")
-    desc_test: datetime = Field(default_factory=datetime.now, description="test desc")
-    example_test: datetime = Field(default_factory=datetime.now, example=1.5)
-    example_factory_test: datetime = Field(default_factory=datetime.now, example=datetime.now)
-    field_test: datetime = CustomerField(default_factory=datetime.now)
-    title_test: datetime = Field(default_factory=datetime.now, title="title_test")
-    type_test: datetime = Field(default_factory=datetime.now)
-    extra_test: datetime = Field(default_factory=datetime.now, customer_string="c1", customer_int=1)
+    range_e_test: TimestampType = Field(
+        default_factory=datetime_utc_now, timestamp_ge=1600000000.0, timestamp_le=1600000010.0
+    )
+    lt_now_test: TimestampType = Field(default_factory=datetime_utc_now, timestamp_lt_now=True)
+    gt_now_test: TimestampType = Field(default_factory=datetime_utc_now, timestamp_gt_now=True)
+    within_test: TimestampType = Field(default_factory=datetime_utc_now, timestamp_within=timedelta(seconds=1))
+    within_and_gt_now_test: TimestampType = Field(
+        default_factory=datetime_utc_now, timestamp_gt_now=True, timestamp_within=timedelta(seconds=3600)
+    )
+    default_test: TimestampType = Field(default=1.5)
+    default_factory_test: TimestampType = Field(default_factory=datetime.now)
+    miss_default_test: TimestampType = Field()
+    required_test: TimestampType = Field()
+    alias_test: TimestampType = Field(default_factory=datetime_utc_now, alias="alias")
+    desc_test: TimestampType = Field(default_factory=datetime_utc_now, description="test desc")
+    example_test: TimestampType = Field(default_factory=datetime_utc_now, example=1.5)
+    example_factory_test: TimestampType = Field(default_factory=datetime_utc_now, example=datetime.now)
+    field_test: TimestampType = CustomerField(default_factory=datetime_utc_now)
+    title_test: TimestampType = Field(default_factory=datetime_utc_now, title="title_test")
+    type_test: datetime = Field(default_factory=datetime_utc_now)
+    extra_test: TimestampType = Field(default_factory=datetime_utc_now, customer_string="c1", customer_int=1)
 
     const_test_timestamp_const_validator = field_validator("const_test", mode="after", check_fields=None)(
         timestamp_const_validator
@@ -729,7 +733,7 @@ class NestedMessage(ProtobufCompatibleBaseModel):
 
     class UserPayMessage(ProtobufCompatibleBaseModel):
         bank_number: str = Field(default="", min_length=13, max_length=19)
-        exp: datetime = Field(default_factory=datetime.now, timestamp_gt_now=True)
+        exp: TimestampType = Field(default_factory=datetime_utc_now, timestamp_gt_now=True)
         uuid: UUID = Field(default="")
 
         exp_timestamp_gt_now_validator = field_validator("exp", mode="after", check_fields=None)(
@@ -738,7 +742,7 @@ class NestedMessage(ProtobufCompatibleBaseModel):
 
     class NotEnableUserPayMessage(ProtobufCompatibleBaseModel):
         bank_number: str = Field(default="")
-        exp: datetime = Field(default_factory=datetime.now)
+        exp: TimestampType = Field(default_factory=datetime_utc_now)
         uuid: str = Field(default="")
 
     string_in_map_test: "typing.Dict[str, StringTest]" = Field(default_factory=dict)

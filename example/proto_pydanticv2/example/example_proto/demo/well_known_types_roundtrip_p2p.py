@@ -3,13 +3,13 @@
 # Protobuf Version: 6.31.1
 # Pydantic Version: 2.11.7
 import typing
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from google.protobuf.message import Message  # type: ignore
 from pydantic import Field
 
 from protobuf_to_pydantic.default_base_model import ProtobufCompatibleBaseModel
-from protobuf_to_pydantic.util import DurationType
+from protobuf_to_pydantic.util import DurationType, TimestampType, datetime_utc_now
 
 
 class WellKnownTypesMessage(ProtobufCompatibleBaseModel):
@@ -18,21 +18,21 @@ class WellKnownTypesMessage(ProtobufCompatibleBaseModel):
     """
 
     # Timestamp fields
-    created_at: datetime = Field(default_factory=datetime.now)
-    updated_at: datetime = Field(default_factory=datetime.now)
-    expires_at: datetime = Field(default_factory=datetime.now)
+    created_at: TimestampType = Field(default_factory=datetime_utc_now)
+    updated_at: TimestampType = Field(default_factory=datetime_utc_now)
+    expires_at: TimestampType = Field(default_factory=datetime_utc_now)
     # Duration fields
     timeout: DurationType = Field(default_factory=timedelta)
     processing_time: DurationType = Field(default_factory=timedelta)
     ttl: DurationType = Field(default_factory=timedelta)
     # Optional well-known types
-    optional_timestamp: typing.Optional[datetime] = Field(default_factory=datetime.now)
+    optional_timestamp: typing.Optional[TimestampType] = Field(default_factory=datetime_utc_now)
     optional_duration: typing.Optional[DurationType] = Field(default_factory=timedelta)
     # Repeated well-known types
-    event_timestamps: typing.List[datetime] = Field(default_factory=list)
+    event_timestamps: typing.List[TimestampType] = Field(default_factory=list)
     intervals: typing.List[DurationType] = Field(default_factory=list)
     # Map with well-known types as values
-    timestamp_map: "typing.Dict[str, datetime]" = Field(default_factory=dict)
+    timestamp_map: "typing.Dict[str, TimestampType]" = Field(default_factory=dict)
     duration_map: "typing.Dict[str, DurationType]" = Field(default_factory=dict)
 
 
@@ -42,14 +42,14 @@ class WellKnownEdgeCasesMessage(ProtobufCompatibleBaseModel):
     """
 
     # Zero values
-    zero_timestamp: datetime = Field(default_factory=datetime.now)
+    zero_timestamp: TimestampType = Field(default_factory=datetime_utc_now)
     zero_duration: DurationType = Field(default_factory=timedelta)
     # Max values
-    max_timestamp: datetime = Field(default_factory=datetime.now)
+    max_timestamp: TimestampType = Field(default_factory=datetime_utc_now)
     max_duration: DurationType = Field(default_factory=timedelta)
     # Negative duration (durations can be negative)
     negative_duration: DurationType = Field(default_factory=timedelta)
     # Timestamp with nanosecond precision
-    precise_timestamp: datetime = Field(default_factory=datetime.now)
+    precise_timestamp: TimestampType = Field(default_factory=datetime_utc_now)
     # Duration with nanosecond precision
     precise_duration: DurationType = Field(default_factory=timedelta)

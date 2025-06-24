@@ -77,48 +77,20 @@ class UserMessage(ProtobufCompatibleBaseModel):
         serialize_by_alias=True,
     )
 
-    uid: str = Field(
-        alias_priority=1,
-        validation_alias="uid",
-        serialization_alias="uid",
-        title="UID",
-        description="user union id",
-        example="10086",
-    )
-    age: int = Field(
-        default=0,
-        alias_priority=1,
-        validation_alias="age",
-        serialization_alias="age",
-        title="use age",
-        example=18,
-        ge=0,
-    )
-    height: float = Field(
-        default=0.0, alias_priority=1, validation_alias="height", serialization_alias="height", ge=0.0, le=2.5
-    )
+    uid: str = Field(default="", alias_priority=1, validation_alias="uid", serialization_alias="uid")
+    age: int = Field(default=0, alias_priority=1, validation_alias="age", serialization_alias="age")
+    height: float = Field(default=0.0, alias_priority=1, validation_alias="height", serialization_alias="height")
     sex: SexType = Field(default=0, alias_priority=1, validation_alias="sex", serialization_alias="sex")
     demo: ExampleExampleProtoCommonSingleDemoEnum = Field(
         default=0, alias_priority=1, validation_alias="demo", serialization_alias="demo"
     )
     is_adult: bool = Field(default=False, alias_priority=1, validation_alias="isAdult", serialization_alias="isAdult")
-    user_name: str = Field(
-        default="",
-        alias_priority=1,
-        validation_alias="userName",
-        serialization_alias="userName",
-        description="user name",
-        example="so1n",
-        min_length=1,
-        max_length=10,
-    )
+    user_name: str = Field(default="", alias_priority=1, validation_alias="userName", serialization_alias="userName")
     demo_message: ExampleExampleProtoCommonSingleDemoMessage = Field(
         default_factory=ExampleExampleProtoCommonSingleDemoMessage,
         alias_priority=1,
         validation_alias="demoMessage",
         serialization_alias="demoMessage",
-        customer_string="c1",
-        customer_int=1,
     )
 ''',
         )
@@ -199,48 +171,20 @@ class UserMessage(ProtobufCompatibleBaseModel):
         serialize_by_alias=True,
     )
 
-    uid: str = Field(
-        alias_priority=1,
-        validation_alias="uid",
-        serialization_alias="uid",
-        title="UID",
-        description="user union id",
-        example="10086",
-    )
-    age: int = Field(
-        default=0,
-        alias_priority=1,
-        validation_alias="age",
-        serialization_alias="age",
-        title="use age",
-        example=18,
-        ge=0,
-    )
-    height: float = Field(
-        default=0.0, alias_priority=1, validation_alias="height", serialization_alias="height", ge=0.0, le=2.5
-    )
+    uid: str = Field(default="", alias_priority=1, validation_alias="uid", serialization_alias="uid")
+    age: int = Field(default=0, alias_priority=1, validation_alias="age", serialization_alias="age")
+    height: float = Field(default=0.0, alias_priority=1, validation_alias="height", serialization_alias="height")
     sex: SexType = Field(default=0, alias_priority=1, validation_alias="sex", serialization_alias="sex")
     demo: ExampleExampleProtoCommonSingleDemoEnum = Field(
         default=0, alias_priority=1, validation_alias="demo", serialization_alias="demo"
     )
     is_adult: bool = Field(default=False, alias_priority=1, validation_alias="isAdult", serialization_alias="isAdult")
-    user_name: str = Field(
-        default="",
-        alias_priority=1,
-        validation_alias="userName",
-        serialization_alias="userName",
-        description="user name",
-        example="so1n",
-        min_length=1,
-        max_length=10,
-    )
+    user_name: str = Field(default="", alias_priority=1, validation_alias="userName", serialization_alias="userName")
     demo_message: ExampleExampleProtoCommonSingleDemoMessage = Field(
         default_factory=ExampleExampleProtoCommonSingleDemoMessage,
         alias_priority=1,
         validation_alias="demoMessage",
         serialization_alias="demoMessage",
-        customer_string="c1",
-        customer_int=1,
     )
 
 
@@ -311,48 +255,20 @@ class UserMessage(ProtobufCompatibleBaseModel):
         serialize_by_alias=True,
     )
 
-    uid: str = Field(
-        alias_priority=1,
-        validation_alias="uid",
-        serialization_alias="uid",
-        title="UID",
-        description="user union id",
-        example="10086",
-    )
-    age: int = Field(
-        default=0,
-        alias_priority=1,
-        validation_alias="age",
-        serialization_alias="age",
-        title="use age",
-        example=18,
-        ge=0,
-    )
-    height: float = Field(
-        default=0.0, alias_priority=1, validation_alias="height", serialization_alias="height", ge=0.0, le=2.5
-    )
+    uid: str = Field(default="", alias_priority=1, validation_alias="uid", serialization_alias="uid")
+    age: int = Field(default=0, alias_priority=1, validation_alias="age", serialization_alias="age")
+    height: float = Field(default=0.0, alias_priority=1, validation_alias="height", serialization_alias="height")
     sex: SexType = Field(default=0, alias_priority=1, validation_alias="sex", serialization_alias="sex")
     demo: ExampleExampleProtoCommonSingleDemoEnum = Field(
         default=0, alias_priority=1, validation_alias="demo", serialization_alias="demo"
     )
     is_adult: bool = Field(default=False, alias_priority=1, validation_alias="isAdult", serialization_alias="isAdult")
-    user_name: str = Field(
-        default="",
-        alias_priority=1,
-        validation_alias="userName",
-        serialization_alias="userName",
-        description="user name",
-        example="so1n",
-        min_length=1,
-        max_length=10,
-    )
+    user_name: str = Field(default="", alias_priority=1, validation_alias="userName", serialization_alias="userName")
     demo_message: ExampleExampleProtoCommonSingleDemoMessage = Field(
         default_factory=ExampleExampleProtoCommonSingleDemoMessage,
         alias_priority=1,
         validation_alias="demoMessage",
         serialization_alias="demoMessage",
-        customer_string="c1",
-        customer_int=1,
     )
 
 
@@ -367,20 +283,10 @@ class RepeatedMessage(ProtobufCompatibleBaseModel):
     )
 
     str_list: typing.List[str] = Field(
-        default_factory=list,
-        alias_priority=1,
-        validation_alias="strList",
-        serialization_alias="strList",
-        min_length=3,
-        max_length=5,
+        default_factory=list, alias_priority=1, validation_alias="strList", serialization_alias="strList"
     )
-    int_list: typing.Set[int] = Field(
-        default_factory=set,
-        alias_priority=1,
-        validation_alias="intList",
-        serialization_alias="intList",
-        min_length=1,
-        max_length=5,
+    int_list: typing.List[int] = Field(
+        default_factory=list, alias_priority=1, validation_alias="intList", serialization_alias="intList"
     )
     user_list: typing.List[UserMessage] = Field(
         default_factory=list, alias_priority=1, validation_alias="userList", serialization_alias="userList"
@@ -436,48 +342,20 @@ class UserMessage(ProtobufCompatibleBaseModel):
         serialize_by_alias=True,
     )
 
-    uid: str = Field(
-        alias_priority=1,
-        validation_alias="uid",
-        serialization_alias="uid",
-        title="UID",
-        description="user union id",
-        example="10086",
-    )
-    age: int = Field(
-        default=0,
-        alias_priority=1,
-        validation_alias="age",
-        serialization_alias="age",
-        title="use age",
-        example=18,
-        ge=0,
-    )
-    height: float = Field(
-        default=0.0, alias_priority=1, validation_alias="height", serialization_alias="height", ge=0.0, le=2.5
-    )
+    uid: str = Field(default="", alias_priority=1, validation_alias="uid", serialization_alias="uid")
+    age: int = Field(default=0, alias_priority=1, validation_alias="age", serialization_alias="age")
+    height: float = Field(default=0.0, alias_priority=1, validation_alias="height", serialization_alias="height")
     sex: SexType = Field(default=0, alias_priority=1, validation_alias="sex", serialization_alias="sex")
     demo: ExampleExampleProtoCommonSingleDemoEnum = Field(
         default=0, alias_priority=1, validation_alias="demo", serialization_alias="demo"
     )
     is_adult: bool = Field(default=False, alias_priority=1, validation_alias="isAdult", serialization_alias="isAdult")
-    user_name: str = Field(
-        default="",
-        alias_priority=1,
-        validation_alias="userName",
-        serialization_alias="userName",
-        description="user name",
-        example="so1n",
-        min_length=1,
-        max_length=10,
-    )
+    user_name: str = Field(default="", alias_priority=1, validation_alias="userName", serialization_alias="userName")
     demo_message: ExampleExampleProtoCommonSingleDemoMessage = Field(
         default_factory=ExampleExampleProtoCommonSingleDemoMessage,
         alias_priority=1,
         validation_alias="demoMessage",
         serialization_alias="demoMessage",
-        customer_string="c1",
-        customer_int=1,
     )
 
 
@@ -492,20 +370,10 @@ class RepeatedMessage(ProtobufCompatibleBaseModel):
     )
 
     str_list: typing.List[str] = Field(
-        default_factory=list,
-        alias_priority=1,
-        validation_alias="strList",
-        serialization_alias="strList",
-        min_length=3,
-        max_length=5,
+        default_factory=list, alias_priority=1, validation_alias="strList", serialization_alias="strList"
     )
-    int_list: typing.Set[int] = Field(
-        default_factory=set,
-        alias_priority=1,
-        validation_alias="intList",
-        serialization_alias="intList",
-        min_length=1,
-        max_length=5,
+    int_list: typing.List[int] = Field(
+        default_factory=list, alias_priority=1, validation_alias="intList", serialization_alias="intList"
     )
     user_list: typing.List[UserMessage] = Field(
         default_factory=list, alias_priority=1, validation_alias="userList", serialization_alias="userList"
@@ -540,23 +408,8 @@ class AfterReferMessage(ProtobufCompatibleBaseModel):
         serialize_by_alias=True,
     )
 
-    uid: str = Field(
-        alias_priority=1,
-        validation_alias="uid",
-        serialization_alias="uid",
-        title="UID",
-        description="user union id",
-        example="10086",
-    )
-    age: int = Field(
-        default=0,
-        alias_priority=1,
-        validation_alias="age",
-        serialization_alias="age",
-        title="use age",
-        example=18,
-        ge=0,
-    )
+    uid: str = Field(default="", alias_priority=1, validation_alias="uid", serialization_alias="uid")
+    age: int = Field(default=0, alias_priority=1, validation_alias="age", serialization_alias="age")
 
 
 class NestedMessage(ProtobufCompatibleBaseModel):
@@ -570,13 +423,15 @@ class NestedMessage(ProtobufCompatibleBaseModel):
             serialize_by_alias=True,
         )
 
-        bank_number: PaymentCardNumber = Field(
+        bank_number: str = Field(
             default="", alias_priority=1, validation_alias="bankNumber", serialization_alias="bankNumber"
         )
-        exp: datetime = Field(
-            default_factory=exp_time, alias_priority=1, validation_alias="exp", serialization_alias="exp"
-        )
-        uuid: str = Field(default_factory=uuid4, alias_priority=1, validation_alias="uuid", serialization_alias="uuid")
+        exp: typing_extensions.Annotated[
+            datetime,
+            BeforeValidator(func=timestamp_validator),
+            PlainSerializer(func=timestamp_serializer, return_type=str, when_used="json"),
+        ] = Field(default_factory=datetime_utc_now, alias_priority=1, validation_alias="exp", serialization_alias="exp")
+        uuid: str = Field(default="", alias_priority=1, validation_alias="uuid", serialization_alias="uuid")
 
     class IncludeEnum(IntEnum):
         zero = 0
@@ -604,6 +459,12 @@ class NestedMessage(ProtobufCompatibleBaseModel):
     )
     include_enum: IncludeEnum = Field(
         default=0, alias_priority=1, validation_alias="includeEnum", serialization_alias="includeEnum"
+    )
+    not_enable_user_pay: UserPayMessage = Field(
+        default_factory=UserPayMessage,
+        alias_priority=1,
+        validation_alias="notEnableUserPay",
+        serialization_alias="notEnableUserPay",
     )
     empty: typing.Any = Field(alias_priority=1, validation_alias="empty", serialization_alias="empty")
     after_refer: AfterReferMessage = Field(

@@ -105,13 +105,19 @@ class TestWellKnownTypesRoundTrip:
                 if field_descriptor.label == field_descriptor.LABEL_REPEATED:
                     # For repeated fields, extend the list
                     getattr(msg, field).extend(value)
-                elif field_descriptor.message_type and field_descriptor.message_type.name == "Timestamp":
+                elif (
+                    field_descriptor.message_type
+                    and field_descriptor.message_type.name == "Timestamp"
+                ):
                     # Handle Timestamp fields
                     if isinstance(value, datetime):
                         getattr(msg, field).FromDatetime(value)
                     elif isinstance(value, (int, float)):
                         getattr(msg, field).FromSeconds(value)
-                elif field_descriptor.message_type and field_descriptor.message_type.name == "Duration":
+                elif (
+                    field_descriptor.message_type
+                    and field_descriptor.message_type.name == "Duration"
+                ):
                     # Handle Duration fields
                     if isinstance(value, timedelta):
                         getattr(msg, field).FromTimedelta(value)
@@ -152,7 +158,7 @@ class TestWellKnownTypesRoundTrip:
         """Normalize well-known type representations for comparison."""
         for field in descriptor.fields:
             json_name = field.json_name if hasattr(field, "json_name") else field.name
-            
+
             if field.message_type and field.message_type.name == "Timestamp":
                 # Both should be ISO format strings, just ensure they're present
                 if json_name in original and json_name in final:
@@ -166,14 +172,8 @@ class TestWellKnownTypesRoundTrip:
 
     def test_basic_timestamp(self):
         """Test basic Timestamp field round-trip."""
-        # TODO: This test should pass but currently fails due to timezone handling issues
-        # when converting between Pydantic datetime and protobuf Timestamp JSON format.
-        # The issue is that Pydantic serializes datetime without timezone suffix when
-        # the datetime is naive, but protobuf expects RFC3339 format with timezone.
-        return  # Skip for now
-        
         msg = well_known_types_roundtrip_pb2.WellKnownTypesMessage()
-        
+
         # Test various timestamp values
         test_cases = [
             # Current time
@@ -191,14 +191,8 @@ class TestWellKnownTypesRoundTrip:
 
     def test_basic_duration(self):
         """Test basic Duration field round-trip."""
-        # TODO: This test currently fails because WellKnownTypesMessage has timestamp fields
-        # with default_factory=datetime.now which creates naive datetime objects without timezone info.
-        # The duration fields themselves work correctly (see test_duration_only_roundtrip).
-        # To fix this, the generated models would need to use timezone-aware datetimes.
-        return  # Skip for now
-        
         msg = well_known_types_roundtrip_pb2.WellKnownTypesMessage()
-        
+
         test_cases = [
             # Zero duration
             {"timeout": timedelta(0)},
@@ -217,16 +211,14 @@ class TestWellKnownTypesRoundTrip:
 
     def test_optional_well_known_types(self):
         """Test optional Timestamp and Duration fields."""
-        # TODO: This test should pass but currently fails due to timezone handling issues
-        # with Timestamp fields (same issue as test_basic_timestamp)
-        return  # Skip for now
-        
         msg = well_known_types_roundtrip_pb2.WellKnownTypesMessage()
-        
+
         test_cases = [
             # Both set
             {
-                "optional_timestamp": datetime(2023, 6, 15, 10, 30, 0, tzinfo=timezone.utc),
+                "optional_timestamp": datetime(
+                    2023, 6, 15, 10, 30, 0, tzinfo=timezone.utc
+                ),
                 "optional_duration": timedelta(hours=2, minutes=15),
             },
             # Only timestamp set
@@ -242,12 +234,8 @@ class TestWellKnownTypesRoundTrip:
 
     def test_repeated_well_known_types(self):
         """Test repeated Timestamp and Duration fields."""
-        # TODO: This test should pass but currently fails due to timezone handling issues
-        # with Timestamp fields (same issue as test_basic_timestamp)
-        return  # Skip for now
-        
         msg = well_known_types_roundtrip_pb2.WellKnownTypesMessage()
-        
+
         test_cases = [
             # Empty lists
             {"event_timestamps": [], "intervals": []},
@@ -279,15 +267,19 @@ class TestWellKnownTypesRoundTrip:
         # TODO: This test should pass but currently fails due to timezone handling issues
         # with Timestamp fields (same issue as test_basic_timestamp)
         return  # Skip for now
-        
+
         msg = well_known_types_roundtrip_pb2.WellKnownTypesMessage()
-        
+
         # For map fields, we need to set them differently
         msg.timestamp_map["start"] = msg.timestamp_map["start"]
-        msg.timestamp_map["start"].FromDatetime(datetime(2023, 1, 1, tzinfo=timezone.utc))
+        msg.timestamp_map["start"].FromDatetime(
+            datetime(2023, 1, 1, tzinfo=timezone.utc)
+        )
         msg.timestamp_map["end"] = msg.timestamp_map["end"]
-        msg.timestamp_map["end"].FromDatetime(datetime(2023, 12, 31, tzinfo=timezone.utc))
-        
+        msg.timestamp_map["end"].FromDatetime(
+            datetime(2023, 12, 31, tzinfo=timezone.utc)
+        )
+
         msg.duration_map["timeout"] = msg.duration_map["timeout"]
         msg.duration_map["timeout"].FromTimedelta(timedelta(seconds=30))
         msg.duration_map["interval"] = msg.duration_map["interval"]
@@ -299,7 +291,7 @@ class TestWellKnownTypesRoundTrip:
         pydantic_model = self._json_to_pydantic(proto_json, model_class)
         pydantic_json = self._pydantic_to_json(pydantic_model)
         reconstructed_msg = self._json_to_protobuf(pydantic_json, type(msg))
-        
+
         # Verify maps are preserved
         assert len(reconstructed_msg.timestamp_map) == 2
         assert len(reconstructed_msg.duration_map) == 2
@@ -309,16 +301,18 @@ class TestWellKnownTypesRoundTrip:
         # TODO: This test should pass but currently fails due to timezone handling issues
         # with Timestamp fields (same issue as test_basic_timestamp)
         return  # Skip for now
-        
+
         msg = well_known_types_roundtrip_pb2.WellKnownEdgeCasesMessage()
-        
+
         # Zero timestamp (Unix epoch)
         msg.zero_timestamp.FromSeconds(0)
-        
+
         # Max reasonable timestamp (year 9999)
         # Note: We use a reasonable max instead of the actual max to avoid overflow issues
-        msg.max_timestamp.FromDatetime(datetime(9999, 12, 31, 23, 59, 59, tzinfo=timezone.utc))
-        
+        msg.max_timestamp.FromDatetime(
+            datetime(9999, 12, 31, 23, 59, 59, tzinfo=timezone.utc)
+        )
+
         # Precise timestamp with microseconds (Python datetime precision limit)
         precise_dt = datetime(2023, 1, 1, 12, 0, 0, 123456, tzinfo=timezone.utc)
         msg.precise_timestamp.FromDatetime(precise_dt)
@@ -329,7 +323,7 @@ class TestWellKnownTypesRoundTrip:
         pydantic_model = self._json_to_pydantic(proto_json, model_class)
         pydantic_json = self._pydantic_to_json(pydantic_model)
         reconstructed_msg = self._json_to_protobuf(pydantic_json, type(msg))
-        
+
         # Verify timestamps are preserved
         assert reconstructed_msg.zero_timestamp.ToSeconds() == 0
         assert reconstructed_msg.max_timestamp.ToDatetime().year == 9999
@@ -341,9 +335,9 @@ class TestWellKnownTypesRoundTrip:
         # The duration fields themselves work correctly (see test_duration_only_roundtrip).
         # To fix this, the generated models would need to use timezone-aware datetimes.
         return  # Skip for now
-        
+
         msg = well_known_types_roundtrip_pb2.WellKnownTypesMessage()
-        
+
         # Test various duration edge cases
         test_cases = [
             # Zero duration
@@ -363,17 +357,18 @@ class TestWellKnownTypesRoundTrip:
             msg = well_known_types_roundtrip_pb2.WellKnownTypesMessage()
             # Only set the duration field we're testing
             msg.timeout.FromTimedelta(test_data["timeout"])
-            
+
             # Test the round trip
             proto_json = self._protobuf_to_json(msg)
             model_class = self._create_pydantic_model(type(msg))
             pydantic_model = self._json_to_pydantic(proto_json, model_class)
             pydantic_json = self._pydantic_to_json(pydantic_model)
             reconstructed_msg = self._json_to_protobuf(pydantic_json, type(msg))
-            
+
             # Verify duration is preserved
-            assert reconstructed_msg.timeout.ToTimedelta() == test_data["timeout"], \
+            assert reconstructed_msg.timeout.ToTimedelta() == test_data["timeout"], (
                 f"Duration mismatch for {test_data['timeout']}: got {reconstructed_msg.timeout.ToTimedelta()}"
+            )
 
     def test_value_field_basic(self):
         """Test basic google.protobuf.Value field round-trip."""
@@ -382,9 +377,9 @@ class TestWellKnownTypesRoundTrip:
         # The test needs to be updated to use the proper protobuf API for Value fields
         # (e.g., msg.dynamic_value.Pack() or setting specific value types).
         return  # Skip for now
-        
+
         msg = value_demo_pb2.ValueTestMessage()
-        
+
         # Test different value types
         test_cases = [
             # Null value
@@ -398,13 +393,19 @@ class TestWellKnownTypesRoundTrip:
             # List value
             {"id": "test5", "dynamic_value": [1, "two", 3.0, True, None]},
             # Struct value (dict)
-            {"id": "test6", "dynamic_value": {"name": "John", "age": 30, "active": True}},
+            {
+                "id": "test6",
+                "dynamic_value": {"name": "John", "age": 30, "active": True},
+            },
             # Nested structures
             {
                 "id": "test7",
                 "dynamic_value": {
                     "user": {"name": "Alice", "scores": [95, 87, 92]},
-                    "metadata": {"created": "2023-01-01", "tags": ["python", "protobuf"]},
+                    "metadata": {
+                        "created": "2023-01-01",
+                        "tags": ["python", "protobuf"],
+                    },
                 },
             },
         ]
@@ -418,21 +419,23 @@ class TestWellKnownTypesRoundTrip:
         # fields in collections require special handling - they cannot be set directly.
         # The test needs to be updated to use the proper protobuf API for Value fields.
         return  # Skip for now
-        
+
         msg = value_demo_pb2.ValueTestMessage()
-        
+
         # Test repeated Value field
         msg.id = "collection_test"
-        msg.value_list.extend([
-            # Different types in the list
-            42,
-            "string value",
-            True,
-            None,
-            {"nested": "object"},
-            [1, 2, 3],
-        ])
-        
+        msg.value_list.extend(
+            [
+                # Different types in the list
+                42,
+                "string value",
+                True,
+                None,
+                {"nested": "object"},
+                [1, 2, 3],
+            ]
+        )
+
         # Test map with Value values
         msg.value_map["number"] = 123
         msg.value_map["string"] = "test string"
@@ -447,7 +450,7 @@ class TestWellKnownTypesRoundTrip:
         pydantic_model = self._json_to_pydantic(proto_json, model_class)
         pydantic_json = self._pydantic_to_json(pydantic_model)
         reconstructed_msg = self._json_to_protobuf(pydantic_json, type(msg))
-        
+
         # Verify collections are preserved
         assert len(reconstructed_msg.value_list) == 6
         assert len(reconstructed_msg.value_map) == 6
@@ -457,32 +460,36 @@ class TestWellKnownTypesRoundTrip:
         # TODO: This test should pass but currently fails due to timezone handling issues
         # with Timestamp fields (same issue as test_basic_timestamp)
         return  # Skip for now
-        
+
         msg = well_known_types_roundtrip_pb2.WellKnownTypesMessage()
-        
+
         # Set various fields
         msg.created_at.FromDatetime(datetime(2023, 1, 1, tzinfo=timezone.utc))
         msg.updated_at.FromDatetime(datetime(2023, 6, 15, tzinfo=timezone.utc))
         msg.expires_at.FromDatetime(datetime(2024, 1, 1, tzinfo=timezone.utc))
-        
+
         msg.timeout.FromTimedelta(timedelta(seconds=30))
         msg.processing_time.FromTimedelta(timedelta(milliseconds=150))
         msg.ttl.FromTimedelta(timedelta(hours=24))
-        
+
         msg.optional_timestamp.FromDatetime(datetime.now(timezone.utc))
         msg.optional_duration.FromTimedelta(timedelta(minutes=5))
-        
-        msg.event_timestamps.extend([
-            msg.event_timestamps.add(),
-            msg.event_timestamps.add(),
-        ])
+
+        msg.event_timestamps.extend(
+            [
+                msg.event_timestamps.add(),
+                msg.event_timestamps.add(),
+            ]
+        )
         msg.event_timestamps[0].FromDatetime(datetime(2023, 1, 1, tzinfo=timezone.utc))
         msg.event_timestamps[1].FromDatetime(datetime(2023, 1, 2, tzinfo=timezone.utc))
-        
-        msg.intervals.extend([
-            msg.intervals.add(),
-            msg.intervals.add(),
-        ])
+
+        msg.intervals.extend(
+            [
+                msg.intervals.add(),
+                msg.intervals.add(),
+            ]
+        )
         msg.intervals[0].FromTimedelta(timedelta(minutes=10))
         msg.intervals[1].FromTimedelta(timedelta(minutes=20))
 
@@ -492,7 +499,7 @@ class TestWellKnownTypesRoundTrip:
         pydantic_model = self._json_to_pydantic(proto_json, model_class)
         pydantic_json = self._pydantic_to_json(pydantic_model)
         reconstructed_msg = self._json_to_protobuf(pydantic_json, type(msg))
-        
+
         # Verify all fields are preserved
         assert reconstructed_msg.created_at.ToDatetime().year == 2023
         assert reconstructed_msg.timeout.ToTimedelta() == timedelta(seconds=30)
@@ -501,7 +508,7 @@ class TestWellKnownTypesRoundTrip:
 
     def test_static_model_timestamp_duration(self):
         """Test that pre-generated static models handle timestamps and durations correctly."""
-        
+
         # Create a model with timestamp and duration
         model = well_known_types_roundtrip_p2p.WellKnownTypesMessage(
             created_at=datetime(2023, 1, 1, 12, 0, 0, tzinfo=timezone.utc),
@@ -512,15 +519,17 @@ class TestWellKnownTypesRoundTrip:
             ],
             intervals=[timedelta(hours=1), timedelta(hours=2)],
         )
-        
+
         # Serialize to JSON
         json_str = model.model_dump_json(by_alias=True)
-        
+
         # Parse back
-        parsed_model = well_known_types_roundtrip_p2p.WellKnownTypesMessage.model_validate_json(
-            json_str
+        parsed_model = (
+            well_known_types_roundtrip_p2p.WellKnownTypesMessage.model_validate_json(
+                json_str
+            )
         )
-        
+
         # Verify values
         assert parsed_model.created_at.year == 2023
         assert parsed_model.timeout == timedelta(minutes=30)
@@ -542,13 +551,13 @@ class TestWellKnownTypesRoundTrip:
                 "array": [1, 2, 3],
             },
         )
-        
+
         # Serialize to JSON
         json_str = model.model_dump_json(by_alias=True)
-        
+
         # Parse back
         parsed_model = value_demo_p2p.ValueTestMessage.model_validate_json(json_str)
-        
+
         # Verify values
         assert parsed_model.id == "test"
         assert isinstance(parsed_model.dynamic_value, dict)
@@ -561,12 +570,12 @@ class TestWellKnownTypesRoundTrip:
         # Create a simple model with only duration field
         from pydantic import BaseModel, Field
         from protobuf_to_pydantic.util import DurationType
-        
+
         class DurationOnlyModel(BaseModel):
             duration: DurationType = Field()
             optional_duration: Optional[DurationType] = Field(default=None)
             duration_list: List[DurationType] = Field(default_factory=list)
-        
+
         # Test various duration values
         test_cases = [
             # Basic durations
@@ -582,23 +591,25 @@ class TestWellKnownTypesRoundTrip:
             timedelta(milliseconds=100),
             timedelta(microseconds=1),
         ]
-        
+
         for td in test_cases:
             # Create model instance
             model = DurationOnlyModel(
                 duration=td,
                 optional_duration=td,
-                duration_list=[td, timedelta(seconds=60)]
+                duration_list=[td, timedelta(seconds=60)],
             )
-            
+
             # Serialize to JSON
             json_str = model.model_dump_json()
-            
+
             # Parse back
             parsed_model = DurationOnlyModel.model_validate_json(json_str)
-            
+
             # Verify values
-            assert parsed_model.duration == td, f"Duration mismatch: expected {td}, got {parsed_model.duration}"
+            assert parsed_model.duration == td, (
+                f"Duration mismatch: expected {td}, got {parsed_model.duration}"
+            )
             assert parsed_model.optional_duration == td
             assert parsed_model.duration_list[0] == td
             assert parsed_model.duration_list[1] == timedelta(seconds=60)

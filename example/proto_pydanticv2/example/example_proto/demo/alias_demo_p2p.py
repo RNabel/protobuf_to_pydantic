@@ -3,13 +3,13 @@
 # Protobuf Version: 6.31.1
 # Pydantic Version: 2.11.7
 import typing
-from datetime import datetime
 
 from google.protobuf.message import Message  # type: ignore
 from pydantic import Field, model_validator
 
 from protobuf_to_pydantic.customer_validator.v2 import check_one_of
 from protobuf_to_pydantic.default_base_model import ProtobufCompatibleBaseModel
+from protobuf_to_pydantic.util import TimestampType, datetime_utc_now
 
 
 class GeoLocation(ProtobufCompatibleBaseModel):
@@ -28,7 +28,7 @@ class ReportData(ProtobufCompatibleBaseModel):
     }
     one_of_validator = model_validator(mode="before")(check_one_of)
     location_value: typing.Optional[GeoLocation] = Field(default_factory=GeoLocation)
-    time_value: datetime = Field(default_factory=datetime.now)
+    time_value: TimestampType = Field(default_factory=datetime_utc_now)
 
 
 class Report(ProtobufCompatibleBaseModel):

@@ -43,7 +43,13 @@ from protobuf_to_pydantic.customer_validator.v2 import (
 )
 from protobuf_to_pydantic.default_base_model import ProtobufCompatibleBaseModel
 from protobuf_to_pydantic.field_info_rule.protobuf_option_to_field_info.types import HostNameStr, UriRefStr
-from protobuf_to_pydantic.util import Timedelta, duration_serializer
+from protobuf_to_pydantic.util import (
+    Timedelta,
+    datetime_utc_now,
+    duration_serializer,
+    timestamp_serializer,
+    timestamp_validator,
+)
 from pydantic import ConfigDict, Field, field_validator, model_validator
 from pydantic.alias_generators import to_camel
 from pydantic.aliases import AliasGenerator
@@ -724,8 +730,12 @@ class NestedMessage(ProtobufCompatibleBaseModel):
             min_length=13,
             max_length=19,
         )
-        exp: datetime = Field(
-            default_factory=datetime.now,
+        exp: typing_extensions.Annotated[
+            datetime,
+            BeforeValidator(func=timestamp_validator),
+            PlainSerializer(func=timestamp_serializer, return_type=str, when_used="json"),
+        ] = Field(
+            default_factory=datetime_utc_now,
             alias_priority=1,
             validation_alias="exp",
             serialization_alias="exp",
@@ -750,9 +760,11 @@ class NestedMessage(ProtobufCompatibleBaseModel):
         bank_number: str = Field(
             default="", alias_priority=1, validation_alias="bankNumber", serialization_alias="bankNumber"
         )
-        exp: datetime = Field(
-            default_factory=datetime.now, alias_priority=1, validation_alias="exp", serialization_alias="exp"
-        )
+        exp: typing_extensions.Annotated[
+            datetime,
+            BeforeValidator(func=timestamp_validator),
+            PlainSerializer(func=timestamp_serializer, return_type=str, when_used="json"),
+        ] = Field(default_factory=datetime_utc_now, alias_priority=1, validation_alias="exp", serialization_alias="exp")
         uuid: str = Field(default="", alias_priority=1, validation_alias="uuid", serialization_alias="uuid")
 
     model_config = ConfigDict(
@@ -1053,55 +1065,85 @@ class TimestampTest(ProtobufCompatibleBaseModel):
         serialize_by_alias=True,
     )
 
-    required_test: datetime = Field(
-        alias_priority=1, validation_alias="requiredTest", serialization_alias="requiredTest"
-    )
-    const_test: datetime = Field(
-        default_factory=datetime.now,
+    required_test: typing_extensions.Annotated[
+        datetime,
+        BeforeValidator(func=timestamp_validator),
+        PlainSerializer(func=timestamp_serializer, return_type=str, when_used="json"),
+    ] = Field(alias_priority=1, validation_alias="requiredTest", serialization_alias="requiredTest")
+    const_test: typing_extensions.Annotated[
+        datetime,
+        BeforeValidator(func=timestamp_validator),
+        PlainSerializer(func=timestamp_serializer, return_type=str, when_used="json"),
+    ] = Field(
+        default_factory=datetime_utc_now,
         alias_priority=1,
         validation_alias="constTest",
         serialization_alias="constTest",
         timestamp_const=1600000000.0,
     )
-    range_test: datetime = Field(
-        default_factory=datetime.now,
+    range_test: typing_extensions.Annotated[
+        datetime,
+        BeforeValidator(func=timestamp_validator),
+        PlainSerializer(func=timestamp_serializer, return_type=str, when_used="json"),
+    ] = Field(
+        default_factory=datetime_utc_now,
         alias_priority=1,
         validation_alias="rangeTest",
         serialization_alias="rangeTest",
         timestamp_lt=1600000010.0,
         timestamp_gt=1600000000.0,
     )
-    range_e_test: datetime = Field(
-        default_factory=datetime.now,
+    range_e_test: typing_extensions.Annotated[
+        datetime,
+        BeforeValidator(func=timestamp_validator),
+        PlainSerializer(func=timestamp_serializer, return_type=str, when_used="json"),
+    ] = Field(
+        default_factory=datetime_utc_now,
         alias_priority=1,
         validation_alias="rangeETest",
         serialization_alias="rangeETest",
         timestamp_le=1600000010.0,
         timestamp_ge=1600000000.0,
     )
-    lt_now_test: datetime = Field(
-        default_factory=datetime.now,
+    lt_now_test: typing_extensions.Annotated[
+        datetime,
+        BeforeValidator(func=timestamp_validator),
+        PlainSerializer(func=timestamp_serializer, return_type=str, when_used="json"),
+    ] = Field(
+        default_factory=datetime_utc_now,
         alias_priority=1,
         validation_alias="ltNowTest",
         serialization_alias="ltNowTest",
         timestamp_lt_now=True,
     )
-    gt_now_test: datetime = Field(
-        default_factory=datetime.now,
+    gt_now_test: typing_extensions.Annotated[
+        datetime,
+        BeforeValidator(func=timestamp_validator),
+        PlainSerializer(func=timestamp_serializer, return_type=str, when_used="json"),
+    ] = Field(
+        default_factory=datetime_utc_now,
         alias_priority=1,
         validation_alias="gtNowTest",
         serialization_alias="gtNowTest",
         timestamp_gt_now=True,
     )
-    within_test: datetime = Field(
-        default_factory=datetime.now,
+    within_test: typing_extensions.Annotated[
+        datetime,
+        BeforeValidator(func=timestamp_validator),
+        PlainSerializer(func=timestamp_serializer, return_type=str, when_used="json"),
+    ] = Field(
+        default_factory=datetime_utc_now,
         alias_priority=1,
         validation_alias="withinTest",
         serialization_alias="withinTest",
         timestamp_within=timedelta(seconds=1),
     )
-    within_and_gt_now_test: datetime = Field(
-        default_factory=datetime.now,
+    within_and_gt_now_test: typing_extensions.Annotated[
+        datetime,
+        BeforeValidator(func=timestamp_validator),
+        PlainSerializer(func=timestamp_serializer, return_type=str, when_used="json"),
+    ] = Field(
+        default_factory=datetime_utc_now,
         alias_priority=1,
         validation_alias="withinAndGtNowTest",
         serialization_alias="withinAndGtNowTest",

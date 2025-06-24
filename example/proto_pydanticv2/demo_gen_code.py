@@ -6,13 +6,17 @@ import typing
 from datetime import datetime
 from enum import IntEnum
 
+import typing_extensions
 from google.protobuf.field_mask_pb2 import FieldMask  # type: ignore
 from google.protobuf.wrappers_pb2 import DoubleValue  # type: ignore
 from protobuf_to_pydantic.customer_validator.v2 import check_one_of
 from protobuf_to_pydantic.default_base_model import ProtobufCompatibleBaseModel
+from protobuf_to_pydantic.util import datetime_utc_now, timestamp_serializer, timestamp_validator
 from pydantic import ConfigDict, Field, model_validator
 from pydantic.alias_generators import to_camel
 from pydantic.aliases import AliasGenerator
+from pydantic.functional_serializers import PlainSerializer
+from pydantic.functional_validators import BeforeValidator
 
 
 class AfterReferMessage(ProtobufCompatibleBaseModel):
@@ -268,9 +272,11 @@ class NestedMessage(ProtobufCompatibleBaseModel):
         bank_number: str = Field(
             default="", alias_priority=1, validation_alias="bankNumber", serialization_alias="bankNumber"
         )
-        exp: datetime = Field(
-            default_factory=datetime.now, alias_priority=1, validation_alias="exp", serialization_alias="exp"
-        )
+        exp: typing_extensions.Annotated[
+            datetime,
+            BeforeValidator(func=timestamp_validator),
+            PlainSerializer(func=timestamp_serializer, return_type=str, when_used="json"),
+        ] = Field(default_factory=datetime_utc_now, alias_priority=1, validation_alias="exp", serialization_alias="exp")
         uuid: str = Field(default="", alias_priority=1, validation_alias="uuid", serialization_alias="uuid")
 
     class IncludeEnum(IntEnum):
