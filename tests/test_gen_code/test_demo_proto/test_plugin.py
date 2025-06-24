@@ -79,7 +79,7 @@ class NestedMessage(ProtobufCompatibleBaseModel):
         exp: TimestampType = Field(default_factory=exp_time)
         uuid: str = Field(default_factory=uuid4)
 
-    class IncludeEnum(IntEnum):
+    class IncludeEnum(IntEnum, FlexibleEnumMixin):
         zero = 0
         one = 1
         two = 2

@@ -15,12 +15,13 @@ from pydantic.types import PaymentCardNumber
 from example.plugin_config import exp_time
 from protobuf_to_pydantic.customer_validator.v2 import check_one_of
 from protobuf_to_pydantic.default_base_model import ProtobufCompatibleBaseModel
+from protobuf_to_pydantic.flexible_enum_mixin import FlexibleEnumMixin
 from protobuf_to_pydantic.util import TimestampType
 
 from ..common.single_p2p import DemoEnum, DemoMessage
 
 
-class SexType(IntEnum):
+class SexType(IntEnum, FlexibleEnumMixin):
     man = 0
     women = 1
 
@@ -86,7 +87,7 @@ class NestedMessage(ProtobufCompatibleBaseModel):
         exp: typing.Optional[TimestampType] = Field(default_factory=exp_time)
         uuid: typing.Optional[str] = Field(default_factory=uuid4)
 
-    class IncludeEnum(IntEnum):
+    class IncludeEnum(IntEnum, FlexibleEnumMixin):
         zero = 0
         one = 1
         two = 2

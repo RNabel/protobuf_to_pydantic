@@ -8,9 +8,10 @@ from google.protobuf.message import Message  # type: ignore
 from pydantic import Field
 
 from protobuf_to_pydantic.default_base_model import ProtobufCompatibleBaseModel
+from protobuf_to_pydantic.flexible_enum_mixin import FlexibleEnumMixin
 
 
-class DemoEnum(IntEnum):
+class DemoEnum(IntEnum, FlexibleEnumMixin):
     zero = 0
     one = 1
     two = 3

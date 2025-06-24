@@ -49,10 +49,11 @@ from protobuf_to_pydantic.customer_validator.v2 import (
 )
 from protobuf_to_pydantic.default_base_model import ProtobufCompatibleBaseModel
 from protobuf_to_pydantic.field_info_rule.protobuf_option_to_field_info.types import HostNameStr, UriRefStr
+from protobuf_to_pydantic.flexible_enum_mixin import FlexibleEnumMixin
 from protobuf_to_pydantic.util import DurationType, TimestampType, datetime_utc_now
 
 
-class State(IntEnum):
+class State(IntEnum, FlexibleEnumMixin):
     INACTIVE = 0
     PENDING = 1
     ACTIVE = 2
