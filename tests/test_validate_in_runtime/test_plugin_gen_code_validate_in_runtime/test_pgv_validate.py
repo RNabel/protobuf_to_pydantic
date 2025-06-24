@@ -1,21 +1,14 @@
 from typing import Any, Callable, Type
 
-from google.protobuf import __version__
 from pydantic import BaseModel
 
-if __version__ > "4.0.0":
-    from example.proto_pydanticv2.example.example_proto.validate import demo_p2p
-else:
-    from example.proto_3_20_pydanticv2.example.example_proto.validate import demo_p2p
-
+from example.proto_pydanticv2.example.example_proto.validate import demo_p2p
 from tests.test_validate_in_runtime.test_gen_model_validate_in_runtime.test_pgv_validate import (
     BaseTestPgvModelValidator,
 )
 
-
 def stub_func(model_class: Type[BaseModel], **kwargs: Any) -> Type[BaseModel]:
     return model_class
-
 
 class TestP2pModelValidator(BaseTestPgvModelValidator):
     number_model_class_list: list = [

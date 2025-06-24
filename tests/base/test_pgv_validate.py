@@ -7,8 +7,6 @@ import pytest
 from google.protobuf.any_pb2 import Any as AnyMessage  # type: ignore
 from pydantic import ValidationError
 
-
-
 class BaseTestPgvModelValidator:
     number_model_class_list: list = []
     replace_message_fn: Callable = staticmethod(lambda model_class, **kwargs: model_class)  # type: ignore

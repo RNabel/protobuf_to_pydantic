@@ -2,35 +2,22 @@ import json
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional
 
-from google.protobuf import json_format, __version__
+from google.protobuf import json_format
 from google.protobuf.message import Message
 from pydantic import BaseModel
 
-if __version__ > "4.0.0":
-    from example.proto_pydanticv2.example.example_proto.demo import (
-        well_known_types_roundtrip_pb2,
-        value_demo_pb2,
-    )
-else:
-    from example.proto_3_20_pydanticv2.example.example_proto.demo import (
-        well_known_types_roundtrip_pb2,
-        value_demo_pb2,
-    )
+from example.proto_pydanticv2.example.example_proto.demo import (
+    well_known_types_roundtrip_pb2,
+    value_demo_pb2,
+)
 
 from protobuf_to_pydantic import msg_to_pydantic_model
 
 # Import the pre-generated Pydantic models
-if __version__ > "4.0.0":
-    from example.proto_pydanticv2.example.example_proto.demo import (
-        well_known_types_roundtrip_p2p,
-        value_demo_p2p,
-    )
-else:
-    from example.proto_3_20_pydanticv2.example.example_proto.demo import (
-        well_known_types_roundtrip_p2p,
-        value_demo_p2p,
-    )
-
+from example.proto_pydanticv2.example.example_proto.demo import (
+    well_known_types_roundtrip_p2p,
+    value_demo_p2p,
+)
 
 class TestWellKnownTypesRoundTrip:
     """Test round-trip conversion for well-known protobuf types."""

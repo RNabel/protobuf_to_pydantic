@@ -2,7 +2,6 @@
 
 from protobuf_to_pydantic.gen_code import P2C
 
-
 class P2CNoHeader(P2C):
     """P2C subclass that excludes headers and imports for test comparisons."""
     

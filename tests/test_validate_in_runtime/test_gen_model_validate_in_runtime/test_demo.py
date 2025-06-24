@@ -1,8 +1,6 @@
 from functools import partial
 from typing import Callable
 
-from google.protobuf import __version__
-
 from protobuf_to_pydantic import msg_to_pydantic_model
 from tests.base.base_demo_validate import (
     BaseTestAliasDemoValidator,
@@ -11,18 +9,11 @@ from tests.base.base_demo_validate import (
 )
 from tests.base.base_p2p_validate import local_dict
 
-if __version__ > "4.0.0":
-    from example.proto_pydanticv2.example.example_proto.demo import (  # type: ignore[no-redef]
-        alias_demo_pb2,
-        all_feidl_set_optional_demo_pb2,
-        single_config_pb2,
-    )
-else:
-    from example.proto_3_20_pydanticv2.example.example_proto.demo import (  # type: ignore[no-redef]
-        alias_demo_pb2,
-        all_feidl_set_optional_demo_pb2,
-        single_config_pb2,
-    )
+from example.proto_pydanticv2.example.example_proto.demo import (  # type: ignore[no-redef]
+    alias_demo_pb2,
+    all_feidl_set_optional_demo_pb2,
+    single_config_pb2,
+)
 
 
 class TestAliasDemoValidator(BaseTestAliasDemoValidator):

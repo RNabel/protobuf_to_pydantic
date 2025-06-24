@@ -3,7 +3,6 @@ from typing import Callable, Type
 import pytest
 from pydantic import ValidationError
 
-
 class BaseTestAliasDemoValidator:
     replace_message_fn: Callable = staticmethod(lambda x:x)  # type: ignore[assignment]
 
@@ -85,7 +84,6 @@ class BaseTestAllFieldSetOptionalDemoValidator:
         model_class = self.replace_message_fn(model_class)
         model_class()
 
-
 class BaseTestDemoValidator:
     pass
 
@@ -104,7 +102,6 @@ class BaseTestSingleConfigValidator:
 
         with pytest.raises(ValidationError):
             model_class(**{"uid": "10086", "age": 1, "height": 1, "user_name": ""})
-
 
 class BaseTestCustomCommentHandler:
     replace_message_fn: Callable = staticmethod(lambda x:x)  # type: ignore[assignment]

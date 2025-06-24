@@ -9,24 +9,15 @@ import json
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict
 
-from google.protobuf import json_format, struct_pb2, __version__
+from google.protobuf import json_format, struct_pb2
 from google.protobuf.message import Message
 
-if __version__ > "4.0.0":
-    from example.proto_pydanticv2.example.example_proto.demo import (
-        well_known_types_roundtrip_pb2,
-        well_known_types_roundtrip_p2p,
-        value_demo_pb2,
-        value_demo_p2p,
-    )
-else:
-    from example.proto_3_20_pydanticv2.example.example_proto.demo import (
-        well_known_types_roundtrip_pb2,
-        well_known_types_roundtrip_p2p,
-        value_demo_pb2,
-        value_demo_p2p,
-    )
-
+from example.proto_pydanticv2.example.example_proto.demo import (
+    well_known_types_roundtrip_pb2,
+    well_known_types_roundtrip_p2p,
+    value_demo_pb2,
+    value_demo_p2p,
+)
 
 class TestComprehensiveRoundtrip:
     """Test comprehensive roundtrip conversions for all well-known types."""

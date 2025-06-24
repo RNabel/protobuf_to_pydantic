@@ -2,32 +2,15 @@ import json
 import math
 from typing import Any, Dict
 
-from google.protobuf import json_format, __version__
+from google.protobuf import json_format
 from google.protobuf.message import Message
 from pydantic import BaseModel
 
-if __version__ > "4.0.0":
-    from example.proto_pydanticv2.example.example_proto.demo import (
-        basic_types_roundtrip_pb2,
-    )
-else:
-    from example.proto_3_20_pydanticv2.example.example_proto.demo import (
-        basic_types_roundtrip_pb2,
-    )
-
+from example.proto_pydanticv2.example.example_proto.demo import (         basic_types_roundtrip_pb2,     )
 from protobuf_to_pydantic import msg_to_pydantic_model
 
 # Import the pre-generated Pydantic models
-if __version__ > "4.0.0":
-    from example.proto_pydanticv2.example.example_proto.demo import (
-        basic_types_roundtrip_p2p,
-    )
-else:
-    from example.proto_3_20_pydanticv2.example.example_proto.demo import (
-        basic_types_roundtrip_p2p,
-    )
-
-
+from example.proto_pydanticv2.example.example_proto.demo import (         basic_types_roundtrip_p2p,     )
 class TestBasicTypesRoundTrip:
     """Test round-trip conversion between Protobuf messages and Pydantic models for all basic types."""
 

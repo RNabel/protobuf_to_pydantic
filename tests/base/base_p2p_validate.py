@@ -16,7 +16,6 @@ local_dict: dict = {
     "customer_any": customer_any,
 }
 
-
 class BaseTestP2pModelValidator:
     number_model_class_list: list = []
     replace_message_fn: Callable = staticmethod(lambda model_class, **kwargs: model_class)  # type: ignore

@@ -1,6 +1,5 @@
 from protobuf_to_pydantic.gen_code import P2C
 
-
 class P2CTest(P2C):
     def format_content(self, content_str: str) -> str:
         try:
