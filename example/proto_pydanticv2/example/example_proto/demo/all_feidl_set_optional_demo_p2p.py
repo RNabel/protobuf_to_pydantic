@@ -119,12 +119,7 @@ class EmptyMessage(ProtobufCompatibleBaseModel):
 
 
 class OptionalMessage(ProtobufCompatibleBaseModel):
-    _one_of_dict = {
-        "OptionalMessage.a": {
-            "fields": {"age", "defaultTemplateTest", "intMap", "item", "name", "strList", "x", "y"},
-            "required": True,
-        }
-    }
+    _one_of_dict = {"OptionalMessage.a": {"fields": {"x", "y"}, "required": True}}
     one_of_validator = model_validator(mode="before")(check_one_of)
     x: typing.Optional[str] = Field(default="")
     y: typing.Optional[int] = Field(default=0, title="use age", ge=0, example=18)

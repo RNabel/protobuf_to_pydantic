@@ -120,12 +120,7 @@ class InvoiceItem(ProtobufCompatibleBaseModel):
         output = getsource(demo_p2p.OptionalMessage)
         assert_expected_inline(output, """\
 class OptionalMessage(ProtobufCompatibleBaseModel):
-    _one_of_dict = {
-        "OptionalMessage.a": {
-            "fields": {"age", "defaultTemplateTest", "intMap", "item", "name", "strList", "x", "y", "yy"},
-            "required": True,
-        }
-    }
+    _one_of_dict = {"OptionalMessage.a": {"fields": {"x", "y", "yy"}, "required": True}}
     one_of_validator = model_validator(mode="before")(check_one_of)
     x: str = Field(default="")
     y: int = Field(default=0, alias="yy", title="use age", ge=0, example=18)

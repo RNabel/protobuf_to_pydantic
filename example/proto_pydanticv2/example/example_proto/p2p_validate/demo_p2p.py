@@ -700,7 +700,7 @@ class MessageIgnoredTest(ProtobufCompatibleBaseModel):
 
 
 class OneOfTest(ProtobufCompatibleBaseModel):
-    _one_of_dict = {"OneOfTest.id": {"fields": {"header", "x", "y"}, "required": True}}
+    _one_of_dict = {"OneOfTest.id": {"fields": {"x", "y"}, "required": True}}
     one_of_validator = model_validator(mode="before")(check_one_of)
     header: str = Field(default="")
     x: str = Field(default="")
@@ -708,7 +708,7 @@ class OneOfTest(ProtobufCompatibleBaseModel):
 
 
 class OneOfNotTest(ProtobufCompatibleBaseModel):
-    _one_of_dict = {"OneOfNotTest.id": {"fields": {"header", "x", "y"}}}
+    _one_of_dict = {"OneOfNotTest.id": {"fields": {"x", "y"}}}
     one_of_validator = model_validator(mode="before")(check_one_of)
     header: str = Field(default="")
     x: str = Field(default="")
@@ -717,11 +717,7 @@ class OneOfNotTest(ProtobufCompatibleBaseModel):
 
 class OneOfOptionalTest(ProtobufCompatibleBaseModel):
     _one_of_dict = {
-        "OneOfOptionalTest.id": {
-            "fields": {"age", "header", "intMap", "name", "strList", "x", "y", "z"},
-            "optional_fields": {"x", "y"},
-            "required": True,
-        }
+        "OneOfOptionalTest.id": {"fields": {"x", "y", "z"}, "optional_fields": {"x", "y"}, "required": True}
     }
     one_of_validator = model_validator(mode="before")(check_one_of)
     header: str = Field(default="")
