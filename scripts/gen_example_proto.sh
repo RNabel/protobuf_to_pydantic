@@ -1,5 +1,7 @@
 #!/bin/bash
 # Executed at the root of the project
+set -euo pipefail
+
 proto_target=$(uv run python -c "from google.protobuf import __version__;target_p = 'proto' if __version__ > '4.0.0' else 'proto_3_20';target_p += '_pydanticv2';print(target_p)")
 echo "Using proto_target: ${proto_target}"
 # gen python protos code path
