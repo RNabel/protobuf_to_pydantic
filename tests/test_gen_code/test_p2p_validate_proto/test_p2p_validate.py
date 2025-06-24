@@ -3,17 +3,10 @@ import time
 from typing import Any
 
 from expecttest import assert_expected_inline
-from google.protobuf import __version__
 
 from tests.test_gen_code.test_helper import P2CNoHeader
 
-if __version__ > "4.0.0":
-    from example.proto_pydanticv2.example.example_proto.p2p_validate import demo_pb2
-else:
-    from example.proto_3_20_pydanticv2.example.example_proto.p2p_validate import (
-        demo_pb2,
-    )
-
+from example.proto_pydanticv2.example.example_proto.p2p_validate import demo_pb2
 from example.gen_p2p_code import (
     CustomCommentTemplate,
     CustomerField,
@@ -23,10 +16,8 @@ from example.gen_p2p_code import (
 )
 from protobuf_to_pydantic import msg_to_pydantic_model, pydantic_model_to_py_code
 
-
 def exp_time() -> float:
     return time.time()
-
 
 class TestP2pValidate:
     @staticmethod

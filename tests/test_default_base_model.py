@@ -6,7 +6,6 @@ from typing import Any
 from protobuf_to_pydantic import msg_to_pydantic_model
 from protobuf_to_pydantic.default_base_model import ProtobufCompatibleBaseModel
 
-
 # Create a simple test descriptor with float fields
 def create_test_descriptor() -> Any:
     """Create a mock descriptor for testing."""
@@ -36,7 +35,6 @@ def create_test_descriptor() -> Any:
     messages = GetMessages([proto])
     return messages["test.TestMessage"]
 
-
 def test_default_base_model_is_protobuf_compatible():
     """Test that models created without specifying a base use ProtobufCompatibleBaseModel."""
     TestMessage = create_test_descriptor()
@@ -52,7 +50,6 @@ def test_default_base_model_is_protobuf_compatible():
     
     # Verify the configuration is inherited
     assert PydanticModel.model_config.get("ser_json_inf_nan") == "strings"
-
 
 def test_default_base_model_handles_special_floats():
     """Test that the default base model correctly handles special float values."""
@@ -98,14 +95,12 @@ def test_default_base_model_handles_special_floats():
     assert json_data2[float_key] == "NaN"
     assert json_data2[double_key] == "NaN"
 
-
 def test_plugin_config_uses_protobuf_compatible_base():
     """Test that the plugin config now defaults to ProtobufCompatibleBaseModel."""
     from protobuf_to_pydantic.plugin.config import ConfigModel
     
     config = ConfigModel()
     assert config.base_model_class == ProtobufCompatibleBaseModel
-
 
 if __name__ == "__main__":
     test_default_base_model_is_protobuf_compatible()

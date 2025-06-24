@@ -3,20 +3,13 @@ from typing import Any
 from uuid import uuid4
 
 from expecttest import assert_expected_inline
-from google.protobuf import __version__
 
-if __version__ > "4.0.0":
-    from example.proto_pydanticv2.example.example_proto.demo import demo_pb2
-else:
-    from example.proto_3_20_pydanticv2.example.example_proto.demo import demo_pb2  # type: ignore[no-redef]
-
+from example.proto_pydanticv2.example.example_proto.demo import demo_pb2
 from protobuf_to_pydantic import msg_to_pydantic_model, pydantic_model_to_py_code
 from tests.test_gen_code.test_helper import P2CNoHeader
 
-
 def exp_time() -> float:
     return time.time()
-
 
 class BaseTestTextComment:
     @staticmethod
@@ -768,7 +761,6 @@ class TestSameName0(ProtobufCompatibleBaseModel):
 """,
         )
 
-
 class TestTextCommentByPyi(BaseTestTextComment):
     @staticmethod
     def _model_output(msg: Any) -> str:
@@ -779,7 +771,6 @@ class TestTextCommentByPyi(BaseTestTextComment):
             ),
             p2c_class=P2CNoHeader,
         )
-
 
 class TestTextCommentByProtobufFProtobufField(BaseTestTextComment):
     @staticmethod

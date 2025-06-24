@@ -1,12 +1,5 @@
 from typing import Any, Callable, Type
-
-from google.protobuf import __version__
-from google.protobuf.any_pb2 import Any as AnyMessage  # type: ignore
-
-if __version__ > "4.0.0":
-    from example.proto_pydanticv2 import demo_gen_code_by_pgv
-else:
-    from example.proto_3_20_pydanticv2 import demo_gen_code_by_pgv
+from example.proto_pydanticv2 import demo_gen_code_by_pgv
 
 from tests.base.test_pgv_validate import BaseTestPgvModelValidator
 
@@ -17,10 +10,17 @@ def stub_func(model_class: Type, **kwargs: Any) -> Type:
 
 class TestPgvModelValidator(BaseTestPgvModelValidator):
     number_model_class_list: list = [
-        demo_gen_code_by_pgv.FloatTest, demo_gen_code_by_pgv.DoubleTest, demo_gen_code_by_pgv.Int32Test,
-        demo_gen_code_by_pgv.Uint32Test, demo_gen_code_by_pgv.Sfixed32Test, demo_gen_code_by_pgv.Int64Test,
-        demo_gen_code_by_pgv.Sint64Test, demo_gen_code_by_pgv.Uint64Test, demo_gen_code_by_pgv.Sfixed64Test,
-        demo_gen_code_by_pgv.Fixed32Test, demo_gen_code_by_pgv.Fixed64Test
+        demo_gen_code_by_pgv.FloatTest,
+        demo_gen_code_by_pgv.DoubleTest,
+        demo_gen_code_by_pgv.Int32Test,
+        demo_gen_code_by_pgv.Uint32Test,
+        demo_gen_code_by_pgv.Sfixed32Test,
+        demo_gen_code_by_pgv.Int64Test,
+        demo_gen_code_by_pgv.Sint64Test,
+        demo_gen_code_by_pgv.Uint64Test,
+        demo_gen_code_by_pgv.Sfixed64Test,
+        demo_gen_code_by_pgv.Fixed32Test,
+        demo_gen_code_by_pgv.Fixed64Test,
     ]
     replace_message_fn: Callable = staticmethod(stub_func)  # type: ignore
 

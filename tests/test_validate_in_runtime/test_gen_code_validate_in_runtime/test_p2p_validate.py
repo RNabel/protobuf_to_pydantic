@@ -1,11 +1,6 @@
 from typing import Any, Callable, Type
 
-from google.protobuf import __version__
-
-if __version__ > "4.0.0":
-    from example.proto_pydanticv2 import demo_gen_code_by_p2p
-else:
-    from example.proto_3_20_pydanticv2 import demo_gen_code_by_p2p
+from example.proto_pydanticv2 import demo_gen_code_by_p2p
 
 from tests.base.base_p2p_validate import BaseTestP2pModelValidator, local_dict
 
@@ -21,20 +16,33 @@ class BaseGenCodeP2pModelValidator(BaseTestP2pModelValidator):
     @property
     def number_model_class_list(self):
         return [
-            self.core_module.FloatTest, self.core_module.DoubleTest, self.core_module.Int32Test,
-            self.core_module.Uint32Test, self.core_module.Sfixed32Test, self.core_module.Int64Test,
-            self.core_module.Sint64Test, self.core_module.Uint64Test, self.core_module.Sfixed64Test,
-            self.core_module.Fixed32Test, self.core_module.Fixed64Test
+            self.core_module.FloatTest,
+            self.core_module.DoubleTest,
+            self.core_module.Int32Test,
+            self.core_module.Uint32Test,
+            self.core_module.Sfixed32Test,
+            self.core_module.Int64Test,
+            self.core_module.Sint64Test,
+            self.core_module.Uint64Test,
+            self.core_module.Sfixed64Test,
+            self.core_module.Fixed32Test,
+            self.core_module.Fixed64Test,
         ]
 
     def test_bool(self) -> None:
-        self._test_bool(self.replace_message_fn(self.core_module.BoolTest, local_dict=local_dict))
+        self._test_bool(
+            self.replace_message_fn(self.core_module.BoolTest, local_dict=local_dict)
+        )
 
     def test_string(self) -> None:
-        self._test_string(self.replace_message_fn(self.core_module.StringTest, local_dict=local_dict))
+        self._test_string(
+            self.replace_message_fn(self.core_module.StringTest, local_dict=local_dict)
+        )
 
     def test_bytes(self) -> None:
-        self._test_bytes(self.replace_message_fn(self.core_module.BytesTest, local_dict=local_dict))
+        self._test_bytes(
+            self.replace_message_fn(self.core_module.BytesTest, local_dict=local_dict)
+        )
 
     def test_enum(self) -> None:
         self._test_enum(self.core_module.EnumTest)
@@ -68,6 +76,7 @@ class BaseGenCodeP2pModelValidator(BaseTestP2pModelValidator):
 
     def test_optional_message(self) -> None:
         self._test_optional_message(self.core_module.OptionalMessage)
+
 
 class TestP2pModelValidator(BaseGenCodeP2pModelValidator):
     core_module = demo_gen_code_by_p2p

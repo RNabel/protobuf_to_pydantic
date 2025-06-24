@@ -1,16 +1,8 @@
 from inspect import getsource
 
 from expecttest import assert_expected_inline
-from google.protobuf import __version__
 
-if __version__ > "4.0.0":
-    from example.proto_pydanticv2.example.example_proto.demo import demo_p2p, diff_pkg_refer_2_p2p
-else:
-    from example.proto_3_20_pydanticv2.example.example_proto.demo import (
-        demo_p2p,
-        diff_pkg_refer_2_p2p,
-    )
-
+from example.proto_pydanticv2.example.example_proto.demo import demo_p2p, diff_pkg_refer_2_p2p
 class TestPlugin:
 
     def test_empty_message(self) -> None:
@@ -182,7 +174,6 @@ class RootMessage(ProtobufCompatibleBaseModel):
     field1: str = Field(default="")
     field2: AnOtherMessage = Field(default_factory=AnOtherMessage)
 ''')
-
 
     def test_same_bane_inline_structure(self) -> None:
         output = getsource(demo_p2p.TestSameName0)

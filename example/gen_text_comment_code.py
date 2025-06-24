@@ -5,7 +5,6 @@ import time
 import warnings
 from uuid import uuid4
 
-from google.protobuf import __version__
 from google.protobuf.message import Message
 
 from protobuf_to_pydantic import (
@@ -29,8 +28,7 @@ class CustomCommentTemplate(Template):
 # use pydantic v1 method, pydantic will print warning, ignore!~
 warnings.filterwarnings("ignore")
 
-target_p: str = "proto" if __version__ > "4.0.0" else "proto_3_20"
-target_p += "_pydanticv2"
+target_p: str = "proto_pydanticv2"
 
 module = importlib.import_module(
     f"example.{target_p}.example.example_proto.demo.demo_pb2"

@@ -11,7 +11,6 @@ from protobuf_to_pydantic.customer_validator.rule import (
 
 _diff_utc_second: float = datetime.now().astimezone().utcoffset().total_seconds()  # type: ignore
 
-
 class TestCustomerConTimedelta:
     def test_contimedelta_const(self) -> None:
         class Demo(BaseModel):
@@ -82,7 +81,6 @@ class TestCustomerConTimedelta:
         Demo(demo=timedelta(minutes=2))
         with pytest.raises(ValidationError):
             Demo(demo=timedelta(minutes=1))
-
 
 class TestCustomerConTimestamp:
     def test_contimestamp_const(self) -> None:

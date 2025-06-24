@@ -1,15 +1,8 @@
 from typing import Callable
 
-from google.protobuf import __version__
-
-if __version__ > "4.0.0":
-    from example.proto_pydanticv2.example.example_proto.validate import demo_pb2
-else:
-    from example.proto_3_20_pydanticv2.example.example_proto.validate import demo_pb2
-
+from example.proto_pydanticv2.example.example_proto.validate import demo_pb2
 from protobuf_to_pydantic import msg_to_pydantic_model
 from tests.base.test_pgv_validate import BaseTestPgvModelValidator
-
 
 class TestPgvModelValidator(BaseTestPgvModelValidator):
     number_model_class_list: list = [

@@ -3,19 +3,11 @@
 from typing import Any
 
 from expecttest import assert_expected_inline
-from google.protobuf import __version__
 
-if __version__ > "4.0.0":
-    from example.proto_pydanticv2.example.example_proto.demo import value_demo_pb2
-    from example.proto_pydanticv2.example.example_proto.demo import value_demo_p2p
-else:
-    from example.proto_3_20_pydanticv2.example.example_proto.demo import value_demo_pb2  # type: ignore[no-redef]
-    from example.proto_3_20_pydanticv2.example.example_proto.demo import value_demo_p2p  # type: ignore[no-redef]
-
+from example.proto_pydanticv2.example.example_proto.demo import value_demo_pb2, value_demo_p2p
 from protobuf_to_pydantic import msg_to_pydantic_model, pydantic_model_to_py_code
 from protobuf_to_pydantic.gen_model import clear_create_model_cache
 from tests.test_gen_code.test_helper import P2CNoHeader
-
 
 class TestValueField:
     @staticmethod

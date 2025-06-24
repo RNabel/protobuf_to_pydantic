@@ -3,7 +3,6 @@ import inspect
 import pathlib
 import warnings
 
-from google.protobuf import __version__
 from google.protobuf.message import Message
 
 from protobuf_to_pydantic import (
@@ -14,8 +13,7 @@ from protobuf_to_pydantic import (
 # use pydantic v1 method, pydantic will print warning, ignore!~
 warnings.filterwarnings("ignore")
 
-target_p: str = "proto" if __version__ > "4.0.0" else "proto_3_20"
-target_p += "_pydanticv2"
+target_p: str = "proto_pydanticv2"
 
 module = importlib.import_module(
     f"example.{target_p}.example.example_proto.validate.demo_pb2"
