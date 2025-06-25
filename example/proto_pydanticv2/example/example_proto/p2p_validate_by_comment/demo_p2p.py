@@ -6,13 +6,14 @@ import typing
 from datetime import datetime, timedelta
 from enum import IntEnum
 from ipaddress import IPv4Address, IPv6Address
+from typing import Annotated, Any, Literal, Union
 from uuid import UUID, uuid4
 
 import typing_extensions
 from annotated_types import Ge, Gt, Interval, Le, Lt, MaxLen, MinLen
 from google.protobuf.any_pb2 import Any  # type: ignore
 from google.protobuf.message import Message  # type: ignore
-from pydantic import ConfigDict, Field, field_validator, model_validator
+from pydantic import ConfigDict, Field, field_validator
 from pydantic.networks import AnyUrl, EmailStr, IPvAnyAddress
 from pydantic.types import StringConstraints
 
@@ -21,7 +22,6 @@ from protobuf_to_pydantic.customer_con_type.v2 import DatetimeType, TimedeltaTyp
 from protobuf_to_pydantic.customer_validator.v2 import (
     any_in_validator,
     any_not_in_validator,
-    check_one_of,
     contains_validator,
     duration_const_validator,
     duration_ge_validator,
@@ -689,20 +689,104 @@ class MessageIgnoredTest(ProtobufCompatibleBaseModel):
     range_test: int = Field(default=0)
 
 
-class OneOfTest(ProtobufCompatibleBaseModel):
-    _one_of_dict = {"OneOfTest.id": {"fields": {"x", "y"}, "required": True}}
-    one_of_validator = model_validator(mode="before")(check_one_of)
+class _OneOfTestIdBase(ProtobufCompatibleBaseModel):
+    """Base class for id oneof variants."""
+
     header: str = Field(default="")
-    x: str = Field(default="")
-    y: int = Field(default=0)
+
+
+class OneOfTestIdX(_OneOfTestIdBase):
+    """Variant when 'x' is set in id oneof."""
+
+    id_case: Literal["x"] = "x"
+    x: str
+
+
+class OneOfTestIdY(_OneOfTestIdBase):
+    """Variant when 'y' is set in id oneof."""
+
+    id_case: Literal["y"] = "y"
+    y: int
+
+
+OneOfTestIdUnion = Annotated[Union[OneOfTestIdX, OneOfTestIdY], Field(discriminator="id_case")]
+
+
+class OneOfTest(ProtobufCompatibleBaseModel):
+    id: OneOfTestIdUnion
+    header: str = Field(default="")
+
+
+class _OneOfNotTestIdBase(ProtobufCompatibleBaseModel):
+    """Base class for id oneof variants."""
+
+    header: str = Field(default="")
+
+
+class OneOfNotTestIdX(_OneOfNotTestIdBase):
+    """Variant when 'x' is set in id oneof."""
+
+    id_case: Literal["x"] = "x"
+    x: str
+
+
+class OneOfNotTestIdY(_OneOfNotTestIdBase):
+    """Variant when 'y' is set in id oneof."""
+
+    id_case: Literal["y"] = "y"
+    y: int
+
+
+class OneOfNotTestIdNone(_OneOfNotTestIdBase):
+    """Variant when no field is set in id oneof."""
+
+    id_case: Literal[None] = None
+
+
+OneOfNotTestIdUnion = Annotated[
+    Union[OneOfNotTestIdX, OneOfNotTestIdY, OneOfNotTestIdNone], Field(discriminator="id_case")
+]
 
 
 class OneOfNotTest(ProtobufCompatibleBaseModel):
-    _one_of_dict = {"OneOfNotTest.id": {"fields": {"x", "y"}}}
-    one_of_validator = model_validator(mode="before")(check_one_of)
+    id: OneOfNotTestIdUnion
     header: str = Field(default="")
-    x: str = Field(default="")
-    y: int = Field(default=0)
+
+
+class _OneOfOptionalTestIdBase(ProtobufCompatibleBaseModel):
+    """Base class for id oneof variants."""
+
+    header: str = Field(default="")
+    name: str = Field(default="")
+    age: int = Field(default=0)
+    str_list: str = Field(default="")
+    int_map: Any = Field(default=None)
+
+
+class OneOfOptionalTestIdX(_OneOfOptionalTestIdBase):
+    """Variant when 'x' is set in id oneof."""
+
+    id_case: Literal["x"] = "x"
+    x: str
+
+
+class OneOfOptionalTestIdY(_OneOfOptionalTestIdBase):
+    """Variant when 'y' is set in id oneof."""
+
+    id_case: Literal["y"] = "y"
+    y: int
+
+
+class OneOfOptionalTestIdZ(_OneOfOptionalTestIdBase):
+    """Variant when 'z' is set in id oneof."""
+
+    id_case: Literal["z"] = "z"
+    z: bool
+
+
+OneOfOptionalTestIdUnion = Annotated[
+    Union[OneOfOptionalTestIdX, OneOfOptionalTestIdY, OneOfOptionalTestIdZ], Field(discriminator="id_case")
+]
 
 
 class OneOfOptionalTest(ProtobufCompatibleBaseModel):
@@ -710,12 +794,9 @@ class OneOfOptionalTest(ProtobufCompatibleBaseModel):
     Annotations are used in runtime mode
     """
 
-    _one_of_dict = {"OneOfOptionalTest.id": {"fields": {"x", "y", "z"}, "required": True}}
-    one_of_validator = model_validator(mode="before")(check_one_of)
+    id: OneOfOptionalTestIdUnion
+
     header: str = Field(default="")
-    x: typing.Optional[str] = Field(default="")
-    y: typing.Optional[int] = Field(default=0)
-    z: bool = Field(default=False)
     name: typing.Optional[str] = Field(default="")
     age: typing.Optional[int] = Field(default=0)
     str_list: typing.List[str] = Field(default_factory=list)

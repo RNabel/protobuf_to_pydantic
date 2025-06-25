@@ -139,10 +139,7 @@ class InvoiceItem(ProtobufCompatibleBaseModel):
             output,
             """\
 class OptionalMessage(ProtobufCompatibleBaseModel):
-    _one_of_dict = {"OptionalMessage.a": {"fields": {"x", "y", "yy"}, "required": True}}
-    one_of_validator = model_validator(mode="before")(check_one_of)
-    x: str = Field(default="")
-    y: int = Field(default=0, alias="yy", title="use age", ge=0, example=18)
+    a: OptionalMessageAUnion
     name: typing.Optional[str] = Field(default="")
     age: typing.Optional[int] = Field(default=0)
     item: typing.Optional[InvoiceItem] = Field(default_factory=InvoiceItem)

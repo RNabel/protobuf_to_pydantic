@@ -4,16 +4,16 @@
 # Pydantic Version: 2.11.7
 import typing
 from enum import IntEnum
+from typing import Annotated, Any, Literal, Union
 from uuid import uuid4
 
 from google.protobuf.field_mask_pb2 import FieldMask  # type: ignore
 from google.protobuf.message import Message  # type: ignore
 from google.protobuf.wrappers_pb2 import DoubleValue  # type: ignore
-from pydantic import ConfigDict, Field, model_validator
+from pydantic import ConfigDict, Field
 from pydantic.types import PaymentCardNumber
 
 from example.plugin_config import exp_time
-from protobuf_to_pydantic.customer_validator.v2 import check_one_of
 from protobuf_to_pydantic.default_base_model import ProtobufCompatibleBaseModel
 from protobuf_to_pydantic.flexible_enum_mixin import FlexibleEnumMixin
 from protobuf_to_pydantic.util import TimestampType
@@ -119,11 +119,36 @@ class EmptyMessage(ProtobufCompatibleBaseModel):
     pass
 
 
+class _OptionalMessageABase(ProtobufCompatibleBaseModel):
+    """Base class for a oneof variants."""
+
+    name: str = Field(default="")
+    age: int = Field(default=0)
+    item: Any = Field(default=None)
+    str_list: str = Field(default="")
+    int_map: Any = Field(default=None)
+    default_template_test: float = Field(default=0.0)
+
+
+class OptionalMessageAY(_OptionalMessageABase):
+    """Variant when 'y' is set in a oneof."""
+
+    a_case: Literal["y"] = "y"
+    y: int
+
+
+class OptionalMessageAX(_OptionalMessageABase):
+    """Variant when 'x' is set in a oneof."""
+
+    a_case: Literal["x"] = "x"
+    x: str
+
+
+OptionalMessageAUnion = Annotated[Union[OptionalMessageAY, OptionalMessageAX], Field(discriminator="a_case")]
+
+
 class OptionalMessage(ProtobufCompatibleBaseModel):
-    _one_of_dict = {"OptionalMessage.a": {"fields": {"x", "y"}, "required": True}}
-    one_of_validator = model_validator(mode="before")(check_one_of)
-    x: typing.Optional[str] = Field(default="")
-    y: typing.Optional[int] = Field(default=0, title="use age", ge=0, example=18)
+    a: OptionalMessageAUnion
     name: typing.Optional[str] = Field(default="")
     age: typing.Optional[int] = Field(default=0)
     item: typing.Optional[InvoiceItem] = Field(default_factory=InvoiceItem)

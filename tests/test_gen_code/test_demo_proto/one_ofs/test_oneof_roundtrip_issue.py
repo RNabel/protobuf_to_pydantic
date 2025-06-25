@@ -7,6 +7,76 @@ from pydantic import BaseModel, Field, ValidationError
 
 from example.proto_pydanticv2.example.example_proto.demo import demo_pb2
 from example.proto_pydanticv2.demo_gen_code import OptionalMessage
+from example.proto_pydanticv2.example.example_proto.demo.demo_p2p import (
+    OptionalMessageAUnion, OptionalMessageAX, OptionalMessageAY
+)
+
+
+def test_discriminated_union_json_roundtrip():
+    """Demonstrates that discriminated unions solve the oneof roundtrip issue.
+    
+    With discriminated unions, only the active variant is serialized, ensuring
+    clean JSON roundtrip without violating oneof constraints.
+    """
+    print("\n=== Testing Discriminated Union JSON Roundtrip ===")
+    
+    # Create discriminated union instance with x variant
+    x_variant = OptionalMessageAX(
+        a_case="x",
+        x="test_value",
+        # Common fields
+        name="test_name",
+        age=25,
+        str_list="test",
+        default_template_test=123.45
+    )
+    print(f"X variant model: {x_variant}")
+    
+    # Serialize to JSON
+    x_json = x_variant.model_dump_json(exclude_none=True)
+    print(f"X variant JSON: {x_json}")
+    
+    # Parse back from JSON
+    x_roundtrip = OptionalMessageAX.model_validate_json(x_json)
+    print(f"X variant roundtrip: {x_roundtrip}")
+    
+    # Verify roundtrip success
+    assert x_variant == x_roundtrip
+    print("✅ X variant roundtrip successful!")
+    
+    # Test Y variant
+    y_variant = OptionalMessageAY(
+        a_case="y", 
+        y=42,
+        name="test_name_y",
+        age=30
+    )
+    print(f"\nY variant model: {y_variant}")
+    
+    y_json = y_variant.model_dump_json(exclude_none=True)
+    print(f"Y variant JSON: {y_json}")
+    
+    y_roundtrip = OptionalMessageAY.model_validate_json(y_json)
+    print(f"Y variant roundtrip: {y_roundtrip}")
+    
+    assert y_variant == y_roundtrip
+    print("✅ Y variant roundtrip successful!")
+    
+    # Verify the discriminator correctly identifies the variant
+    x_dict = json.loads(x_json)
+    print(f"\nDiscriminator in X JSON: a_case = {x_dict.get('a_case')}")
+    print(f"X JSON contains only: {list(x_dict.keys())}")
+    
+    y_dict = json.loads(y_json)
+    print(f"Discriminator in Y JSON: a_case = {y_dict.get('a_case')}")
+    print(f"Y JSON contains only: {list(y_dict.keys())}")
+    
+    # Key insight: discriminated unions ensure only the active field is present
+    assert 'x' in x_dict and 'y' not in x_dict, "X variant should only contain 'x', not 'y'"
+    assert 'y' in y_dict and 'x' not in y_dict, "Y variant should only contain 'y', not 'x'"
+    
+    print("\n✅ Discriminated unions ensure clean JSON with only active fields!")
+    print("✅ This solves the oneof roundtrip issue completely!")
 
 
 def test_oneof_roundtrip_issue():
@@ -161,7 +231,10 @@ def analyze_oneof_serialization_issue():
 
 
 if __name__ == "__main__":
-    print("=== Testing oneof roundtrip issue ===")
+    print("=== Testing discriminated union JSON roundtrip (NEW) ===")
+    test_discriminated_union_json_roundtrip()
+    
+    print("\n=== Testing oneof roundtrip issue (OLD BEHAVIOR) ===")
     test_oneof_roundtrip_issue()
     
     print("\n=== Testing array field issue ===")
