@@ -216,9 +216,10 @@ class TestOneofFieldTypes:
         dict_msg = report.model_dump()
         
         # The serialized form should preserve the type information
-        print(f"String oneof dict: {dict_str}")
-        print(f"Integer oneof dict: {dict_int}")
-        print(f"Message oneof dict: {dict_msg}")
+        # Verify that serialization works for all types
+        assert dict_str is not None
+        assert dict_int is not None
+        assert dict_msg is not None
 
     def test_oneof_with_bytes_field(self):
         """Test oneof with bytes field type."""

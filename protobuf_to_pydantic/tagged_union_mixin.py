@@ -82,7 +82,14 @@ class TaggedUnionMixin:
                         continue
                     if key in field_aliases:
                         actual_field = field_aliases[key]
-                        if actual_field not in field_mapping:
+                        if actual_field in field_mapping:
+                            # Same field specified via different alias
+                            raise ValueError(
+                                f"Field '{actual_field}' specified multiple times in oneof '{field_name}' "
+                                f"using different aliases: '{field_mapping[actual_field]}' and '{key}'. "
+                                f"Only one field allowed."
+                            )
+                        else:
                             present_fields.append(actual_field)
                             field_mapping[actual_field] = key
 

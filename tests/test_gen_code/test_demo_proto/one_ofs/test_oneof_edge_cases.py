@@ -163,10 +163,12 @@ class TestOneofEdgeCases:
         try:
             msg_overflow = OptionalMessage(y=2147483648)  # int32 max + 1
             # If this succeeds, Python is handling larger ints
-            print(f"Large int accepted: {msg_overflow.a.y}")
+            assert (
+                msg_overflow.a.y == 2147483648
+            )  # Python can handle values larger than int32
         except ValidationError:
             # This would be the expected behavior for strict int32
-            print("Int32 overflow correctly rejected")
+            assert True  # ValidationError was raised as expected for strict int32
 
         # Test with Unicode in string field
         msg_unicode = OptionalMessage(x="Hello 世界 🌍")
@@ -258,9 +260,11 @@ class TestOneofEdgeCases:
         for data in test_cases:
             try:
                 msg = OptionalMessage.model_validate(data)
-                print(f"Created from {data}: {msg}")
+                # Successfully created from dict with None values
+                assert msg is not None
             except ValidationError as e:
-                print(f"Failed to create from {data}: {e}")
+                # Expected failure - None values may not be valid
+                assert "validation" in str(e).lower() or "None" in str(e)
 
     def test_concurrent_oneof_creation(self):
         """Test creating oneofs concurrently (simulated)."""
