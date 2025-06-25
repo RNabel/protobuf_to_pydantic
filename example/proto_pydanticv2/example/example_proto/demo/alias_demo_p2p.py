@@ -6,31 +6,27 @@ import typing
 from typing import Annotated, Any, Literal, Union
 
 from google.protobuf.message import Message  # type: ignore
-from pydantic import Field
+from pydantic import Field, model_validator
 
 from protobuf_to_pydantic.default_base_model import ProtobufCompatibleBaseModel
 
 
-class _ReportDataDataBase(ProtobufCompatibleBaseModel):
-    """Base class for data oneof variants."""
-
-
-class ReportDataDataLocation_Value(_ReportDataDataBase):
-    """Variant when 'location_value' is set in data oneof."""
-
-    data_case: Literal["location_value"] = "location_value"
-    location_value: Any
-
-
-class ReportDataDataTime_Value(_ReportDataDataBase):
+class ReportDataDataTime_Value(ProtobufCompatibleBaseModel):
     """Variant when 'time_value' is set in data oneof."""
 
-    data_case: Literal["time_value"] = "time_value"
+    data_case: Literal["time_value"] = Field(default="time_value", alias="__data_case__", exclude=True)
     time_value: Any
 
 
+class ReportDataDataLocation_Value(ProtobufCompatibleBaseModel):
+    """Variant when 'location_value' is set in data oneof."""
+
+    data_case: Literal["location_value"] = Field(default="location_value", alias="__data_case__", exclude=True)
+    location_value: Any
+
+
 ReportDataDataUnion = Annotated[
-    Union[ReportDataDataLocation_Value, ReportDataDataTime_Value], Field(discriminator="data_case")
+    Union[ReportDataDataTime_Value, ReportDataDataLocation_Value], Field(discriminator="data_case")
 ]
 
 
@@ -40,6 +36,49 @@ class ReportData(ProtobufCompatibleBaseModel):
     """
 
     data: ReportDataDataUnion
+
+    def model_dump(self, **kwargs):
+        """Override to handle oneof fields specially."""
+        data = super().model_dump(**kwargs)
+        result = {}
+
+        for field_name, field_value in data.items():
+            if field_name in ["data"]:
+                # This is a oneof field - flatten it
+                if isinstance(field_value, dict):
+                    for k, v in field_value.items():
+                        if not (k.endswith("_case") or k.startswith("__")):
+                            result[k] = v
+            else:
+                result[field_name] = field_value
+
+        return result
+
+    def model_dump_json(self, **kwargs):
+        """Override to use custom model_dump."""
+        from pydantic_core import to_json
+
+        # Extract indent before passing to model_dump
+        indent = kwargs.pop("indent", None)
+        data = self.model_dump(**kwargs)
+        return to_json(data, indent=indent).decode()
+
+    @model_validator(mode="before")
+    @classmethod
+    def _deserialize_oneofs(cls, data):
+        """Handle oneof field deserialization from flat JSON."""
+        if not isinstance(data, dict):
+            return data
+
+        # Handle data oneof
+        if "data" not in data:
+            # Check if any oneof field is present in flat format
+            if "location_value" in data:
+                data["data"] = {"location_value": data.pop("location_value"), "data_case": "location_value"}
+            elif "time_value" in data:
+                data["data"] = {"time_value": data.pop("time_value"), "data_case": "time_value"}
+
+        return data
 
 
 class GeoLocation(ProtobufCompatibleBaseModel):

@@ -6,14 +6,14 @@ import typing
 from datetime import datetime, timedelta
 from enum import IntEnum
 from ipaddress import IPv4Address, IPv6Address
-from typing import Annotated, Any, Literal, Union
+from typing import Annotated, Literal, Union
 from uuid import UUID, uuid4
 
 import typing_extensions
 from annotated_types import Ge, Gt, Interval, Le, Lt, MaxLen, MinLen
 from google.protobuf.any_pb2 import Any  # type: ignore
 from google.protobuf.message import Message  # type: ignore
-from pydantic import ConfigDict, Field, field_validator
+from pydantic import ConfigDict, Field, field_validator, model_validator
 from pydantic.networks import AnyUrl, EmailStr, IPvAnyAddress
 from pydantic.types import StringConstraints
 
@@ -689,62 +689,93 @@ class MessageIgnoredTest(ProtobufCompatibleBaseModel):
     range_test: int = Field(default=0)
 
 
-class _OneOfTestIdBase(ProtobufCompatibleBaseModel):
-    """Base class for id oneof variants."""
-
-    header: str = Field(default="")
-
-
-class OneOfTestIdX(_OneOfTestIdBase):
-    """Variant when 'x' is set in id oneof."""
-
-    id_case: Literal["x"] = "x"
-    x: str
-
-
-class OneOfTestIdY(_OneOfTestIdBase):
+class OneOfTestIdY(ProtobufCompatibleBaseModel):
     """Variant when 'y' is set in id oneof."""
 
-    id_case: Literal["y"] = "y"
+    id_case: Literal["y"] = Field(default="y", alias="__id_case__", exclude=True)
     y: int
 
 
-OneOfTestIdUnion = Annotated[Union[OneOfTestIdX, OneOfTestIdY], Field(discriminator="id_case")]
+class OneOfTestIdX(ProtobufCompatibleBaseModel):
+    """Variant when 'x' is set in id oneof."""
+
+    id_case: Literal["x"] = Field(default="x", alias="__id_case__", exclude=True)
+    x: str
+
+
+OneOfTestIdUnion = Annotated[Union[OneOfTestIdY, OneOfTestIdX], Field(discriminator="id_case")]
 
 
 class OneOfTest(ProtobufCompatibleBaseModel):
     id: OneOfTestIdUnion
     header: str = Field(default="")
 
+    def model_dump(self, **kwargs):
+        """Override to handle oneof fields specially."""
+        data = super().model_dump(**kwargs)
+        result = {}
 
-class _OneOfNotTestIdBase(ProtobufCompatibleBaseModel):
-    """Base class for id oneof variants."""
+        for field_name, field_value in data.items():
+            if field_name in ["id"]:
+                # This is a oneof field - flatten it
+                if isinstance(field_value, dict):
+                    for k, v in field_value.items():
+                        if not (k.endswith("_case") or k.startswith("__")):
+                            result[k] = v
+            else:
+                result[field_name] = field_value
 
-    header: str = Field(default="")
+        return result
+
+    def model_dump_json(self, **kwargs):
+        """Override to use custom model_dump."""
+        from pydantic_core import to_json
+
+        # Extract indent before passing to model_dump
+        indent = kwargs.pop("indent", None)
+        data = self.model_dump(**kwargs)
+        return to_json(data, indent=indent).decode()
+
+    @model_validator(mode="before")
+    @classmethod
+    def _deserialize_oneofs(cls, data):
+        """Handle oneof field deserialization from flat JSON."""
+        if not isinstance(data, dict):
+            return data
+
+        # Handle id oneof
+        if "id" not in data:
+            # Check if any oneof field is present in flat format
+            if "x" in data:
+                data["id"] = {"x": data.pop("x"), "id_case": "x"}
+            elif "y" in data:
+                data["id"] = {"y": data.pop("y"), "id_case": "y"}
+
+        return data
 
 
-class OneOfNotTestIdX(_OneOfNotTestIdBase):
-    """Variant when 'x' is set in id oneof."""
-
-    id_case: Literal["x"] = "x"
-    x: str
-
-
-class OneOfNotTestIdY(_OneOfNotTestIdBase):
+class OneOfNotTestIdY(ProtobufCompatibleBaseModel):
     """Variant when 'y' is set in id oneof."""
 
-    id_case: Literal["y"] = "y"
+    id_case: Literal["y"] = Field(default="y", alias="__id_case__", exclude=True)
     y: int
 
 
-class OneOfNotTestIdNone(_OneOfNotTestIdBase):
+class OneOfNotTestIdX(ProtobufCompatibleBaseModel):
+    """Variant when 'x' is set in id oneof."""
+
+    id_case: Literal["x"] = Field(default="x", alias="__id_case__", exclude=True)
+    x: str
+
+
+class OneOfNotTestIdNone(ProtobufCompatibleBaseModel):
     """Variant when no field is set in id oneof."""
 
     id_case: Literal[None] = None
 
 
 OneOfNotTestIdUnion = Annotated[
-    Union[OneOfNotTestIdX, OneOfNotTestIdY, OneOfNotTestIdNone], Field(discriminator="id_case")
+    Union[OneOfNotTestIdY, OneOfNotTestIdX, OneOfNotTestIdNone], Field(discriminator="id_case")
 ]
 
 
@@ -752,40 +783,73 @@ class OneOfNotTest(ProtobufCompatibleBaseModel):
     id: OneOfNotTestIdUnion
     header: str = Field(default="")
 
+    def model_dump(self, **kwargs):
+        """Override to handle oneof fields specially."""
+        data = super().model_dump(**kwargs)
+        result = {}
 
-class _OneOfOptionalTestIdBase(ProtobufCompatibleBaseModel):
-    """Base class for id oneof variants."""
+        for field_name, field_value in data.items():
+            if field_name in ["id"]:
+                # This is a oneof field - flatten it
+                if isinstance(field_value, dict):
+                    for k, v in field_value.items():
+                        if not (k.endswith("_case") or k.startswith("__")):
+                            result[k] = v
+            else:
+                result[field_name] = field_value
 
-    header: str = Field(default="")
-    name: str = Field(default="")
-    age: int = Field(default=0)
-    str_list: str = Field(default="")
-    int_map: Any = Field(default=None)
+        return result
+
+    def model_dump_json(self, **kwargs):
+        """Override to use custom model_dump."""
+        from pydantic_core import to_json
+
+        # Extract indent before passing to model_dump
+        indent = kwargs.pop("indent", None)
+        data = self.model_dump(**kwargs)
+        return to_json(data, indent=indent).decode()
+
+    @model_validator(mode="before")
+    @classmethod
+    def _deserialize_oneofs(cls, data):
+        """Handle oneof field deserialization from flat JSON."""
+        if not isinstance(data, dict):
+            return data
+
+        # Handle id oneof
+        if "id" not in data:
+            # Check if any oneof field is present in flat format
+            if "x" in data:
+                data["id"] = {"x": data.pop("x"), "id_case": "x"}
+            elif "y" in data:
+                data["id"] = {"y": data.pop("y"), "id_case": "y"}
+
+        return data
 
 
-class OneOfOptionalTestIdX(_OneOfOptionalTestIdBase):
-    """Variant when 'x' is set in id oneof."""
-
-    id_case: Literal["x"] = "x"
-    x: str
-
-
-class OneOfOptionalTestIdY(_OneOfOptionalTestIdBase):
+class OneOfOptionalTestIdY(ProtobufCompatibleBaseModel):
     """Variant when 'y' is set in id oneof."""
 
-    id_case: Literal["y"] = "y"
+    id_case: Literal["y"] = Field(default="y", alias="__id_case__", exclude=True)
     y: int
 
 
-class OneOfOptionalTestIdZ(_OneOfOptionalTestIdBase):
+class OneOfOptionalTestIdX(ProtobufCompatibleBaseModel):
+    """Variant when 'x' is set in id oneof."""
+
+    id_case: Literal["x"] = Field(default="x", alias="__id_case__", exclude=True)
+    x: str
+
+
+class OneOfOptionalTestIdZ(ProtobufCompatibleBaseModel):
     """Variant when 'z' is set in id oneof."""
 
-    id_case: Literal["z"] = "z"
+    id_case: Literal["z"] = Field(default="z", alias="__id_case__", exclude=True)
     z: bool
 
 
 OneOfOptionalTestIdUnion = Annotated[
-    Union[OneOfOptionalTestIdX, OneOfOptionalTestIdY, OneOfOptionalTestIdZ], Field(discriminator="id_case")
+    Union[OneOfOptionalTestIdY, OneOfOptionalTestIdX, OneOfOptionalTestIdZ], Field(discriminator="id_case")
 ]
 
 
@@ -801,6 +865,51 @@ class OneOfOptionalTest(ProtobufCompatibleBaseModel):
     age: typing.Optional[int] = Field(default=0)
     str_list: typing.List[str] = Field(default_factory=list)
     int_map: "typing.Dict[str, int]" = Field(default_factory=dict)
+
+    def model_dump(self, **kwargs):
+        """Override to handle oneof fields specially."""
+        data = super().model_dump(**kwargs)
+        result = {}
+
+        for field_name, field_value in data.items():
+            if field_name in ["id"]:
+                # This is a oneof field - flatten it
+                if isinstance(field_value, dict):
+                    for k, v in field_value.items():
+                        if not (k.endswith("_case") or k.startswith("__")):
+                            result[k] = v
+            else:
+                result[field_name] = field_value
+
+        return result
+
+    def model_dump_json(self, **kwargs):
+        """Override to use custom model_dump."""
+        from pydantic_core import to_json
+
+        # Extract indent before passing to model_dump
+        indent = kwargs.pop("indent", None)
+        data = self.model_dump(**kwargs)
+        return to_json(data, indent=indent).decode()
+
+    @model_validator(mode="before")
+    @classmethod
+    def _deserialize_oneofs(cls, data):
+        """Handle oneof field deserialization from flat JSON."""
+        if not isinstance(data, dict):
+            return data
+
+        # Handle id oneof
+        if "id" not in data:
+            # Check if any oneof field is present in flat format
+            if "x" in data:
+                data["id"] = {"x": data.pop("x"), "id_case": "x"}
+            elif "y" in data:
+                data["id"] = {"y": data.pop("y"), "id_case": "y"}
+            elif "z" in data:
+                data["id"] = {"z": data.pop("z"), "id_case": "z"}
+
+        return data
 
 
 class AfterReferMessage(ProtobufCompatibleBaseModel):
