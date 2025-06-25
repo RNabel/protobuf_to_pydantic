@@ -1254,10 +1254,16 @@ class FileDescriptorProtoToCode(BaseP2C):
             # Add fields for union types in the main class
             if one_of_dict:
                 union_fields_content = ""
-                for oneof_full_name in one_of_dict.keys():
+                for oneof_full_name, oneof_config in one_of_dict.items():
                     oneof_name = oneof_full_name.split(".")[-1]
                     union_type_name = f"{desc.name}{oneof_name.title()}Union"
-                    union_fields_content += f"{' ' * (indent + self.code_indent)}{oneof_name}: {union_type_name}\n"
+                    # Make the field optional if the oneof is not required
+                    if not oneof_config.get("required", False):
+                        # Add Optional import
+                        self._add_import_code("typing", "Optional")
+                        union_fields_content += f"{' ' * (indent + self.code_indent)}{oneof_name}: Optional[{union_type_name}] = Field(default=None)\n"
+                    else:
+                        union_fields_content += f"{' ' * (indent + self.code_indent)}{oneof_name}: {union_type_name}\n"
 
                 # Insert union fields into the MAIN class only (not base classes)
                 if union_fields_content:

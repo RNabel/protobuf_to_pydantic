@@ -6,7 +6,7 @@ import typing
 from datetime import datetime, timedelta
 from enum import IntEnum
 from ipaddress import IPv4Address, IPv6Address
-from typing import Annotated, Literal, Union
+from typing import Annotated, Literal, Optional, Union
 from uuid import UUID, uuid4
 
 import typing_extensions
@@ -784,7 +784,7 @@ OneOfNotTestIdUnion = Annotated[
 
 
 class OneOfNotTest(ProtobufCompatibleBaseModel):
-    id: OneOfNotTestIdUnion
+    id: Optional[OneOfNotTestIdUnion] = Field(default=None)
     header: str = Field(default="")
 
     def model_dump(self, **kwargs):

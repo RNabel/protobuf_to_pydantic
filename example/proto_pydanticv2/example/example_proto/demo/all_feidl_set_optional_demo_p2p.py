@@ -119,13 +119,6 @@ class EmptyMessage(ProtobufCompatibleBaseModel):
     pass
 
 
-class OptionalMessageAY(ProtobufCompatibleBaseModel):
-    """Variant when 'y' is set in a oneof."""
-
-    a_case: Literal["y"] = Field(default="y", exclude=True)
-    y: int
-
-
 class OptionalMessageAX(ProtobufCompatibleBaseModel):
     """Variant when 'x' is set in a oneof."""
 
@@ -133,7 +126,14 @@ class OptionalMessageAX(ProtobufCompatibleBaseModel):
     x: str
 
 
-OptionalMessageAUnion = Annotated[Union[OptionalMessageAY, OptionalMessageAX], Field(discriminator="a_case")]
+class OptionalMessageAY(ProtobufCompatibleBaseModel):
+    """Variant when 'y' is set in a oneof."""
+
+    a_case: Literal["y"] = Field(default="y", exclude=True)
+    y: int
+
+
+OptionalMessageAUnion = Annotated[Union[OptionalMessageAX, OptionalMessageAY], Field(discriminator="a_case")]
 
 
 class OptionalMessage(ProtobufCompatibleBaseModel):

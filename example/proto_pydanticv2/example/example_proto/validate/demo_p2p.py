@@ -6,7 +6,7 @@ import typing
 from datetime import timedelta
 from enum import IntEnum
 from ipaddress import IPv4Address, IPv6Address
-from typing import Annotated, Literal, Union
+from typing import Annotated, Literal, Optional, Union
 from uuid import UUID
 
 import typing_extensions
@@ -447,13 +447,6 @@ class MessageIgnoredTest(ProtobufCompatibleBaseModel):
     range_test: int = Field(default=0)
 
 
-class OneOfTestIdX(ProtobufCompatibleBaseModel):
-    """Variant when 'x' is set in id oneof."""
-
-    id_case: Literal["x"] = Field(default="x", exclude=True)
-    x: str
-
-
 class OneOfTestIdY(ProtobufCompatibleBaseModel):
     """Variant when 'y' is set in id oneof."""
 
@@ -461,7 +454,14 @@ class OneOfTestIdY(ProtobufCompatibleBaseModel):
     y: int
 
 
-OneOfTestIdUnion = Annotated[Union[OneOfTestIdX, OneOfTestIdY], Field(discriminator="id_case")]
+class OneOfTestIdX(ProtobufCompatibleBaseModel):
+    """Variant when 'x' is set in id oneof."""
+
+    id_case: Literal["x"] = Field(default="x", exclude=True)
+    x: str
+
+
+OneOfTestIdUnion = Annotated[Union[OneOfTestIdY, OneOfTestIdX], Field(discriminator="id_case")]
 
 
 class OneOfTest(ProtobufCompatibleBaseModel):
@@ -516,18 +516,18 @@ class OneOfTest(ProtobufCompatibleBaseModel):
         return data
 
 
-class OneOfNotTestIdX(ProtobufCompatibleBaseModel):
-    """Variant when 'x' is set in id oneof."""
-
-    id_case: Literal["x"] = Field(default="x", exclude=True)
-    x: str
-
-
 class OneOfNotTestIdY(ProtobufCompatibleBaseModel):
     """Variant when 'y' is set in id oneof."""
 
     id_case: Literal["y"] = Field(default="y", exclude=True)
     y: int
+
+
+class OneOfNotTestIdX(ProtobufCompatibleBaseModel):
+    """Variant when 'x' is set in id oneof."""
+
+    id_case: Literal["x"] = Field(default="x", exclude=True)
+    x: str
 
 
 class OneOfNotTestIdNone(ProtobufCompatibleBaseModel):
@@ -537,12 +537,12 @@ class OneOfNotTestIdNone(ProtobufCompatibleBaseModel):
 
 
 OneOfNotTestIdUnion = Annotated[
-    Union[OneOfNotTestIdX, OneOfNotTestIdY, OneOfNotTestIdNone], Field(discriminator="id_case")
+    Union[OneOfNotTestIdY, OneOfNotTestIdX, OneOfNotTestIdNone], Field(discriminator="id_case")
 ]
 
 
 class OneOfNotTest(ProtobufCompatibleBaseModel):
-    id: OneOfNotTestIdUnion
+    id: Optional[OneOfNotTestIdUnion] = Field(default=None)
     header: str = Field(default="")
 
     def model_dump(self, **kwargs):
