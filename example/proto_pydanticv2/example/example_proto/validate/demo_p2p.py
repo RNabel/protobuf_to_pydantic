@@ -448,13 +448,6 @@ class MessageIgnoredTest(ProtobufCompatibleBaseModel):
     range_test: int = Field(default=0)
 
 
-class OneOfTestIdX(ProtobufCompatibleBaseModel):
-    """Variant when 'x' is set in id oneof."""
-
-    id_case: Literal["x"] = Field(default="x", exclude=True)
-    x: str
-
-
 class OneOfTestIdY(ProtobufCompatibleBaseModel):
     """Variant when 'y' is set in id oneof."""
 
@@ -462,7 +455,14 @@ class OneOfTestIdY(ProtobufCompatibleBaseModel):
     y: int
 
 
-OneOfTestIdUnion = Annotated[Union[OneOfTestIdX, OneOfTestIdY], Field(discriminator="id_case")]
+class OneOfTestIdX(ProtobufCompatibleBaseModel):
+    """Variant when 'x' is set in id oneof."""
+
+    id_case: Literal["x"] = Field(default="x", exclude=True)
+    x: str
+
+
+OneOfTestIdUnion = Annotated[Union[OneOfTestIdY, OneOfTestIdX], Field(discriminator="id_case")]
 
 
 class OneOfTest(TaggedUnionMixin, ProtobufCompatibleBaseModel):
@@ -473,18 +473,18 @@ class OneOfTest(TaggedUnionMixin, ProtobufCompatibleBaseModel):
     header: str = Field(default="")
 
 
-class OneOfNotTestIdX(ProtobufCompatibleBaseModel):
-    """Variant when 'x' is set in id oneof."""
-
-    id_case: Literal["x"] = Field(default="x", exclude=True)
-    x: str
-
-
 class OneOfNotTestIdY(ProtobufCompatibleBaseModel):
     """Variant when 'y' is set in id oneof."""
 
     id_case: Literal["y"] = Field(default="y", exclude=True)
     y: int
+
+
+class OneOfNotTestIdX(ProtobufCompatibleBaseModel):
+    """Variant when 'x' is set in id oneof."""
+
+    id_case: Literal["x"] = Field(default="x", exclude=True)
+    x: str
 
 
 class OneOfNotTestIdNone(ProtobufCompatibleBaseModel):
@@ -494,7 +494,7 @@ class OneOfNotTestIdNone(ProtobufCompatibleBaseModel):
 
 
 OneOfNotTestIdUnion = Annotated[
-    Union[OneOfNotTestIdX, OneOfNotTestIdY, OneOfNotTestIdNone], Field(discriminator="id_case")
+    Union[OneOfNotTestIdY, OneOfNotTestIdX, OneOfNotTestIdNone], Field(discriminator="id_case")
 ]
 
 

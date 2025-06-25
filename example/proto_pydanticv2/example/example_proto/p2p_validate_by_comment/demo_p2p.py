@@ -748,13 +748,6 @@ class OneOfNotTest(TaggedUnionMixin, ProtobufCompatibleBaseModel):
     header: str = Field(default="")
 
 
-class OneOfOptionalTestIdZ(ProtobufCompatibleBaseModel):
-    """Variant when 'z' is set in id oneof."""
-
-    id_case: Literal["z"] = Field(default="z", exclude=True)
-    z: bool
-
-
 class OneOfOptionalTestIdY(ProtobufCompatibleBaseModel):
     """Variant when 'y' is set in id oneof."""
 
@@ -769,8 +762,15 @@ class OneOfOptionalTestIdX(ProtobufCompatibleBaseModel):
     x: str
 
 
+class OneOfOptionalTestIdZ(ProtobufCompatibleBaseModel):
+    """Variant when 'z' is set in id oneof."""
+
+    id_case: Literal["z"] = Field(default="z", exclude=True)
+    z: bool
+
+
 OneOfOptionalTestIdUnion = Annotated[
-    Union[OneOfOptionalTestIdZ, OneOfOptionalTestIdY, OneOfOptionalTestIdX], Field(discriminator="id_case")
+    Union[OneOfOptionalTestIdY, OneOfOptionalTestIdX, OneOfOptionalTestIdZ], Field(discriminator="id_case")
 ]
 
 

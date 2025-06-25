@@ -12,13 +12,6 @@ from protobuf_to_pydantic.default_base_model import ProtobufCompatibleBaseModel
 from protobuf_to_pydantic.tagged_union_mixin import TaggedUnionMixin
 
 
-class ReportDataDataTime_Value(ProtobufCompatibleBaseModel):
-    """Variant when 'time_value' is set in data oneof."""
-
-    data_case: Literal["time_value"] = Field(default="time_value", exclude=True)
-    time_value: Any
-
-
 class ReportDataDataLocation_Value(ProtobufCompatibleBaseModel):
     """Variant when 'location_value' is set in data oneof."""
 
@@ -26,8 +19,15 @@ class ReportDataDataLocation_Value(ProtobufCompatibleBaseModel):
     location_value: Any
 
 
+class ReportDataDataTime_Value(ProtobufCompatibleBaseModel):
+    """Variant when 'time_value' is set in data oneof."""
+
+    data_case: Literal["time_value"] = Field(default="time_value", exclude=True)
+    time_value: Any
+
+
 ReportDataDataUnion = Annotated[
-    Union[ReportDataDataTime_Value, ReportDataDataLocation_Value], Field(discriminator="data_case")
+    Union[ReportDataDataLocation_Value, ReportDataDataTime_Value], Field(discriminator="data_case")
 ]
 
 
