@@ -200,13 +200,7 @@ class FileDescriptorProtoToCode(BaseP2C):
                         }
                     ]
                 }
-            python code (standard):
-                from enum import IntEnum
-
-                class State(IntEnum):
-                    INACTIVE = 0
-
-            python code (flexible):
+            python code:
                 from enum import IntEnum
                 from protobuf_to_pydantic.flexible_enum_mixin import FlexibleEnumMixin
 
@@ -226,7 +220,6 @@ class FileDescriptorProtoToCode(BaseP2C):
                 enum.name if enum.name not in PYTHON_RESERVED else "_r_" + enum.name
             )
 
-            # Use mixin inheritance if flexible enum parsing is enabled
             content = " " * indent + f"class {class_name}(IntEnum, FlexibleEnumMixin):"
 
             _, desc_content, comment_content = self.add_class_desc(

@@ -4,9 +4,13 @@ from expecttest import assert_expected_inline
 
 from tests.test_gen_code.test_helper import P2CNoHeader
 
-from example.proto_pydanticv2.example.example_proto.demo import (         demo_pb2,         diff_pkg_refer_2_pb2,     )
+from example.proto_pydanticv2.example.example_proto.demo import (
+    demo_pb2,
+    diff_pkg_refer_2_pb2,
+)
 from protobuf_to_pydantic import msg_to_pydantic_model, pydantic_model_to_py_code
 from protobuf_to_pydantic.gen_model import clear_create_model_cache
+
 
 class TestSimpleTest:
     @staticmethod

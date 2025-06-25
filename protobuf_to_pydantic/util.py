@@ -171,12 +171,14 @@ def value_validator(v: Any) -> Any:
             return str(v)
 
 
-def python_value_to_protobuf_value(python_value: Any, proto_value: struct_pb2.Value) -> None:
+def python_value_to_protobuf_value(
+    python_value: Any, proto_value: struct_pb2.Value
+) -> None:
     """Convert Python value to protobuf Value using proper API.
-    
+
     This function handles the conversion of Python types to google.protobuf.Value,
     which supports: null, number, string, bool, struct (dict), and list values.
-    
+
     Args:
         python_value: The Python value to convert
         proto_value: The protobuf Value message to populate
@@ -206,12 +208,12 @@ def python_value_to_protobuf_value(python_value: Any, proto_value: struct_pb2.Va
 
 def protobuf_value_to_python_value(proto_value: struct_pb2.Value) -> Any:
     """Convert protobuf Value to Python value.
-    
+
     This function handles the conversion of google.protobuf.Value to Python types.
-    
+
     Args:
         proto_value: The protobuf Value message to convert
-        
+
     Returns:
         The corresponding Python value
     """
@@ -230,7 +232,10 @@ def protobuf_value_to_python_value(proto_value: struct_pb2.Value) -> Any:
             for key, value in proto_value.struct_value.fields.items()
         }
     elif which == "list_value":
-        return [protobuf_value_to_python_value(item) for item in proto_value.list_value.values]
+        return [
+            protobuf_value_to_python_value(item)
+            for item in proto_value.list_value.values
+        ]
     else:
         # No value set
         return None
@@ -240,8 +245,6 @@ ValueType = Annotated[
     Any,
     BeforeValidator(value_validator),
 ]
-
-
 
 
 def camel_to_snake(name: str) -> str:

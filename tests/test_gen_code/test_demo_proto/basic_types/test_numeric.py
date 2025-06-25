@@ -4,9 +4,6 @@ Test round-trip conversion for numeric protobuf types.
 Tests int32, int64, uint32, uint64, sint32, sint64, fixed32, fixed64, sfixed32, sfixed64.
 """
 
-import math
-from typing import Any, Dict
-
 from example.proto_pydanticv2.example.example_proto.demo import (
     basic_types_roundtrip_pb2,
     basic_types_roundtrip_p2p,
@@ -20,14 +17,13 @@ class TestNumericTypes(RoundTripTestBase):
     def _test_numeric_field(self, field_name: str, test_values: list) -> None:
         """Helper to test a numeric field with various values."""
         proto_msg = basic_types_roundtrip_pb2.BasicTypesMessage()
-        
+
         for value in test_values:
             proto_msg.Clear()
             setattr(proto_msg, field_name, value)
-            
+
             self.verify_roundtrip(
-                proto_msg, 
-                basic_types_roundtrip_p2p.BasicTypesMessage
+                proto_msg, basic_types_roundtrip_p2p.BasicTypesMessage
             )
 
     def test_int32_roundtrip(self):
@@ -36,7 +32,7 @@ class TestNumericTypes(RoundTripTestBase):
             0,
             42,
             -42,
-            2147483647,   # max int32
+            2147483647,  # max int32
             -2147483648,  # min int32
         ]
         self._test_numeric_field("int32_field", test_values)
@@ -47,7 +43,7 @@ class TestNumericTypes(RoundTripTestBase):
             0,
             42,
             -42,
-            9223372036854775807,   # max int64
+            9223372036854775807,  # max int64
             -9223372036854775808,  # min int64
         ]
         self._test_numeric_field("int64_field", test_values)
@@ -76,7 +72,7 @@ class TestNumericTypes(RoundTripTestBase):
             0,
             42,
             -42,
-            2147483647,   # max sint32
+            2147483647,  # max sint32
             -2147483648,  # min sint32
         ]
         self._test_numeric_field("sint32_field", test_values)
@@ -87,7 +83,7 @@ class TestNumericTypes(RoundTripTestBase):
             0,
             42,
             -42,
-            9223372036854775807,   # max sint64
+            9223372036854775807,  # max sint64
             -9223372036854775808,  # min sint64
         ]
         self._test_numeric_field("sint64_field", test_values)
@@ -116,7 +112,7 @@ class TestNumericTypes(RoundTripTestBase):
             0,
             42,
             -42,
-            2147483647,   # max sfixed32
+            2147483647,  # max sfixed32
             -2147483648,  # min sfixed32
         ]
         self._test_numeric_field("sfixed32_field", test_values)
@@ -127,7 +123,7 @@ class TestNumericTypes(RoundTripTestBase):
             0,
             42,
             -42,
-            9223372036854775807,   # max sfixed64
+            9223372036854775807,  # max sfixed64
             -9223372036854775808,  # min sfixed64
         ]
         self._test_numeric_field("sfixed64_field", test_values)
@@ -135,7 +131,7 @@ class TestNumericTypes(RoundTripTestBase):
     def test_mixed_numeric_types(self):
         """Test message with multiple numeric fields set."""
         proto_msg = basic_types_roundtrip_pb2.BasicTypesMessage()
-        
+
         # Set various numeric fields
         proto_msg.int32_field = 100
         proto_msg.int64_field = 1000000000000
@@ -147,16 +143,13 @@ class TestNumericTypes(RoundTripTestBase):
         proto_msg.fixed64_field = 4000000000000
         proto_msg.sfixed32_field = -500
         proto_msg.sfixed64_field = -5000000000000
-        
-        self.verify_roundtrip(
-            proto_msg,
-            basic_types_roundtrip_p2p.BasicTypesMessage
-        )
+
+        self.verify_roundtrip(proto_msg, basic_types_roundtrip_p2p.BasicTypesMessage)
 
     def test_numeric_edge_cases(self):
         """Test numeric types with edge case values."""
         proto_msg = basic_types_roundtrip_pb2.BasicTypesMessage()
-        
+
         # Test all zeros
         proto_msg.int32_field = 0
         proto_msg.int64_field = 0
@@ -168,8 +161,5 @@ class TestNumericTypes(RoundTripTestBase):
         proto_msg.fixed64_field = 0
         proto_msg.sfixed32_field = 0
         proto_msg.sfixed64_field = 0
-        
-        self.verify_roundtrip(
-            proto_msg,
-            basic_types_roundtrip_p2p.BasicTypesMessage
-        )
+
+        self.verify_roundtrip(proto_msg, basic_types_roundtrip_p2p.BasicTypesMessage)
