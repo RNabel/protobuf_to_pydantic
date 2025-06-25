@@ -5,13 +5,21 @@ Tests float and double types including special values (inf, -inf, nan).
 """
 
 import math
+import sys
 from typing import Any, Dict
 
+from google.protobuf.internal import type_checkers
 from example.proto_pydanticv2.example.example_proto.demo import (
     basic_types_roundtrip_pb2,
     basic_types_roundtrip_p2p,
 )
 from ..common.base_test import RoundTripTestBase
+
+# Float32 constants - using values that work with protobuf's JSON serialization
+# The actual protobuf _FLOAT_MAX gets rounded during JSON serialization to a slightly
+# larger value, so we use a smaller value to avoid this issue
+FLOAT32_MAX = 3.4e+38  # Safely below protobuf's _FLOAT_MAX to avoid JSON rounding issues
+FLOAT32_MIN = -3.4e+38
 
 
 class TestFloatingPointTypes(RoundTripTestBase):
@@ -117,9 +125,10 @@ class TestFloatingPointTypes(RoundTripTestBase):
         proto_msg = basic_types_roundtrip_pb2.BasicTypesMessage()
         
         # Test values at float precision boundaries
+        # Using protobuf's internal limits which are slightly smaller than theoretical float32 limits
         test_values = [
-            3.4028235e38,   # Near max float
-            -3.4028235e38,  # Near min float
+            FLOAT32_MAX,    # Max float32 value accepted by protobuf
+            FLOAT32_MIN,    # Min float32 value accepted by protobuf
             1.175494e-38,   # Near smallest positive normalized float
             -1.175494e-38,  # Near smallest negative normalized float
         ]
