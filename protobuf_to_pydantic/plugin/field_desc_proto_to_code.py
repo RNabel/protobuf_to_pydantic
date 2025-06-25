@@ -202,19 +202,26 @@ class FileDescriptorProtoToCode(BaseP2C):
                 }
             python code:
                 from enum import IntEnum
+                from protobuf_to_pydantic.flexible_enum_mixin import FlexibleEnumMixin
 
-                class State(IntEnum):
+                class State(IntEnum, FlexibleEnumMixin):
                     INACTIVE = 0
         """
         if not enums:
             return []
         self._add_import_code("enum", "IntEnum")
+        self._add_import_code(
+            "protobuf_to_pydantic.flexible_enum_mixin", "FlexibleEnumMixin"
+        )
+
         content_list = []
         for i, enum in enumerate(enums):
             class_name = (
                 enum.name if enum.name not in PYTHON_RESERVED else "_r_" + enum.name
             )
-            content = " " * indent + f"class {class_name}(IntEnum):"
+
+            content = " " * indent + f"class {class_name}(IntEnum, FlexibleEnumMixin):"
+
             _, desc_content, comment_content = self.add_class_desc(
                 scl_prefix + [i], indent
             )

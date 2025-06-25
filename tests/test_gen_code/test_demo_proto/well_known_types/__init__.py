@@ -1,0 +1,1 @@
+"""Tests for google.protobuf well-known types organized by type."""

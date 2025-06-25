@@ -1,0 +1,61 @@
+syntax = "proto3";
+
+package demo;
+
+// Test enum types for roundtrip conversion
+enum Status {
+  UNKNOWN = 0;
+  ACTIVE = 1;
+  INACTIVE = 2;
+  PENDING = 3;
+  COMPLETED = 4;
+}
+
+enum Priority {
+  LOW = 0;
+  MEDIUM = 1;
+  HIGH = 2;
+  URGENT = 3;
+}
+
+// Enum with non-consecutive values
+enum ErrorCode {
+  ERROR_NONE = 0;
+  ERROR_INVALID_INPUT = 100;
+  ERROR_TIMEOUT = 200;
+  ERROR_INTERNAL = 500;
+  ERROR_UNKNOWN = 999;
+}
+
+// Message with enum fields
+message EnumMessage {
+  Status status = 1;
+  Priority priority = 2;
+  ErrorCode error_code = 3;
+  
+  // Optional enum field
+  optional Status optional_status = 4;
+  
+  // Repeated enum field
+  repeated Priority priority_list = 5;
+  
+  // Map with enum values
+  map<string, Status> status_map = 6;
+}
+
+// Message with multiple enum references
+message ComplexEnumMessage {
+  Status primary_status = 1;
+  repeated Status status_history = 2;
+  map<string, Priority> task_priorities = 3;
+  optional ErrorCode last_error = 4;
+  
+  // Nested message with enums
+  message NestedEnum {
+    Status nested_status = 1;
+    Priority nested_priority = 2;
+  }
+  
+  NestedEnum nested = 5;
+  repeated NestedEnum nested_list = 6;
+}
