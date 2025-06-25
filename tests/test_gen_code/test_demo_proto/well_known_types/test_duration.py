@@ -18,10 +18,6 @@ from ..common.base_test import RoundTripTestBase
 class TestDuration(RoundTripTestBase):
     """Test round-trip conversion for google.protobuf.Duration."""
 
-    @pytest.mark.skip(
-        reason="Fails due to proto3 presence handling - default_factory creates unwanted values"
-    )
-    @pytest.mark.proto3_presence
     def test_duration_basic(self):
         """Test basic Duration values."""
         proto_msg = well_known_types_roundtrip_pb2.WellKnownTypesMessage()
@@ -43,10 +39,6 @@ class TestDuration(RoundTripTestBase):
                 proto_msg, well_known_types_roundtrip_p2p.WellKnownTypesMessage
             )
 
-    @pytest.mark.skip(
-        reason="Fails due to proto3 presence handling - default_factory creates unwanted values"
-    )
-    @pytest.mark.proto3_presence
     def test_duration_negative(self):
         """Test negative Duration values."""
         proto_msg = well_known_types_roundtrip_pb2.WellKnownTypesMessage()
@@ -109,10 +101,6 @@ class TestDuration(RoundTripTestBase):
             json_str = self.protobuf_to_json(proto_msg)
             assert f'"timeout": {expected_json}' in json_str
 
-    @pytest.mark.skip(
-        reason="Fails due to proto3 presence handling - default_factory creates unwanted values"
-    )
-    @pytest.mark.proto3_presence
     def test_duration_edge_cases(self):
         """Test Duration edge cases."""
         proto_msg = well_known_types_roundtrip_pb2.WellKnownTypesMessage()
@@ -134,10 +122,6 @@ class TestDuration(RoundTripTestBase):
             proto_msg, well_known_types_roundtrip_p2p.WellKnownTypesMessage
         )
 
-    @pytest.mark.skip(
-        reason="Fails due to proto3 presence handling - default_factory creates unwanted values"
-    )
-    @pytest.mark.proto3_presence
     def test_repeated_durations(self):
         """Test repeated Duration fields."""
         proto_msg = well_known_types_roundtrip_pb2.WellKnownTypesMessage()
@@ -174,10 +158,6 @@ class TestDuration(RoundTripTestBase):
         assert isinstance(pydantic_model.timeout, timedelta)
         assert pydantic_model.timeout == duration
 
-    @pytest.mark.skip(
-        reason="Fails due to proto3 presence handling - default_factory creates unwanted values"
-    )
-    @pytest.mark.proto3_presence
     def test_duration_from_pydantic_to_protobuf(self):
         """Test conversion from Pydantic to protobuf Duration."""
         # Create Pydantic model with duration
@@ -195,10 +175,6 @@ class TestDuration(RoundTripTestBase):
         # Verify duration is correct
         assert proto_msg.timeout.ToTimedelta() == duration
 
-    @pytest.mark.skip(
-        reason="Fails due to proto3 presence handling - default_factory creates unwanted values"
-    )
-    @pytest.mark.proto3_presence
     def test_optional_duration(self):
         """Test optional Duration field handling."""
         # Test with duration set
@@ -211,10 +187,6 @@ class TestDuration(RoundTripTestBase):
                 proto_msg, well_known_types_roundtrip_p2p.WellKnownTypesMessage
             )
 
-    @pytest.mark.skip(
-        reason="Fails due to proto3 presence handling - default_factory creates unwanted values"
-    )
-    @pytest.mark.proto3_presence
     def test_duration_arithmetic(self):
         """Test Duration values from arithmetic operations."""
         proto_msg = well_known_types_roundtrip_pb2.WellKnownTypesMessage()
