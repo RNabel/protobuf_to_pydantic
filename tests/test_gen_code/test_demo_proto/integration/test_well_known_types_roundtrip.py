@@ -20,10 +20,6 @@ from ..common.base_test import RoundTripTestBase
 class TestWellKnownTypesRoundTrip(RoundTripTestBase):
     """Test round-trip conversion for well-known protobuf types."""
 
-    @pytest.mark.skip(
-        reason="Fails due to proto3 presence handling - default_factory creates unwanted values"
-    )
-    @pytest.mark.proto3_presence
     def test_timestamp_roundtrip(self):
         """Test Timestamp field round-trip conversion."""
         proto_msg = well_known_types_roundtrip_pb2.WellKnownTypesMessage()
@@ -36,16 +32,12 @@ class TestWellKnownTypesRoundTrip(RoundTripTestBase):
             proto_msg, well_known_types_roundtrip_p2p.WellKnownTypesMessage
         )
 
-    @pytest.mark.skip(
-        reason="Fails due to proto3 presence handling - default_factory creates unwanted values"
-    )
-    @pytest.mark.proto3_presence
     def test_duration_roundtrip(self):
         """Test Duration field round-trip conversion."""
         proto_msg = well_known_types_roundtrip_pb2.WellKnownTypesMessage()
 
         # Set a specific duration (1 hour, 30 minutes)
-        proto_msg.duration.FromTimedelta(timedelta(hours=1, minutes=30))
+        proto_msg.timeout.FromTimedelta(timedelta(hours=1, minutes=30))
 
         self.verify_roundtrip(
             proto_msg, well_known_types_roundtrip_p2p.WellKnownTypesMessage
@@ -186,94 +178,66 @@ class TestWellKnownTypesRoundTrip(RoundTripTestBase):
             proto_msg, well_known_types_roundtrip_p2p.WellKnownTypesMessage
         )
 
-    @pytest.mark.skip(
-        reason="Fails due to proto3 presence handling - default_factory creates unwanted values"
-    )
-    @pytest.mark.proto3_presence
     def test_value_null_roundtrip(self):
         """Test google.protobuf.Value with null value."""
-        proto_msg = value_demo_pb2.ValueDemo()
+        proto_msg = value_demo_pb2.ValueTestMessage()
 
         # Set null value
-        proto_msg.single_value.null_value = 0  # NULL_VALUE
+        proto_msg.dynamic_value.null_value = 0  # NULL_VALUE
 
-        self.verify_roundtrip(proto_msg, value_demo_p2p.ValueDemo)
+        self.verify_roundtrip(proto_msg, value_demo_p2p.ValueTestMessage)
 
-    @pytest.mark.skip(
-        reason="Fails due to proto3 presence handling - default_factory creates unwanted values"
-    )
-    @pytest.mark.proto3_presence
     def test_value_number_roundtrip(self):
         """Test google.protobuf.Value with number value."""
-        proto_msg = value_demo_pb2.ValueDemo()
+        proto_msg = value_demo_pb2.ValueTestMessage()
 
         # Set number value
-        proto_msg.single_value.number_value = 42.5
+        proto_msg.dynamic_value.number_value = 42.5
 
-        self.verify_roundtrip(proto_msg, value_demo_p2p.ValueDemo)
+        self.verify_roundtrip(proto_msg, value_demo_p2p.ValueTestMessage)
 
-    @pytest.mark.skip(
-        reason="Fails due to proto3 presence handling - default_factory creates unwanted values"
-    )
-    @pytest.mark.proto3_presence
     def test_value_string_roundtrip(self):
         """Test google.protobuf.Value with string value."""
-        proto_msg = value_demo_pb2.ValueDemo()
+        proto_msg = value_demo_pb2.ValueTestMessage()
 
         # Set string value
-        proto_msg.single_value.string_value = "test string"
+        proto_msg.dynamic_value.string_value = "test string"
 
-        self.verify_roundtrip(proto_msg, value_demo_p2p.ValueDemo)
+        self.verify_roundtrip(proto_msg, value_demo_p2p.ValueTestMessage)
 
-    @pytest.mark.skip(
-        reason="Fails due to proto3 presence handling - default_factory creates unwanted values"
-    )
-    @pytest.mark.proto3_presence
     def test_value_bool_roundtrip(self):
         """Test google.protobuf.Value with bool value."""
-        proto_msg = value_demo_pb2.ValueDemo()
+        proto_msg = value_demo_pb2.ValueTestMessage()
 
         # Set bool value
-        proto_msg.single_value.bool_value = True
+        proto_msg.dynamic_value.bool_value = True
 
-        self.verify_roundtrip(proto_msg, value_demo_p2p.ValueDemo)
+        self.verify_roundtrip(proto_msg, value_demo_p2p.ValueTestMessage)
 
-    @pytest.mark.skip(
-        reason="Fails due to proto3 presence handling - default_factory creates unwanted values"
-    )
-    @pytest.mark.proto3_presence
     def test_value_struct_roundtrip(self):
         """Test google.protobuf.Value with struct value."""
-        proto_msg = value_demo_pb2.ValueDemo()
+        proto_msg = value_demo_pb2.ValueTestMessage()
 
         # Set struct value
-        proto_msg.single_value.struct_value.fields["key1"].string_value = "value1"
-        proto_msg.single_value.struct_value.fields["key2"].number_value = 123
-        proto_msg.single_value.struct_value.fields["key3"].bool_value = False
+        proto_msg.dynamic_value.struct_value.fields["key1"].string_value = "value1"
+        proto_msg.dynamic_value.struct_value.fields["key2"].number_value = 123
+        proto_msg.dynamic_value.struct_value.fields["key3"].bool_value = False
 
-        self.verify_roundtrip(proto_msg, value_demo_p2p.ValueDemo)
+        self.verify_roundtrip(proto_msg, value_demo_p2p.ValueTestMessage)
 
-    @pytest.mark.skip(
-        reason="Fails due to proto3 presence handling - default_factory creates unwanted values"
-    )
-    @pytest.mark.proto3_presence
     def test_value_list_roundtrip(self):
         """Test google.protobuf.Value with list value."""
-        proto_msg = value_demo_pb2.ValueDemo()
+        proto_msg = value_demo_pb2.ValueTestMessage()
 
         # Set list value
-        list_value = proto_msg.single_value.list_value
-        list_value.values.add().string_value = "item1"
-        list_value.values.add().number_value = 42
-        list_value.values.add().bool_value = True
-        list_value.values.add().null_value = 0
+        list_value = proto_msg.value_list
+        list_value.add().string_value = "item1"
+        list_value.add().number_value = 42
+        list_value.add().bool_value = True
+        list_value.add().null_value = 0
 
-        self.verify_roundtrip(proto_msg, value_demo_p2p.ValueDemo)
+        self.verify_roundtrip(proto_msg, value_demo_p2p.ValueTestMessage)
 
-    @pytest.mark.skip(
-        reason="Fails due to proto3 presence handling - default_factory creates unwanted values"
-    )
-    @pytest.mark.proto3_presence
     def test_complex_well_known_types_message(self):
         """Test complex message with multiple well-known types."""
         proto_msg = well_known_types_roundtrip_pb2.WellKnownTypesMessage()
@@ -282,41 +246,30 @@ class TestWellKnownTypesRoundTrip(RoundTripTestBase):
         proto_msg.created_at.FromDatetime(
             datetime(2024, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
         )
-        proto_msg.duration.FromTimedelta(timedelta(days=1, hours=2, minutes=30))
-        proto_msg.double_value.value = 3.14159
-        proto_msg.string_value.value = "test"
-        proto_msg.bool_value.value = True
+        proto_msg.timeout.FromTimedelta(timedelta(days=1, hours=2, minutes=30))
 
         self.verify_roundtrip(
             proto_msg, well_known_types_roundtrip_p2p.WellKnownTypesMessage
         )
 
-    @pytest.mark.skip(
-        reason="Fails due to proto3 presence handling - default_factory creates unwanted values"
-    )
-    @pytest.mark.proto3_presence
     def test_repeated_timestamps(self):
         """Test repeated timestamp fields."""
-        proto_msg = well_known_types_roundtrip_pb2.RepeatedWellKnownTypes()
+        proto_msg = well_known_types_roundtrip_pb2.WellKnownTypesMessage()
 
         # Add multiple timestamps
-        ts1 = proto_msg.timestamps.add()
+        ts1 = proto_msg.event_timestamps.add()
         ts1.FromDatetime(datetime(2024, 1, 1, tzinfo=timezone.utc))
 
-        ts2 = proto_msg.timestamps.add()
+        ts2 = proto_msg.event_timestamps.add()
         ts2.FromDatetime(datetime(2024, 6, 15, 14, 30, tzinfo=timezone.utc))
 
         self.verify_roundtrip(
-            proto_msg, well_known_types_roundtrip_p2p.RepeatedWellKnownTypes
+            proto_msg, well_known_types_roundtrip_p2p.WellKnownTypesMessage
         )
 
-    @pytest.mark.skip(
-        reason="Fails due to proto3 presence handling - default_factory creates unwanted values"
-    )
-    @pytest.mark.proto3_presence
     def test_map_with_value_type(self):
         """Test map fields with google.protobuf.Value values."""
-        proto_msg = value_demo_pb2.ValueDemo()
+        proto_msg = value_demo_pb2.ValueTestMessage()
 
         # Add various value types to map
         proto_msg.value_map["null_key"].null_value = 0
@@ -335,4 +288,4 @@ class TestWellKnownTypesRoundTrip(RoundTripTestBase):
         list_val.values.add().number_value = 2
         list_val.values.add().number_value = 3
 
-        self.verify_roundtrip(proto_msg, value_demo_p2p.ValueDemo)
+        self.verify_roundtrip(proto_msg, value_demo_p2p.ValueTestMessage)
