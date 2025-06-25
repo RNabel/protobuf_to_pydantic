@@ -94,7 +94,7 @@ class TestTimestamp(RoundTripTestBase):
 
     def test_repeated_timestamps(self):
         """Test repeated Timestamp fields."""
-        proto_msg = well_known_types_roundtrip_pb2.RepeatedWellKnownTypes()
+        proto_msg = well_known_types_roundtrip_pb2.WellKnownTypesMessage()
         
         # Add multiple timestamps
         timestamps = [
@@ -104,12 +104,12 @@ class TestTimestamp(RoundTripTestBase):
         ]
         
         for ts in timestamps:
-            timestamp_msg = proto_msg.timestamps.add()
+            timestamp_msg = proto_msg.event_timestamps.add()
             timestamp_msg.FromDatetime(ts)
         
         self.verify_roundtrip(
             proto_msg,
-            well_known_types_roundtrip_p2p.RepeatedWellKnownTypes
+            well_known_types_roundtrip_p2p.WellKnownTypesMessage
         )
 
     def test_timestamp_from_protobuf_to_pydantic(self):
@@ -144,8 +144,8 @@ class TestTimestamp(RoundTripTestBase):
             well_known_types_roundtrip_pb2.WellKnownTypesMessage
         )
         
-        # Verify timestamp is correct
-        assert proto_msg.created_at.ToDatetime() == dt
+        # Verify timestamp is correct (ToDatetime returns timezone-naive by default)
+        assert proto_msg.created_at.ToDatetime(tzinfo=timezone.utc) == dt
 
     def test_optional_timestamp(self):
         """Test optional Timestamp field handling."""
@@ -164,10 +164,10 @@ class TestTimestamp(RoundTripTestBase):
         """Test Timestamp timezone conversion."""
         proto_msg = well_known_types_roundtrip_pb2.WellKnownTypesMessage()
         
-        # Create datetime in different timezone
-        import pytz
-        eastern = pytz.timezone('US/Eastern')
-        dt_eastern = eastern.localize(datetime(2024, 1, 1, 12, 0, 0))
+        # Create datetime with UTC offset (no pytz needed)
+        from datetime import timedelta
+        offset = timedelta(hours=-5)  # Eastern time offset
+        dt_eastern = datetime(2024, 1, 1, 12, 0, 0, tzinfo=timezone(offset))
         
         # Convert to UTC for protobuf
         dt_utc = dt_eastern.astimezone(timezone.utc)

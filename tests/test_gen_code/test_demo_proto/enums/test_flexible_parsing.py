@@ -3,7 +3,7 @@ Test FlexibleEnumMixin functionality for flexible enum parsing.
 
 Tests the custom enum parsing behavior that allows:
 - Enum members (Status.ACTIVE)
-- String names ("ACTIVE") 
+- String names ("ACTIVE")
 - Integer values (1)
 """
 
@@ -20,9 +20,9 @@ class TestFlexibleEnumParsing:
         model = enum_types_roundtrip_p2p.EnumMessage(
             status=enum_types_roundtrip_p2p.Status.ACTIVE,
             priority=enum_types_roundtrip_p2p.Priority.HIGH,
-            error_code=enum_types_roundtrip_p2p.ErrorCode.ERROR_TIMEOUT
+            error_code=enum_types_roundtrip_p2p.ErrorCode.ERROR_TIMEOUT,
         )
-        
+
         assert model.status == enum_types_roundtrip_p2p.Status.ACTIVE
         assert model.priority == enum_types_roundtrip_p2p.Priority.HIGH
         assert model.error_code == enum_types_roundtrip_p2p.ErrorCode.ERROR_TIMEOUT
@@ -30,11 +30,9 @@ class TestFlexibleEnumParsing:
     def test_accepts_string_names(self):
         """Test that string enum names are converted to enum values."""
         model = enum_types_roundtrip_p2p.EnumMessage(
-            status="ACTIVE",
-            priority="HIGH", 
-            error_code="ERROR_TIMEOUT"
+            status="ACTIVE", priority="HIGH", error_code="ERROR_TIMEOUT"
         )
-        
+
         assert model.status == enum_types_roundtrip_p2p.Status.ACTIVE
         assert model.priority == enum_types_roundtrip_p2p.Priority.HIGH
         assert model.error_code == enum_types_roundtrip_p2p.ErrorCode.ERROR_TIMEOUT
@@ -44,9 +42,9 @@ class TestFlexibleEnumParsing:
         model = enum_types_roundtrip_p2p.EnumMessage(
             status=1,  # ACTIVE
             priority=2,  # HIGH
-            error_code=200  # ERROR_TIMEOUT
+            error_code=200,  # ERROR_TIMEOUT
         )
-        
+
         assert model.status == enum_types_roundtrip_p2p.Status.ACTIVE
         assert model.priority == enum_types_roundtrip_p2p.Priority.HIGH
         assert model.error_code == enum_types_roundtrip_p2p.ErrorCode.ERROR_TIMEOUT
@@ -57,7 +55,7 @@ class TestFlexibleEnumParsing:
         with pytest.raises(ValidationError) as exc_info:
             enum_types_roundtrip_p2p.EnumMessage(status="active")
         assert "'active' is not a valid name" in str(exc_info.value)
-        
+
         # Mixed case should fail
         with pytest.raises(ValidationError) as exc_info:
             enum_types_roundtrip_p2p.EnumMessage(status="Active")
@@ -85,11 +83,11 @@ class TestFlexibleEnumParsing:
         # Test with string
         model1 = enum_types_roundtrip_p2p.EnumMessage(optional_status="ACTIVE")
         assert model1.optional_status == enum_types_roundtrip_p2p.Status.ACTIVE
-        
+
         # Test with integer
         model2 = enum_types_roundtrip_p2p.EnumMessage(optional_status=1)
         assert model2.optional_status == enum_types_roundtrip_p2p.Status.ACTIVE
-        
+
         # Test with enum member
         model3 = enum_types_roundtrip_p2p.EnumMessage(
             optional_status=enum_types_roundtrip_p2p.Status.ACTIVE
@@ -100,18 +98,18 @@ class TestFlexibleEnumParsing:
         """Test flexible parsing works with repeated enum fields."""
         model = enum_types_roundtrip_p2p.EnumMessage(
             priority_list=[
-                "LOW",                                      # String
-                1,                                          # Integer (MEDIUM)
-                enum_types_roundtrip_p2p.Priority.HIGH,    # Enum member
-                "URGENT"                                    # String
+                "LOW",  # String
+                1,  # Integer (MEDIUM)
+                enum_types_roundtrip_p2p.Priority.HIGH,  # Enum member
+                "URGENT",  # String
             ]
         )
-        
+
         expected = [
             enum_types_roundtrip_p2p.Priority.LOW,
             enum_types_roundtrip_p2p.Priority.MEDIUM,
             enum_types_roundtrip_p2p.Priority.HIGH,
-            enum_types_roundtrip_p2p.Priority.URGENT
+            enum_types_roundtrip_p2p.Priority.URGENT,
         ]
         assert model.priority_list == expected
 
@@ -119,16 +117,16 @@ class TestFlexibleEnumParsing:
         """Test flexible parsing works with map fields containing enum values."""
         model = enum_types_roundtrip_p2p.EnumMessage(
             status_map={
-                "task1": "ACTIVE",                              # String
-                "task2": 3,                                     # Integer (PENDING) 
-                "task3": enum_types_roundtrip_p2p.Status.COMPLETED  # Enum member
+                "task1": "ACTIVE",  # String
+                "task2": 3,  # Integer (PENDING)
+                "task3": enum_types_roundtrip_p2p.Status.COMPLETED,  # Enum member
             }
         )
-        
+
         expected = {
             "task1": enum_types_roundtrip_p2p.Status.ACTIVE,
             "task2": enum_types_roundtrip_p2p.Status.PENDING,
-            "task3": enum_types_roundtrip_p2p.Status.COMPLETED
+            "task3": enum_types_roundtrip_p2p.Status.COMPLETED,
         }
         assert model.status_map == expected
 
@@ -138,10 +136,10 @@ class TestFlexibleEnumParsing:
             primary_status="ACTIVE",
             nested={
                 "nested_status": 1,  # ACTIVE as integer
-                "nested_priority": "HIGH"  # String
-            }
+                "nested_priority": "HIGH",  # String
+            },
         )
-        
+
         assert model.primary_status == enum_types_roundtrip_p2p.Status.ACTIVE
         assert model.nested.nested_status == enum_types_roundtrip_p2p.Status.ACTIVE
         assert model.nested.nested_priority == enum_types_roundtrip_p2p.Priority.HIGH
@@ -149,18 +147,18 @@ class TestFlexibleEnumParsing:
     def test_json_validation_with_flexible_parsing(self):
         """Test that flexible parsing works when validating from JSON."""
         json_data = {
-            "status": "ACTIVE",        # String
-            "priority": 2,             # Integer (HIGH)
+            "status": "ACTIVE",  # String
+            "priority": 2,  # Integer (HIGH)
             "errorCode": "ERROR_TIMEOUT",  # String
             "priorityList": ["LOW", 3, "HIGH"],  # Mixed
             "statusMap": {
                 "task1": "PENDING",
-                "task2": 4  # COMPLETED
-            }
+                "task2": 4,  # COMPLETED
+            },
         }
-        
+
         model = enum_types_roundtrip_p2p.EnumMessage.model_validate(json_data)
-        
+
         assert model.status == enum_types_roundtrip_p2p.Status.ACTIVE
         assert model.priority == enum_types_roundtrip_p2p.Priority.HIGH
         assert model.error_code == enum_types_roundtrip_p2p.ErrorCode.ERROR_TIMEOUT
@@ -176,14 +174,14 @@ class TestFlexibleEnumParsing:
             ("ERROR_INVALID_INPUT", 100),
             ("ERROR_TIMEOUT", 200),
             ("ERROR_INTERNAL", 500),
-            ("ERROR_UNKNOWN", 999)
+            ("ERROR_UNKNOWN", 999),
         ]
-        
+
         for name, value in test_cases:
             # Test with string name
             model1 = enum_types_roundtrip_p2p.EnumMessage(error_code=name)
             assert model1.error_code.value == value
-            
+
             # Test with integer value
             model2 = enum_types_roundtrip_p2p.EnumMessage(error_code=value)
             assert model2.error_code.name == name
@@ -192,20 +190,21 @@ class TestFlexibleEnumParsing:
         """Test that serialization still uses integers for protobuf compatibility."""
         model = enum_types_roundtrip_p2p.EnumMessage(
             status="ACTIVE",  # Provided as string
-            priority=2,       # Provided as integer
-            error_code=enum_types_roundtrip_p2p.ErrorCode.ERROR_TIMEOUT  # Enum member
+            priority=2,  # Provided as integer
+            error_code=enum_types_roundtrip_p2p.ErrorCode.ERROR_TIMEOUT,  # Enum member
         )
-        
+
         # Serialize to dict
         data = model.model_dump()
-        
+
         # All should serialize as integers
-        assert data["status"] == 1      # ACTIVE
-        assert data["priority"] == 2     # HIGH  
+        assert data["status"] == 1  # ACTIVE
+        assert data["priority"] == 2  # HIGH
         assert data["error_code"] == 200  # ERROR_TIMEOUT
-        
+
         # JSON serialization should also use integers
         import json
+
         json_str = model.model_dump_json(by_alias=True)
         json_data = json.loads(json_str)
         assert json_data["status"] == 1

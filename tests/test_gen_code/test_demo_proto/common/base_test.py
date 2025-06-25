@@ -20,7 +20,6 @@ class RoundTripTestBase:
         msg: Message, 
         use_integers_for_enums: bool = True,
         always_print_fields_with_no_presence: bool = True,
-        including_default_value_fields: bool = True,
         preserving_proto_field_name: bool = False,
         sort_keys: bool = False,
         indent: Optional[int] = None
@@ -30,7 +29,6 @@ class RoundTripTestBase:
             msg,
             use_integers_for_enums=use_integers_for_enums,
             always_print_fields_with_no_presence=always_print_fields_with_no_presence,
-            including_default_value_fields=including_default_value_fields,
             preserving_proto_field_name=preserving_proto_field_name,
             sort_keys=sort_keys,
             indent=indent

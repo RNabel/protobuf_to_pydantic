@@ -41,13 +41,13 @@ class TestEnumJSONSpecCompliance:
         json_data = {
             "status": "ACTIVE",
             "priority": "HIGH",
-            "errorCode": "ERROR_TIMEOUT"
+            "errorCode": "ERROR_TIMEOUT",
         }
         json_str = json.dumps(json_data)
 
         # Parse into protobuf
         proto_msg = json_format.Parse(json_str, enum_types_roundtrip_pb2.EnumMessage())
-        
+
         # Verify correct enum values
         assert proto_msg.status == enum_types_roundtrip_pb2.Status.ACTIVE
         assert proto_msg.priority == enum_types_roundtrip_pb2.Priority.HIGH
@@ -58,13 +58,13 @@ class TestEnumJSONSpecCompliance:
         json_data = {
             "status": 1,  # ACTIVE
             "priority": 2,  # HIGH
-            "errorCode": 200  # ERROR_TIMEOUT
+            "errorCode": 200,  # ERROR_TIMEOUT
         }
         json_str = json.dumps(json_data)
 
         # Parse into protobuf
         proto_msg = json_format.Parse(json_str, enum_types_roundtrip_pb2.EnumMessage())
-        
+
         # Verify correct enum values
         assert proto_msg.status == enum_types_roundtrip_pb2.Status.ACTIVE
         assert proto_msg.priority == enum_types_roundtrip_pb2.Priority.HIGH
@@ -101,21 +101,23 @@ class TestEnumJSONSpecCompliance:
         """Test that unset enums (zero value) serialize correctly."""
         # Create message without setting enums (they default to 0)
         proto_msg = enum_types_roundtrip_pb2.EnumMessage()
-        
+
         # Default JSON serialization (without always_print_fields_with_no_presence)
         json_str = json_format.MessageToJson(proto_msg)
         json_dict = json.loads(json_str)
 
         # By default, protobuf doesn't include unset fields in JSON
         assert json_dict == {}
-        
+
         # With always_print_fields_with_no_presence=True
-        json_str = json_format.MessageToJson(proto_msg, always_print_fields_with_no_presence=True)
+        json_str = json_format.MessageToJson(
+            proto_msg, always_print_fields_with_no_presence=True
+        )
         json_dict = json.loads(json_str)
-        
+
         # Now zero values should serialize to the first enum value name
         assert json_dict["status"] == "UNKNOWN"  # Value 0
-        assert json_dict["priority"] == "LOW"     # Value 0
+        assert json_dict["priority"] == "LOW"  # Value 0
         assert json_dict["errorCode"] == "ERROR_NONE"  # Value 0
 
     def test_pydantic_compatibility_with_protobuf_json(self):
@@ -124,13 +126,15 @@ class TestEnumJSONSpecCompliance:
         proto_msg = enum_types_roundtrip_pb2.EnumMessage()
         proto_msg.status = enum_types_roundtrip_pb2.Status.ACTIVE
         proto_msg.priority = enum_types_roundtrip_pb2.Priority.HIGH
-        
+
         # Convert to default protobuf JSON (strings)
         proto_json_str = json_format.MessageToJson(proto_msg)
-        
+
         # Parse with Pydantic model
-        pydantic_model = enum_types_roundtrip_p2p.EnumMessage.model_validate_json(proto_json_str)
-        
+        pydantic_model = enum_types_roundtrip_p2p.EnumMessage.model_validate_json(
+            proto_json_str
+        )
+
         # Verify values are correct
         assert pydantic_model.status == enum_types_roundtrip_pb2.Status.ACTIVE
         assert pydantic_model.priority == enum_types_roundtrip_pb2.Priority.HIGH
@@ -138,16 +142,18 @@ class TestEnumJSONSpecCompliance:
     def test_repeated_enum_json_format(self):
         """Test JSON format for repeated enum fields."""
         proto_msg = enum_types_roundtrip_pb2.EnumMessage()
-        proto_msg.priority_list.extend([
-            enum_types_roundtrip_pb2.Priority.LOW,
-            enum_types_roundtrip_pb2.Priority.HIGH,
-            enum_types_roundtrip_pb2.Priority.URGENT
-        ])
-        
+        proto_msg.priority_list.extend(
+            [
+                enum_types_roundtrip_pb2.Priority.LOW,
+                enum_types_roundtrip_pb2.Priority.HIGH,
+                enum_types_roundtrip_pb2.Priority.URGENT,
+            ]
+        )
+
         # Default JSON serialization
         json_str = json_format.MessageToJson(proto_msg)
         json_dict = json.loads(json_str)
-        
+
         # Repeated enums should be string array
         assert json_dict["priorityList"] == ["LOW", "HIGH", "URGENT"]
 
@@ -156,16 +162,13 @@ class TestEnumJSONSpecCompliance:
         proto_msg = enum_types_roundtrip_pb2.EnumMessage()
         proto_msg.status_map["task1"] = enum_types_roundtrip_pb2.Status.ACTIVE
         proto_msg.status_map["task2"] = enum_types_roundtrip_pb2.Status.COMPLETED
-        
+
         # Default JSON serialization
         json_str = json_format.MessageToJson(proto_msg)
         json_dict = json.loads(json_str)
-        
+
         # Map enum values should be strings
-        assert json_dict["statusMap"] == {
-            "task1": "ACTIVE",
-            "task2": "COMPLETED"
-        }
+        assert json_dict["statusMap"] == {"task1": "ACTIVE", "task2": "COMPLETED"}
 
     def test_optional_enum_presence(self):
         """Test optional enum field presence in JSON."""
@@ -173,15 +176,15 @@ class TestEnumJSONSpecCompliance:
         proto_msg = enum_types_roundtrip_pb2.EnumMessage()
         json_str = json_format.MessageToJson(proto_msg)
         json_dict = json.loads(json_str)
-        
+
         # Optional field should not be present if not set
         assert "optionalStatus" not in json_dict
-        
+
         # With optional field set
         proto_msg.optional_status = enum_types_roundtrip_pb2.Status.ACTIVE
         json_str = json_format.MessageToJson(proto_msg)
         json_dict = json.loads(json_str)
-        
+
         # Now it should be present as string
         assert json_dict["optionalStatus"] == "ACTIVE"
 
@@ -189,12 +192,12 @@ class TestEnumJSONSpecCompliance:
         """Test different protobuf JSON serialization options."""
         proto_msg = enum_types_roundtrip_pb2.EnumMessage()
         proto_msg.status = enum_types_roundtrip_pb2.Status.ACTIVE
-        
+
         # Test use_integers_for_enums option
         json_str_int = json_format.MessageToJson(proto_msg, use_integers_for_enums=True)
         json_dict_int = json.loads(json_str_int)
         assert json_dict_int["status"] == 1  # Integer representation
-        
+
         # Test default (strings)
         json_str_default = json_format.MessageToJson(proto_msg)
         json_dict_default = json.loads(json_str_default)
