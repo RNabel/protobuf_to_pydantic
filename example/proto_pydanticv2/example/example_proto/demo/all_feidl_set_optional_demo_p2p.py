@@ -10,12 +10,13 @@ from uuid import uuid4
 from google.protobuf.field_mask_pb2 import FieldMask  # type: ignore
 from google.protobuf.message import Message  # type: ignore
 from google.protobuf.wrappers_pb2 import DoubleValue  # type: ignore
-from pydantic import ConfigDict, Field, model_validator
+from pydantic import ConfigDict, Field
 from pydantic.types import PaymentCardNumber
 
 from example.plugin_config import exp_time
 from protobuf_to_pydantic.default_base_model import ProtobufCompatibleBaseModel
 from protobuf_to_pydantic.flexible_enum_mixin import FlexibleEnumMixin
+from protobuf_to_pydantic.tagged_union_mixin import TaggedUnionMixin
 from protobuf_to_pydantic.util import TimestampType
 
 from ..common.single_p2p import DemoEnum, DemoMessage
@@ -136,61 +137,17 @@ class OptionalMessageAY(ProtobufCompatibleBaseModel):
 OptionalMessageAUnion = Annotated[Union[OptionalMessageAX, OptionalMessageAY], Field(discriminator="a_case")]
 
 
-class OptionalMessage(ProtobufCompatibleBaseModel):
+class OptionalMessage(TaggedUnionMixin, ProtobufCompatibleBaseModel):
     a: OptionalMessageAUnion
+
+    _oneof_fields = {"a": ["x", "y"]}
+
     name: typing.Optional[str] = Field(default="")
     age: typing.Optional[int] = Field(default=0)
     item: typing.Optional[InvoiceItem] = Field(default_factory=InvoiceItem)
     str_list: typing.Optional[typing.List[str]] = Field(default_factory=list)
     int_map: typing.Optional["typing.Dict[str, int]"] = Field(default_factory=dict)
     default_template_test: typing.Optional[float] = Field(default=1600000000.0)
-
-    def model_dump(self, **kwargs):
-        """Override to handle oneof fields specially."""
-        data = super().model_dump(**kwargs)
-        result = {}
-
-        for field_name, field_value in data.items():
-            if field_name in ["a"]:
-                # This is a oneof field - flatten it
-                if isinstance(field_value, dict):
-                    for k, v in field_value.items():
-                        if not (k.endswith("_case") or k.startswith("__")):
-                            result[k] = v
-            else:
-                result[field_name] = field_value
-
-        return result
-
-    def model_dump_json(self, **kwargs):
-        """Override to use custom model_dump."""
-        from pydantic_core import to_json
-
-        # Extract indent before passing to model_dump
-        indent = kwargs.pop("indent", None)
-        data = self.model_dump(**kwargs)
-        return to_json(data, indent=indent).decode()
-
-    @model_validator(mode="before")
-    @classmethod
-    def _deserialize_oneofs(cls, data):
-        """Handle oneof field deserialization from flat JSON."""
-        if not isinstance(data, dict):
-            return data
-
-        # Handle a oneof
-        if "a" not in data:
-            # Check if any oneof field is present in flat format
-            present_fields = [f for f in ["x", "y"] if f in data]
-            if len(present_fields) > 1:
-                raise ValueError(
-                    f"Multiple fields from oneof 'a' specified: {', '.join(present_fields)}. Only one field allowed."
-                )
-            if present_fields:
-                field = present_fields[0]
-                data["a"] = {field: data.pop(field), "a_case": field}
-
-        return data
 
 
 class Invoice3(ProtobufCompatibleBaseModel):

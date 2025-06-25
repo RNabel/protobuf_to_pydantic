@@ -138,61 +138,17 @@ class InvoiceItem(ProtobufCompatibleBaseModel):
         assert_expected_inline(
             output,
             """\
-class OptionalMessage(ProtobufCompatibleBaseModel):
+class OptionalMessage(TaggedUnionMixin, ProtobufCompatibleBaseModel):
     a: OptionalMessageAUnion
+
+    _oneof_fields = {"a": ["x", "y"]}
+
     name: typing.Optional[str] = Field(default="")
     age: typing.Optional[int] = Field(default=0)
     item: typing.Optional[InvoiceItem] = Field(default_factory=InvoiceItem)
     str_list: typing.List[str] = Field(default_factory=list)
     int_map: "typing.Dict[str, int]" = Field(default_factory=dict)
     default_template_test: float = Field(default=1600000000.0)
-
-    def model_dump(self, **kwargs):
-        \"\"\"Override to handle oneof fields specially.\"\"\"
-        data = super().model_dump(**kwargs)
-        result = {}
-
-        for field_name, field_value in data.items():
-            if field_name in ["a"]:
-                # This is a oneof field - flatten it
-                if isinstance(field_value, dict):
-                    for k, v in field_value.items():
-                        if not (k.endswith("_case") or k.startswith("__")):
-                            result[k] = v
-            else:
-                result[field_name] = field_value
-
-        return result
-
-    def model_dump_json(self, **kwargs):
-        \"\"\"Override to use custom model_dump.\"\"\"
-        from pydantic_core import to_json
-
-        # Extract indent before passing to model_dump
-        indent = kwargs.pop("indent", None)
-        data = self.model_dump(**kwargs)
-        return to_json(data, indent=indent).decode()
-
-    @model_validator(mode="before")
-    @classmethod
-    def _deserialize_oneofs(cls, data):
-        \"\"\"Handle oneof field deserialization from flat JSON.\"\"\"
-        if not isinstance(data, dict):
-            return data
-
-        # Handle a oneof
-        if "a" not in data:
-            # Check if any oneof field is present in flat format
-            present_fields = [f for f in ["x", "y"] if f in data]
-            if len(present_fields) > 1:
-                raise ValueError(
-                    f"Multiple fields from oneof 'a' specified: {', '.join(present_fields)}. Only one field allowed."
-                )
-            if present_fields:
-                field = present_fields[0]
-                data["a"] = {field: data.pop(field), "a_case": field}
-
-        return data
 """,
         )
 

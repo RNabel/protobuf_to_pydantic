@@ -13,7 +13,7 @@ import typing_extensions
 from annotated_types import Ge, Gt, Interval, Le, Lt, MaxLen, MinLen
 from google.protobuf.any_pb2 import Any  # type: ignore
 from google.protobuf.message import Message  # type: ignore
-from pydantic import ConfigDict, Field, field_validator, model_validator
+from pydantic import ConfigDict, Field, field_validator
 from pydantic.networks import AnyUrl, EmailStr, IPvAnyAddress
 from pydantic.types import StringConstraints
 
@@ -50,6 +50,7 @@ from protobuf_to_pydantic.customer_validator.v2 import (
 from protobuf_to_pydantic.default_base_model import ProtobufCompatibleBaseModel
 from protobuf_to_pydantic.field_info_rule.protobuf_option_to_field_info.types import HostNameStr, UriRefStr
 from protobuf_to_pydantic.flexible_enum_mixin import FlexibleEnumMixin
+from protobuf_to_pydantic.tagged_union_mixin import TaggedUnionMixin
 from protobuf_to_pydantic.util import DurationType, TimestampType, datetime_utc_now
 
 
@@ -706,56 +707,12 @@ class OneOfTestIdX(ProtobufCompatibleBaseModel):
 OneOfTestIdUnion = Annotated[Union[OneOfTestIdY, OneOfTestIdX], Field(discriminator="id_case")]
 
 
-class OneOfTest(ProtobufCompatibleBaseModel):
+class OneOfTest(TaggedUnionMixin, ProtobufCompatibleBaseModel):
     id: OneOfTestIdUnion
+
+    _oneof_fields = {"id": ["x", "y"]}
+
     header: str = Field(default="")
-
-    def model_dump(self, **kwargs):
-        """Override to handle oneof fields specially."""
-        data = super().model_dump(**kwargs)
-        result = {}
-
-        for field_name, field_value in data.items():
-            if field_name in ["id"]:
-                # This is a oneof field - flatten it
-                if isinstance(field_value, dict):
-                    for k, v in field_value.items():
-                        if not (k.endswith("_case") or k.startswith("__")):
-                            result[k] = v
-            else:
-                result[field_name] = field_value
-
-        return result
-
-    def model_dump_json(self, **kwargs):
-        """Override to use custom model_dump."""
-        from pydantic_core import to_json
-
-        # Extract indent before passing to model_dump
-        indent = kwargs.pop("indent", None)
-        data = self.model_dump(**kwargs)
-        return to_json(data, indent=indent).decode()
-
-    @model_validator(mode="before")
-    @classmethod
-    def _deserialize_oneofs(cls, data):
-        """Handle oneof field deserialization from flat JSON."""
-        if not isinstance(data, dict):
-            return data
-
-        # Handle id oneof
-        if "id" not in data:
-            # Check if any oneof field is present in flat format
-            present_fields = [f for f in ["x", "y"] if f in data]
-            if len(present_fields) > 1:
-                raise ValueError(
-                    f"Multiple fields from oneof 'id' specified: {', '.join(present_fields)}. Only one field allowed."
-                )
-            if present_fields:
-                field = present_fields[0]
-                data["id"] = {field: data.pop(field), "id_case": field}
-
-        return data
 
 
 class OneOfNotTestIdY(ProtobufCompatibleBaseModel):
@@ -783,63 +740,12 @@ OneOfNotTestIdUnion = Annotated[
 ]
 
 
-class OneOfNotTest(ProtobufCompatibleBaseModel):
+class OneOfNotTest(TaggedUnionMixin, ProtobufCompatibleBaseModel):
     id: Optional[OneOfNotTestIdUnion] = Field(default=None)
+
+    _oneof_fields = {"id": ["x", "y"]}
+
     header: str = Field(default="")
-
-    def model_dump(self, **kwargs):
-        """Override to handle oneof fields specially."""
-        data = super().model_dump(**kwargs)
-        result = {}
-
-        for field_name, field_value in data.items():
-            if field_name in ["id"]:
-                # This is a oneof field - flatten it
-                if isinstance(field_value, dict):
-                    for k, v in field_value.items():
-                        if not (k.endswith("_case") or k.startswith("__")):
-                            result[k] = v
-            else:
-                result[field_name] = field_value
-
-        return result
-
-    def model_dump_json(self, **kwargs):
-        """Override to use custom model_dump."""
-        from pydantic_core import to_json
-
-        # Extract indent before passing to model_dump
-        indent = kwargs.pop("indent", None)
-        data = self.model_dump(**kwargs)
-        return to_json(data, indent=indent).decode()
-
-    @model_validator(mode="before")
-    @classmethod
-    def _deserialize_oneofs(cls, data):
-        """Handle oneof field deserialization from flat JSON."""
-        if not isinstance(data, dict):
-            return data
-
-        # Handle id oneof
-        if "id" not in data:
-            # Check if any oneof field is present in flat format
-            present_fields = [f for f in ["x", "y"] if f in data]
-            if len(present_fields) > 1:
-                raise ValueError(
-                    f"Multiple fields from oneof 'id' specified: {', '.join(present_fields)}. Only one field allowed."
-                )
-            if present_fields:
-                field = present_fields[0]
-                data["id"] = {field: data.pop(field), "id_case": field}
-
-        return data
-
-
-class OneOfOptionalTestIdY(ProtobufCompatibleBaseModel):
-    """Variant when 'y' is set in id oneof."""
-
-    id_case: Literal["y"] = Field(default="y", exclude=True)
-    y: int
 
 
 class OneOfOptionalTestIdZ(ProtobufCompatibleBaseModel):
@@ -847,6 +753,13 @@ class OneOfOptionalTestIdZ(ProtobufCompatibleBaseModel):
 
     id_case: Literal["z"] = Field(default="z", exclude=True)
     z: bool
+
+
+class OneOfOptionalTestIdY(ProtobufCompatibleBaseModel):
+    """Variant when 'y' is set in id oneof."""
+
+    id_case: Literal["y"] = Field(default="y", exclude=True)
+    y: int
 
 
 class OneOfOptionalTestIdX(ProtobufCompatibleBaseModel):
@@ -857,64 +770,20 @@ class OneOfOptionalTestIdX(ProtobufCompatibleBaseModel):
 
 
 OneOfOptionalTestIdUnion = Annotated[
-    Union[OneOfOptionalTestIdY, OneOfOptionalTestIdZ, OneOfOptionalTestIdX], Field(discriminator="id_case")
+    Union[OneOfOptionalTestIdZ, OneOfOptionalTestIdY, OneOfOptionalTestIdX], Field(discriminator="id_case")
 ]
 
 
-class OneOfOptionalTest(ProtobufCompatibleBaseModel):
+class OneOfOptionalTest(TaggedUnionMixin, ProtobufCompatibleBaseModel):
     id: OneOfOptionalTestIdUnion
+
+    _oneof_fields = {"id": ["x", "y", "z"]}
+
     header: str = Field(default="")
     name: typing.Optional[str] = Field(default="")
     age: typing.Optional[int] = Field(default=0)
     str_list: typing.List[str] = Field(default_factory=list)
     int_map: "typing.Dict[str, int]" = Field(default_factory=dict)
-
-    def model_dump(self, **kwargs):
-        """Override to handle oneof fields specially."""
-        data = super().model_dump(**kwargs)
-        result = {}
-
-        for field_name, field_value in data.items():
-            if field_name in ["id"]:
-                # This is a oneof field - flatten it
-                if isinstance(field_value, dict):
-                    for k, v in field_value.items():
-                        if not (k.endswith("_case") or k.startswith("__")):
-                            result[k] = v
-            else:
-                result[field_name] = field_value
-
-        return result
-
-    def model_dump_json(self, **kwargs):
-        """Override to use custom model_dump."""
-        from pydantic_core import to_json
-
-        # Extract indent before passing to model_dump
-        indent = kwargs.pop("indent", None)
-        data = self.model_dump(**kwargs)
-        return to_json(data, indent=indent).decode()
-
-    @model_validator(mode="before")
-    @classmethod
-    def _deserialize_oneofs(cls, data):
-        """Handle oneof field deserialization from flat JSON."""
-        if not isinstance(data, dict):
-            return data
-
-        # Handle id oneof
-        if "id" not in data:
-            # Check if any oneof field is present in flat format
-            present_fields = [f for f in ["x", "y", "z"] if f in data]
-            if len(present_fields) > 1:
-                raise ValueError(
-                    f"Multiple fields from oneof 'id' specified: {', '.join(present_fields)}. Only one field allowed."
-                )
-            if present_fields:
-                field = present_fields[0]
-                data["id"] = {field: data.pop(field), "id_case": field}
-
-        return data
 
 
 class AfterReferMessage(ProtobufCompatibleBaseModel):
