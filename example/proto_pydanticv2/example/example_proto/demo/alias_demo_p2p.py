@@ -3,27 +3,28 @@
 # Protobuf Version: 6.31.1
 # Pydantic Version: 2.11.7
 import typing
-from typing import Annotated, Any, Literal, Union
+from typing import Annotated, Literal, Union
 
 from google.protobuf.message import Message  # type: ignore
 from pydantic import Field
 
 from protobuf_to_pydantic.default_base_model import ProtobufCompatibleBaseModel
 from protobuf_to_pydantic.tagged_union_mixin import TaggedUnionMixin
+from protobuf_to_pydantic.util import TimestampType
 
 
 class ReportDataDataLocation_Value(ProtobufCompatibleBaseModel):
     """Variant when 'location_value' is set in data oneof."""
 
     data_case: Literal["location_value"] = Field(default="location_value", exclude=True)
-    location_value: Any
+    location_value: "GeoLocation"
 
 
 class ReportDataDataTime_Value(ProtobufCompatibleBaseModel):
     """Variant when 'time_value' is set in data oneof."""
 
     data_case: Literal["time_value"] = Field(default="time_value", exclude=True)
-    time_value: Any
+    time_value: TimestampType
 
 
 ReportDataDataUnion = Annotated[

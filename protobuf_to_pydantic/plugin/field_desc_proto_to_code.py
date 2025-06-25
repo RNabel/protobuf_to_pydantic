@@ -811,6 +811,7 @@ class FileDescriptorProtoToCode(BaseP2C):
     def _generate_discriminated_union_classes(
         self,
         desc: DescriptorProto,
+        root_desc: DescriptorProto,
         one_of_dict: Dict[str, OneOfTypedDict],
         optional_dict: Dict[str, OptionTypedDict],
         indent: int,
@@ -844,7 +845,7 @@ class FileDescriptorProtoToCode(BaseP2C):
 
             # Generate variant classes
             variant_types = []
-            for field_name in oneof_config["fields"]:
+            for field_name in sorted(oneof_config["fields"]):
                 if field_name not in field_map:
                     continue
 
@@ -857,7 +858,48 @@ class FileDescriptorProtoToCode(BaseP2C):
                 variant_content += f'{" " * (indent + self.code_indent)}{discriminator_name}: Literal["{field_name}"] = Field(default="{field_name}", exclude=True)\n'
 
                 # Add the oneof field
-                field_type = self._get_field_type_str(field)
+                # Get proper field type (handle messages, enums, etc.)
+                if field.type == 11:  # TYPE_MESSAGE
+                    # Handle message types properly
+                    message = self._descriptors.messages.get(field.type_name)
+                    if message and message.options.map_entry:
+                        # Map type
+                        key_msg, value_msg = message.field
+                        field_type = (
+                            f"typing.Dict[{self._get_protobuf_type_model(key_msg).py_type_str},"
+                            f" {self._get_protobuf_type_model(value_msg).py_type_str}]"
+                        )
+                        self._add_import_code("typing")
+                    else:
+                        # Regular message type
+                        protobuf_type_model = self._get_protobuf_type_model(field)
+                        field_type = protobuf_type_model.py_type_str
+                        # Add import for the message type
+                        if field.type_name.startswith(".google.protobuf"):
+                            # Handle well-known types
+                            pass  # Import already handled by _get_protobuf_type_model
+                        else:
+                            # Add import for custom message types
+                            message_fd = self._descriptors.message_to_fd[field.type_name]
+                            # Check if it's in the same file - if so, use string annotation to handle forward references
+                            if message_fd.name == self._fd.name:
+                                field_type = f'"{field_type}"'
+                            else:
+                                self._add_other_module_pkg(message_fd, field_type)
+                elif field.type == 14:  # TYPE_ENUM
+                    # Handle enum types
+                    type_str = field.type_name.split(".")[-1]
+                    root_desc_enum_name = {i.name for i in root_desc.enum_type}
+                    if type_str in root_desc_enum_name:
+                        field_type = f'"{root_desc.name}.{type_str}"'
+                    else:
+                        field_type = type_str
+                    message_fd = self._descriptors.message_to_fd[field.type_name]
+                    self._add_other_module_pkg(message_fd, type_str)
+                else:
+                    # Primitive types
+                    field_type = self._get_field_type_str(field)
+                
                 variant_content += (
                     f"{' ' * (indent + self.code_indent)}{field_name}: {field_type}\n"
                 )
@@ -1044,7 +1086,7 @@ class FileDescriptorProtoToCode(BaseP2C):
 
             union_classes_content, union_types_content, exclude_map = (
                 self._generate_discriminated_union_classes(
-                    desc, filtered_one_of_dict, optional_dict, indent, field_map
+                    desc, root_desc, filtered_one_of_dict, optional_dict, indent, field_map
                 )
             )
 

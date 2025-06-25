@@ -7,6 +7,7 @@ Tests the fundamental behavior of oneofs:
 - Field access when not set
 """
 
+from datetime import datetime
 import pytest
 from pydantic import ValidationError
 from example.proto_pydanticv2.example.example_proto.demo.demo_p2p import (
@@ -137,8 +138,7 @@ class TestOneofBasicFunctionality:
         assert not hasattr(report.data, "time_value")
 
         # Switch to time_value
-        ts = Timestamp()
-        ts.GetCurrentTime()
+        ts = datetime.now()
         report2 = ReportData(time_value=ts)
 
         assert report2.data.time_value == ts
@@ -159,8 +159,7 @@ class TestOneofBasicFunctionality:
 
         # Test with ReportData
         geo = GeoLocation(latitude=37.7749, longitude=-122.4194)
-        ts = Timestamp()
-        ts.GetCurrentTime()
+        ts = datetime.now()
 
         with pytest.raises(ValueError, match="Multiple fields"):
             ReportData(location_value=geo, time_value=ts)
@@ -180,8 +179,7 @@ class TestOneofBasicFunctionality:
         report_geo = ReportData(location_value=geo)
         assert report_geo.data.data_case == "location_value"
 
-        ts = Timestamp()
-        ts.GetCurrentTime()
+        ts = datetime.now()
         report_time = ReportData(time_value=ts)
         assert report_time.data.data_case == "time_value"
 
