@@ -3,6 +3,7 @@ package roundtrip;
 
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/duration.proto";
+import "google/protobuf/wrappers.proto";
 
 // Message to test well-known protobuf types for round-trip conversion
 message WellKnownTypesMessage {
@@ -27,6 +28,17 @@ message WellKnownTypesMessage {
   // Map with well-known types as values
   map<string, google.protobuf.Timestamp> timestamp_map = 11;
   map<string, google.protobuf.Duration> duration_map = 12;
+  
+  // Wrapper types
+  google.protobuf.DoubleValue double_value = 13;
+  google.protobuf.FloatValue float_value = 14;
+  google.protobuf.Int64Value int64_value = 15;
+  google.protobuf.UInt64Value uint64_value = 16;
+  google.protobuf.Int32Value int32_value = 17;
+  google.protobuf.UInt32Value uint32_value = 18;
+  google.protobuf.BoolValue bool_value = 19;
+  google.protobuf.StringValue string_value = 20;
+  google.protobuf.BytesValue bytes_value = 21;
 }
 
 // Edge cases for well-known types

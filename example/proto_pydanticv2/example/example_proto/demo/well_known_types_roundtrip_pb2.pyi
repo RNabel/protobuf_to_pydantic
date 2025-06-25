@@ -10,6 +10,7 @@ import google.protobuf.duration_pb2
 import google.protobuf.internal.containers
 import google.protobuf.message
 import google.protobuf.timestamp_pb2
+import google.protobuf.wrappers_pb2
 import typing
 
 DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
@@ -68,6 +69,15 @@ class WellKnownTypesMessage(google.protobuf.message.Message):
     INTERVALS_FIELD_NUMBER: builtins.int
     TIMESTAMP_MAP_FIELD_NUMBER: builtins.int
     DURATION_MAP_FIELD_NUMBER: builtins.int
+    DOUBLE_VALUE_FIELD_NUMBER: builtins.int
+    FLOAT_VALUE_FIELD_NUMBER: builtins.int
+    INT64_VALUE_FIELD_NUMBER: builtins.int
+    UINT64_VALUE_FIELD_NUMBER: builtins.int
+    INT32_VALUE_FIELD_NUMBER: builtins.int
+    UINT32_VALUE_FIELD_NUMBER: builtins.int
+    BOOL_VALUE_FIELD_NUMBER: builtins.int
+    STRING_VALUE_FIELD_NUMBER: builtins.int
+    BYTES_VALUE_FIELD_NUMBER: builtins.int
     @property
     def created_at(self) -> google.protobuf.timestamp_pb2.Timestamp:
         """Timestamp fields"""
@@ -102,6 +112,26 @@ class WellKnownTypesMessage(google.protobuf.message.Message):
 
     @property
     def duration_map(self) -> google.protobuf.internal.containers.MessageMap[builtins.str, google.protobuf.duration_pb2.Duration]: ...
+    @property
+    def double_value(self) -> google.protobuf.wrappers_pb2.DoubleValue:
+        """Wrapper types"""
+
+    @property
+    def float_value(self) -> google.protobuf.wrappers_pb2.FloatValue: ...
+    @property
+    def int64_value(self) -> google.protobuf.wrappers_pb2.Int64Value: ...
+    @property
+    def uint64_value(self) -> google.protobuf.wrappers_pb2.UInt64Value: ...
+    @property
+    def int32_value(self) -> google.protobuf.wrappers_pb2.Int32Value: ...
+    @property
+    def uint32_value(self) -> google.protobuf.wrappers_pb2.UInt32Value: ...
+    @property
+    def bool_value(self) -> google.protobuf.wrappers_pb2.BoolValue: ...
+    @property
+    def string_value(self) -> google.protobuf.wrappers_pb2.StringValue: ...
+    @property
+    def bytes_value(self) -> google.protobuf.wrappers_pb2.BytesValue: ...
     def __init__(
         self,
         *,
@@ -117,9 +147,18 @@ class WellKnownTypesMessage(google.protobuf.message.Message):
         intervals: collections.abc.Iterable[google.protobuf.duration_pb2.Duration] | None = ...,
         timestamp_map: collections.abc.Mapping[builtins.str, google.protobuf.timestamp_pb2.Timestamp] | None = ...,
         duration_map: collections.abc.Mapping[builtins.str, google.protobuf.duration_pb2.Duration] | None = ...,
+        double_value: google.protobuf.wrappers_pb2.DoubleValue | None = ...,
+        float_value: google.protobuf.wrappers_pb2.FloatValue | None = ...,
+        int64_value: google.protobuf.wrappers_pb2.Int64Value | None = ...,
+        uint64_value: google.protobuf.wrappers_pb2.UInt64Value | None = ...,
+        int32_value: google.protobuf.wrappers_pb2.Int32Value | None = ...,
+        uint32_value: google.protobuf.wrappers_pb2.UInt32Value | None = ...,
+        bool_value: google.protobuf.wrappers_pb2.BoolValue | None = ...,
+        string_value: google.protobuf.wrappers_pb2.StringValue | None = ...,
+        bytes_value: google.protobuf.wrappers_pb2.BytesValue | None = ...,
     ) -> None: ...
-    def HasField(self, field_name: typing.Literal["_optional_duration", b"_optional_duration", "_optional_timestamp", b"_optional_timestamp", "created_at", b"created_at", "expires_at", b"expires_at", "optional_duration", b"optional_duration", "optional_timestamp", b"optional_timestamp", "processing_time", b"processing_time", "timeout", b"timeout", "ttl", b"ttl", "updated_at", b"updated_at"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing.Literal["_optional_duration", b"_optional_duration", "_optional_timestamp", b"_optional_timestamp", "created_at", b"created_at", "duration_map", b"duration_map", "event_timestamps", b"event_timestamps", "expires_at", b"expires_at", "intervals", b"intervals", "optional_duration", b"optional_duration", "optional_timestamp", b"optional_timestamp", "processing_time", b"processing_time", "timeout", b"timeout", "timestamp_map", b"timestamp_map", "ttl", b"ttl", "updated_at", b"updated_at"]) -> None: ...
+    def HasField(self, field_name: typing.Literal["_optional_duration", b"_optional_duration", "_optional_timestamp", b"_optional_timestamp", "bool_value", b"bool_value", "bytes_value", b"bytes_value", "created_at", b"created_at", "double_value", b"double_value", "expires_at", b"expires_at", "float_value", b"float_value", "int32_value", b"int32_value", "int64_value", b"int64_value", "optional_duration", b"optional_duration", "optional_timestamp", b"optional_timestamp", "processing_time", b"processing_time", "string_value", b"string_value", "timeout", b"timeout", "ttl", b"ttl", "uint32_value", b"uint32_value", "uint64_value", b"uint64_value", "updated_at", b"updated_at"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing.Literal["_optional_duration", b"_optional_duration", "_optional_timestamp", b"_optional_timestamp", "bool_value", b"bool_value", "bytes_value", b"bytes_value", "created_at", b"created_at", "double_value", b"double_value", "duration_map", b"duration_map", "event_timestamps", b"event_timestamps", "expires_at", b"expires_at", "float_value", b"float_value", "int32_value", b"int32_value", "int64_value", b"int64_value", "intervals", b"intervals", "optional_duration", b"optional_duration", "optional_timestamp", b"optional_timestamp", "processing_time", b"processing_time", "string_value", b"string_value", "timeout", b"timeout", "timestamp_map", b"timestamp_map", "ttl", b"ttl", "uint32_value", b"uint32_value", "uint64_value", b"uint64_value", "updated_at", b"updated_at"]) -> None: ...
     @typing.overload
     def WhichOneof(self, oneof_group: typing.Literal["_optional_duration", b"_optional_duration"]) -> typing.Literal["optional_duration"] | None: ...
     @typing.overload
