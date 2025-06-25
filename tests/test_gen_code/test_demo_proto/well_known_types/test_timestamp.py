@@ -18,9 +18,6 @@ from ..common.base_test import RoundTripTestBase
 class TestTimestamp(RoundTripTestBase):
     """Test round-trip conversion for google.protobuf.Timestamp."""
 
-    @pytest.mark.skip(
-        reason="Fails due to proto3 presence handling - default_factory creates unwanted values"
-    )
     @pytest.mark.proto3_presence
     def test_timestamp_current_time(self):
         """Test Timestamp with current time."""
@@ -32,9 +29,6 @@ class TestTimestamp(RoundTripTestBase):
             proto_msg, well_known_types_roundtrip_p2p.WellKnownTypesMessage
         )
 
-    @pytest.mark.skip(
-        reason="Fails due to proto3 presence handling - default_factory creates unwanted values"
-    )
     @pytest.mark.proto3_presence
     def test_timestamp_specific_dates(self):
         """Test Timestamp with specific dates."""
@@ -87,9 +81,6 @@ class TestTimestamp(RoundTripTestBase):
         json_str = self.protobuf_to_json(proto_msg)
         assert '"createdAt": "2024-01-15T10:30:00Z"' in json_str
 
-    @pytest.mark.skip(
-        reason="Fails due to proto3 presence handling - default_factory creates unwanted values"
-    )
     @pytest.mark.proto3_presence
     def test_timestamp_edge_cases(self):
         """Test Timestamp edge cases."""
@@ -103,9 +94,6 @@ class TestTimestamp(RoundTripTestBase):
             proto_msg, well_known_types_roundtrip_p2p.WellKnownTypesMessage
         )
 
-    @pytest.mark.skip(
-        reason="Fails due to proto3 presence handling - default_factory creates unwanted values"
-    )
     @pytest.mark.proto3_presence
     def test_repeated_timestamps(self):
         """Test repeated Timestamp fields."""
@@ -142,9 +130,6 @@ class TestTimestamp(RoundTripTestBase):
         assert isinstance(pydantic_model.created_at, datetime)
         assert pydantic_model.created_at == dt
 
-    @pytest.mark.skip(
-        reason="Fails due to proto3 presence handling - default_factory creates unwanted values"
-    )
     @pytest.mark.proto3_presence
     def test_timestamp_from_pydantic_to_protobuf(self):
         """Test conversion from Pydantic to protobuf Timestamp."""
@@ -163,9 +148,6 @@ class TestTimestamp(RoundTripTestBase):
         # Verify timestamp is correct (ToDatetime returns timezone-naive by default)
         assert proto_msg.created_at.ToDatetime(tzinfo=timezone.utc) == dt
 
-    @pytest.mark.skip(
-        reason="Fails due to proto3 presence handling - default_factory creates unwanted values"
-    )
     @pytest.mark.proto3_presence
     def test_optional_timestamp(self):
         """Test optional Timestamp field handling."""
