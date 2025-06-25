@@ -122,14 +122,14 @@ class EmptyMessage(ProtobufCompatibleBaseModel):
 class OptionalMessageAY(ProtobufCompatibleBaseModel):
     """Variant when 'y' is set in a oneof."""
 
-    a_case: Literal["y"] = Field(default="y", alias="__a_case__", exclude=True)
+    a_case: Literal["y"] = Field(default="y", exclude=True)
     y: int
 
 
 class OptionalMessageAX(ProtobufCompatibleBaseModel):
     """Variant when 'x' is set in a oneof."""
 
-    a_case: Literal["x"] = Field(default="x", alias="__a_case__", exclude=True)
+    a_case: Literal["x"] = Field(default="x", exclude=True)
     x: str
 
 
@@ -181,10 +181,14 @@ class OptionalMessage(ProtobufCompatibleBaseModel):
         # Handle a oneof
         if "a" not in data:
             # Check if any oneof field is present in flat format
-            if "x" in data:
-                data["a"] = {"x": data.pop("x"), "a_case": "x"}
-            elif "y" in data:
-                data["a"] = {"y": data.pop("y"), "a_case": "y"}
+            present_fields = [f for f in ["x", "y"] if f in data]
+            if len(present_fields) > 1:
+                raise ValueError(
+                    f"Multiple fields from oneof 'a' specified: {', '.join(present_fields)}. Only one field allowed."
+                )
+            if present_fields:
+                field = present_fields[0]
+                data["a"] = {field: data.pop(field), "a_case": field}
 
         return data
 

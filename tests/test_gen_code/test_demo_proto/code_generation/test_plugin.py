@@ -146,6 +146,49 @@ class OptionalMessage(ProtobufCompatibleBaseModel):
     str_list: typing.List[str] = Field(default_factory=list)
     int_map: "typing.Dict[str, int]" = Field(default_factory=dict)
     default_template_test: float = Field(default=1600000000.0)
+
+    def model_dump(self, **kwargs):
+        \"\"\"Override to handle oneof fields specially.\"\"\"
+        data = super().model_dump(**kwargs)
+        result = {}
+
+        for field_name, field_value in data.items():
+            if field_name in ["a"]:
+                # This is a oneof field - flatten it
+                if isinstance(field_value, dict):
+                    for k, v in field_value.items():
+                        if not (k.endswith("_case") or k.startswith("__")):
+                            result[k] = v
+            else:
+                result[field_name] = field_value
+
+        return result
+
+    def model_dump_json(self, **kwargs):
+        \"\"\"Override to use custom model_dump.\"\"\"
+        from pydantic_core import to_json
+
+        # Extract indent before passing to model_dump
+        indent = kwargs.pop("indent", None)
+        data = self.model_dump(**kwargs)
+        return to_json(data, indent=indent).decode()
+
+    @model_validator(mode="before")
+    @classmethod
+    def _deserialize_oneofs(cls, data):
+        \"\"\"Handle oneof field deserialization from flat JSON.\"\"\"
+        if not isinstance(data, dict):
+            return data
+
+        # Handle a oneof
+        if "a" not in data:
+            # Check if any oneof field is present in flat format
+            if "x" in data:
+                data["a"] = {"x": data.pop("x"), "a_case": "x"}
+            elif "y" in data:
+                data["a"] = {"y": data.pop("y"), "a_case": "y"}
+
+        return data
 """,
         )
 

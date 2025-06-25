@@ -692,14 +692,14 @@ class MessageIgnoredTest(ProtobufCompatibleBaseModel):
 class OneOfTestIdX(ProtobufCompatibleBaseModel):
     """Variant when 'x' is set in id oneof."""
 
-    id_case: Literal["x"] = Field(default="x", alias="__id_case__", exclude=True)
+    id_case: Literal["x"] = Field(default="x", exclude=True)
     x: str
 
 
 class OneOfTestIdY(ProtobufCompatibleBaseModel):
     """Variant when 'y' is set in id oneof."""
 
-    id_case: Literal["y"] = Field(default="y", alias="__id_case__", exclude=True)
+    id_case: Literal["y"] = Field(default="y", exclude=True)
     y: int
 
 
@@ -746,10 +746,14 @@ class OneOfTest(ProtobufCompatibleBaseModel):
         # Handle id oneof
         if "id" not in data:
             # Check if any oneof field is present in flat format
-            if "x" in data:
-                data["id"] = {"x": data.pop("x"), "id_case": "x"}
-            elif "y" in data:
-                data["id"] = {"y": data.pop("y"), "id_case": "y"}
+            present_fields = [f for f in ["x", "y"] if f in data]
+            if len(present_fields) > 1:
+                raise ValueError(
+                    f"Multiple fields from oneof 'id' specified: {', '.join(present_fields)}. Only one field allowed."
+                )
+            if present_fields:
+                field = present_fields[0]
+                data["id"] = {field: data.pop(field), "id_case": field}
 
         return data
 
@@ -757,14 +761,14 @@ class OneOfTest(ProtobufCompatibleBaseModel):
 class OneOfNotTestIdX(ProtobufCompatibleBaseModel):
     """Variant when 'x' is set in id oneof."""
 
-    id_case: Literal["x"] = Field(default="x", alias="__id_case__", exclude=True)
+    id_case: Literal["x"] = Field(default="x", exclude=True)
     x: str
 
 
 class OneOfNotTestIdY(ProtobufCompatibleBaseModel):
     """Variant when 'y' is set in id oneof."""
 
-    id_case: Literal["y"] = Field(default="y", alias="__id_case__", exclude=True)
+    id_case: Literal["y"] = Field(default="y", exclude=True)
     y: int
 
 
@@ -819,37 +823,41 @@ class OneOfNotTest(ProtobufCompatibleBaseModel):
         # Handle id oneof
         if "id" not in data:
             # Check if any oneof field is present in flat format
-            if "x" in data:
-                data["id"] = {"x": data.pop("x"), "id_case": "x"}
-            elif "y" in data:
-                data["id"] = {"y": data.pop("y"), "id_case": "y"}
+            present_fields = [f for f in ["x", "y"] if f in data]
+            if len(present_fields) > 1:
+                raise ValueError(
+                    f"Multiple fields from oneof 'id' specified: {', '.join(present_fields)}. Only one field allowed."
+                )
+            if present_fields:
+                field = present_fields[0]
+                data["id"] = {field: data.pop(field), "id_case": field}
 
         return data
+
+
+class OneOfOptionalTestIdZ(ProtobufCompatibleBaseModel):
+    """Variant when 'z' is set in id oneof."""
+
+    id_case: Literal["z"] = Field(default="z", exclude=True)
+    z: bool
 
 
 class OneOfOptionalTestIdX(ProtobufCompatibleBaseModel):
     """Variant when 'x' is set in id oneof."""
 
-    id_case: Literal["x"] = Field(default="x", alias="__id_case__", exclude=True)
+    id_case: Literal["x"] = Field(default="x", exclude=True)
     x: str
 
 
 class OneOfOptionalTestIdY(ProtobufCompatibleBaseModel):
     """Variant when 'y' is set in id oneof."""
 
-    id_case: Literal["y"] = Field(default="y", alias="__id_case__", exclude=True)
+    id_case: Literal["y"] = Field(default="y", exclude=True)
     y: int
 
 
-class OneOfOptionalTestIdZ(ProtobufCompatibleBaseModel):
-    """Variant when 'z' is set in id oneof."""
-
-    id_case: Literal["z"] = Field(default="z", alias="__id_case__", exclude=True)
-    z: bool
-
-
 OneOfOptionalTestIdUnion = Annotated[
-    Union[OneOfOptionalTestIdX, OneOfOptionalTestIdY, OneOfOptionalTestIdZ], Field(discriminator="id_case")
+    Union[OneOfOptionalTestIdZ, OneOfOptionalTestIdX, OneOfOptionalTestIdY], Field(discriminator="id_case")
 ]
 
 
@@ -897,12 +905,14 @@ class OneOfOptionalTest(ProtobufCompatibleBaseModel):
         # Handle id oneof
         if "id" not in data:
             # Check if any oneof field is present in flat format
-            if "x" in data:
-                data["id"] = {"x": data.pop("x"), "id_case": "x"}
-            elif "y" in data:
-                data["id"] = {"y": data.pop("y"), "id_case": "y"}
-            elif "z" in data:
-                data["id"] = {"z": data.pop("z"), "id_case": "z"}
+            present_fields = [f for f in ["x", "y", "z"] if f in data]
+            if len(present_fields) > 1:
+                raise ValueError(
+                    f"Multiple fields from oneof 'id' specified: {', '.join(present_fields)}. Only one field allowed."
+                )
+            if present_fields:
+                field = present_fields[0]
+                data["id"] = {field: data.pop(field), "id_case": field}
 
         return data
 

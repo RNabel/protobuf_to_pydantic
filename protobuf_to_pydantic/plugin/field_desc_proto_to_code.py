@@ -842,10 +842,6 @@ class FileDescriptorProtoToCode(BaseP2C):
             oneof_field_names = {name.split(".")[-1] for name in one_of_dict.keys()}
             all_oneof_fields.update(oneof_field_names)
 
-            common_fields = {
-                f.name: f for f in desc.field if f.name not in all_oneof_fields
-            }
-
             # Generate variant classes
             variant_types = []
             for field_name in oneof_config["fields"]:
@@ -858,7 +854,7 @@ class FileDescriptorProtoToCode(BaseP2C):
                 )
                 variant_content = f"\n{' ' * indent}class {variant_class_name}({self.config.base_model_class.__name__}):\n"
                 variant_content += f'{" " * (indent + self.code_indent)}"""Variant when \'{field_name}\' is set in {oneof_name} oneof."""\n'
-                variant_content += f'{" " * (indent + self.code_indent)}{discriminator_name}: Literal["{field_name}"] = Field(default="{field_name}", alias="__{discriminator_name}__", exclude=True)\n'
+                variant_content += f'{" " * (indent + self.code_indent)}{discriminator_name}: Literal["{field_name}"] = Field(default="{field_name}", exclude=True)\n'
 
                 # Add the oneof field
                 field_type = self._get_field_type_str(field)
@@ -904,80 +900,99 @@ class FileDescriptorProtoToCode(BaseP2C):
         indent: int,
     ) -> str:
         """Generate custom model_dump and model_dump_json methods to handle oneofs.
-        
+
         This ensures that only the active field from each oneof is serialized,
         matching protobuf's JSON format.
         """
         if not one_of_dict:
             return ""
-        
+
         # Build the list of oneof fields
         oneof_fields = []
         for oneof_full_name in one_of_dict.keys():
             oneof_name = oneof_full_name.split(".")[-1]
             oneof_fields.append(oneof_name)
-        
+
         # Generate the model_dump override
-        content = f"\n{' ' * (indent + self.code_indent)}def model_dump(self, **kwargs):\n"
-        content += f"{' ' * (indent + self.code_indent * 2)}\"\"\"Override to handle oneof fields specially.\"\"\"\n"
+        content = (
+            f"\n{' ' * (indent + self.code_indent)}def model_dump(self, **kwargs):\n"
+        )
+        content += f'{" " * (indent + self.code_indent * 2)}"""Override to handle oneof fields specially."""\n'
         content += f"{' ' * (indent + self.code_indent * 2)}data = super().model_dump(**kwargs)\n"
         content += f"{' ' * (indent + self.code_indent * 2)}result = {{}}\n"
         content += f"{' ' * (indent + self.code_indent * 2)}\n"
         content += f"{' ' * (indent + self.code_indent * 2)}for field_name, field_value in data.items():\n"
-        content += f"{' ' * (indent + self.code_indent * 3)}if field_name in {oneof_fields}:\n"
+        content += (
+            f"{' ' * (indent + self.code_indent * 3)}if field_name in {oneof_fields}:\n"
+        )
         content += f"{' ' * (indent + self.code_indent * 4)}# This is a oneof field - flatten it\n"
         content += f"{' ' * (indent + self.code_indent * 4)}if isinstance(field_value, dict):\n"
-        content += f"{' ' * (indent + self.code_indent * 5)}for k, v in field_value.items():\n"
+        content += (
+            f"{' ' * (indent + self.code_indent * 5)}for k, v in field_value.items():\n"
+        )
         content += f"{' ' * (indent + self.code_indent * 6)}if not (k.endswith('_case') or k.startswith('__')):\n"
         content += f"{' ' * (indent + self.code_indent * 7)}result[k] = v\n"
         content += f"{' ' * (indent + self.code_indent * 3)}else:\n"
-        content += f"{' ' * (indent + self.code_indent * 4)}result[field_name] = field_value\n"
+        content += (
+            f"{' ' * (indent + self.code_indent * 4)}result[field_name] = field_value\n"
+        )
         content += f"{' ' * (indent + self.code_indent * 2)}\n"
         content += f"{' ' * (indent + self.code_indent * 2)}return result\n"
-        
+
         # Generate the model_dump_json override
         content += f"\n{' ' * (indent + self.code_indent)}def model_dump_json(self, **kwargs):\n"
-        content += f"{' ' * (indent + self.code_indent * 2)}\"\"\"Override to use custom model_dump.\"\"\"\n"
+        content += f'{" " * (indent + self.code_indent * 2)}"""Override to use custom model_dump."""\n'
         content += f"{' ' * (indent + self.code_indent * 2)}from pydantic_core import to_json\n"
         content += f"{' ' * (indent + self.code_indent * 2)}# Extract indent before passing to model_dump\n"
         content += f"{' ' * (indent + self.code_indent * 2)}indent = kwargs.pop('indent', None)\n"
-        content += f"{' ' * (indent + self.code_indent * 2)}data = self.model_dump(**kwargs)\n"
+        content += (
+            f"{' ' * (indent + self.code_indent * 2)}data = self.model_dump(**kwargs)\n"
+        )
         content += f"{' ' * (indent + self.code_indent * 2)}return to_json(data, indent=indent).decode()\n"
-        
+
         return content
-    
-    def _generate_oneof_validator(self, desc: DescriptorProto, one_of_dict: Dict[str, OneOfTypedDict], indent: int) -> str:
+
+    def _generate_oneof_validator(
+        self, desc: DescriptorProto, one_of_dict: Dict[str, OneOfTypedDict], indent: int
+    ) -> str:
         """Generate a model_validator for JSON deserialization."""
         if not one_of_dict:
             return ""
-        
-        content = f"\n{' ' * (indent + self.code_indent)}@model_validator(mode='before')\n"
+
+        content = (
+            f"\n{' ' * (indent + self.code_indent)}@model_validator(mode='before')\n"
+        )
         content += f"{' ' * (indent + self.code_indent)}@classmethod\n"
-        content += f"{' ' * (indent + self.code_indent)}def _deserialize_oneofs(cls, data):\n"
-        content += f"{' ' * (indent + self.code_indent * 2)}\"\"\"Handle oneof field deserialization from flat JSON.\"\"\"\n"
-        content += f"{' ' * (indent + self.code_indent * 2)}if not isinstance(data, dict):\n"
+        content += (
+            f"{' ' * (indent + self.code_indent)}def _deserialize_oneofs(cls, data):\n"
+        )
+        content += f'{" " * (indent + self.code_indent * 2)}"""Handle oneof field deserialization from flat JSON."""\n'
+        content += (
+            f"{' ' * (indent + self.code_indent * 2)}if not isinstance(data, dict):\n"
+        )
         content += f"{' ' * (indent + self.code_indent * 3)}return data\n"
         content += f"\n"
-        
+
         # Process each oneof
         for oneof_name, oneof_info in one_of_dict.items():
             # Extract the actual field name from the full name
             field_name = oneof_name.split(".")[-1]
             fields = sorted(oneof_info["fields"])
-            
-            content += f"{' ' * (indent + self.code_indent * 2)}# Handle {field_name} oneof\n"
+
+            content += (
+                f"{' ' * (indent + self.code_indent * 2)}# Handle {field_name} oneof\n"
+            )
             content += f"{' ' * (indent + self.code_indent * 2)}if '{field_name}' not in data:\n"
             content += f"{' ' * (indent + self.code_indent * 3)}# Check if any oneof field is present in flat format\n"
-            
-            for i, field in enumerate(fields):
-                if i == 0:
-                    content += f"{' ' * (indent + self.code_indent * 3)}if '{field}' in data:\n"
-                else:
-                    content += f"{' ' * (indent + self.code_indent * 3)}elif '{field}' in data:\n"
-                content += f"{' ' * (indent + self.code_indent * 4)}data['{field_name}'] = {{'{field}': data.pop('{field}'), '{field_name}_case': '{field}'}}\n"
-        
+            content += f"{' ' * (indent + self.code_indent * 3)}present_fields = [f for f in {fields} if f in data]\n"
+            content += f"{' ' * (indent + self.code_indent * 3)}if len(present_fields) > 1:\n"
+            content += f"{' ' * (indent + self.code_indent * 4)}raise ValueError(f\"Multiple fields from oneof '{field_name}' specified: {{', '.join(present_fields)}}. Only one field allowed.\")\n"
+            content += f"{' ' * (indent + self.code_indent * 3)}if present_fields:\n"
+            content += f"{' ' * (indent + self.code_indent * 4)}field = present_fields[0]\n"
+            content += f"{' ' * (indent + self.code_indent * 4)}data['{field_name}'] = {{field: data.pop(field), '{field_name}_case': field}}\n"
+
         content += f"\n{' ' * (indent + self.code_indent * 2)}return data\n"
-        
+
         return content
 
     def _get_field_type_str(self, field: FieldDescriptorProto) -> str:
@@ -1302,29 +1317,39 @@ class FileDescriptorProtoToCode(BaseP2C):
                         content_lines.insert(
                             insertion_point, union_fields_content.rstrip()
                         )
-                        
+
                         # Add custom serializer and validator for protobuf-compatible JSON
-                        serializer_content = self._generate_oneof_serializer(desc, one_of_dict, indent)
-                        validator_content = self._generate_oneof_validator(desc, one_of_dict, indent)
-                        
+                        serializer_content = self._generate_oneof_serializer(
+                            desc, one_of_dict, indent
+                        )
+                        validator_content = self._generate_oneof_validator(
+                            desc, one_of_dict, indent
+                        )
+
                         if serializer_content or validator_content:
                             # Find the end of the class to add the methods
                             end_of_class = len(content_lines)
                             for i in range(insertion_point + 1, len(content_lines)):
-                                if content_lines[i].strip() and not content_lines[i].startswith(" " * indent):
+                                if content_lines[i].strip() and not content_lines[
+                                    i
+                                ].startswith(" " * indent):
                                     # Found the next class or top-level code
                                     end_of_class = i
                                     break
-                            
+
                             # Insert before the end of class
                             if end_of_class > insertion_point:
                                 if validator_content:
-                                    content_lines.insert(end_of_class, validator_content)
+                                    content_lines.insert(
+                                        end_of_class, validator_content
+                                    )
                                     # Add model_validator import
                                     self._add_import_code("pydantic", "model_validator")
                                 if serializer_content:
-                                    content_lines.insert(end_of_class, serializer_content)
-                        
+                                    content_lines.insert(
+                                        end_of_class, serializer_content
+                                    )
+
                         content = "\n".join(content_lines)
         else:
             content = "\n".join(

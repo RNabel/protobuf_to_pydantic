@@ -14,14 +14,14 @@ from protobuf_to_pydantic.default_base_model import ProtobufCompatibleBaseModel
 class ReportDataDataTime_Value(ProtobufCompatibleBaseModel):
     """Variant when 'time_value' is set in data oneof."""
 
-    data_case: Literal["time_value"] = Field(default="time_value", alias="__data_case__", exclude=True)
+    data_case: Literal["time_value"] = Field(default="time_value", exclude=True)
     time_value: Any
 
 
 class ReportDataDataLocation_Value(ProtobufCompatibleBaseModel):
     """Variant when 'location_value' is set in data oneof."""
 
-    data_case: Literal["location_value"] = Field(default="location_value", alias="__data_case__", exclude=True)
+    data_case: Literal["location_value"] = Field(default="location_value", exclude=True)
     location_value: Any
 
 
@@ -73,10 +73,14 @@ class ReportData(ProtobufCompatibleBaseModel):
         # Handle data oneof
         if "data" not in data:
             # Check if any oneof field is present in flat format
-            if "location_value" in data:
-                data["data"] = {"location_value": data.pop("location_value"), "data_case": "location_value"}
-            elif "time_value" in data:
-                data["data"] = {"time_value": data.pop("time_value"), "data_case": "time_value"}
+            present_fields = [f for f in ["location_value", "time_value"] if f in data]
+            if len(present_fields) > 1:
+                raise ValueError(
+                    f"Multiple fields from oneof 'data' specified: {', '.join(present_fields)}. Only one field allowed."
+                )
+            if present_fields:
+                field = present_fields[0]
+                data["data"] = {field: data.pop(field), "data_case": field}
 
         return data
 

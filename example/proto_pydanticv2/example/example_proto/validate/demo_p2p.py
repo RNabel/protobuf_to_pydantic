@@ -447,21 +447,21 @@ class MessageIgnoredTest(ProtobufCompatibleBaseModel):
     range_test: int = Field(default=0)
 
 
-class OneOfTestIdY(ProtobufCompatibleBaseModel):
-    """Variant when 'y' is set in id oneof."""
-
-    id_case: Literal["y"] = Field(default="y", alias="__id_case__", exclude=True)
-    y: int
-
-
 class OneOfTestIdX(ProtobufCompatibleBaseModel):
     """Variant when 'x' is set in id oneof."""
 
-    id_case: Literal["x"] = Field(default="x", alias="__id_case__", exclude=True)
+    id_case: Literal["x"] = Field(default="x", exclude=True)
     x: str
 
 
-OneOfTestIdUnion = Annotated[Union[OneOfTestIdY, OneOfTestIdX], Field(discriminator="id_case")]
+class OneOfTestIdY(ProtobufCompatibleBaseModel):
+    """Variant when 'y' is set in id oneof."""
+
+    id_case: Literal["y"] = Field(default="y", exclude=True)
+    y: int
+
+
+OneOfTestIdUnion = Annotated[Union[OneOfTestIdX, OneOfTestIdY], Field(discriminator="id_case")]
 
 
 class OneOfTest(ProtobufCompatibleBaseModel):
@@ -504,26 +504,30 @@ class OneOfTest(ProtobufCompatibleBaseModel):
         # Handle id oneof
         if "id" not in data:
             # Check if any oneof field is present in flat format
-            if "x" in data:
-                data["id"] = {"x": data.pop("x"), "id_case": "x"}
-            elif "y" in data:
-                data["id"] = {"y": data.pop("y"), "id_case": "y"}
+            present_fields = [f for f in ["x", "y"] if f in data]
+            if len(present_fields) > 1:
+                raise ValueError(
+                    f"Multiple fields from oneof 'id' specified: {', '.join(present_fields)}. Only one field allowed."
+                )
+            if present_fields:
+                field = present_fields[0]
+                data["id"] = {field: data.pop(field), "id_case": field}
 
         return data
-
-
-class OneOfNotTestIdY(ProtobufCompatibleBaseModel):
-    """Variant when 'y' is set in id oneof."""
-
-    id_case: Literal["y"] = Field(default="y", alias="__id_case__", exclude=True)
-    y: int
 
 
 class OneOfNotTestIdX(ProtobufCompatibleBaseModel):
     """Variant when 'x' is set in id oneof."""
 
-    id_case: Literal["x"] = Field(default="x", alias="__id_case__", exclude=True)
+    id_case: Literal["x"] = Field(default="x", exclude=True)
     x: str
+
+
+class OneOfNotTestIdY(ProtobufCompatibleBaseModel):
+    """Variant when 'y' is set in id oneof."""
+
+    id_case: Literal["y"] = Field(default="y", exclude=True)
+    y: int
 
 
 class OneOfNotTestIdNone(ProtobufCompatibleBaseModel):
@@ -533,7 +537,7 @@ class OneOfNotTestIdNone(ProtobufCompatibleBaseModel):
 
 
 OneOfNotTestIdUnion = Annotated[
-    Union[OneOfNotTestIdY, OneOfNotTestIdX, OneOfNotTestIdNone], Field(discriminator="id_case")
+    Union[OneOfNotTestIdX, OneOfNotTestIdY, OneOfNotTestIdNone], Field(discriminator="id_case")
 ]
 
 
@@ -577,10 +581,14 @@ class OneOfNotTest(ProtobufCompatibleBaseModel):
         # Handle id oneof
         if "id" not in data:
             # Check if any oneof field is present in flat format
-            if "x" in data:
-                data["id"] = {"x": data.pop("x"), "id_case": "x"}
-            elif "y" in data:
-                data["id"] = {"y": data.pop("y"), "id_case": "y"}
+            present_fields = [f for f in ["x", "y"] if f in data]
+            if len(present_fields) > 1:
+                raise ValueError(
+                    f"Multiple fields from oneof 'id' specified: {', '.join(present_fields)}. Only one field allowed."
+                )
+            if present_fields:
+                field = present_fields[0]
+                data["id"] = {field: data.pop(field), "id_case": field}
 
         return data
 
