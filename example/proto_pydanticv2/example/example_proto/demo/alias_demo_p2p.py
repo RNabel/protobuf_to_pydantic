@@ -38,7 +38,17 @@ class ReportData(TaggedUnionMixin, ProtobufCompatibleBaseModel):
 
     data: ReportDataDataUnion
 
-    _oneof_fields = {"data": ["location_value", "time_value"]}
+    _oneof_fields = {
+        "data": {
+            "aliases": {
+                "locationValue": "location_value",
+                "location_value": "location_value",
+                "timeValue": "time_value",
+                "time_value": "time_value",
+            },
+            "fields": ["location_value", "time_value"],
+        }
+    }
 
 
 class GeoLocation(ProtobufCompatibleBaseModel):

@@ -62,20 +62,41 @@ class TaggedUnionMixin:
             union_fields = union_fields.default
 
         # Process each discriminated union field
-        for field_name, field_options in union_fields.items():
+        for field_name, field_info in union_fields.items():
             if field_name not in data:
+                # field_info can be either a list (old format) or dict with 'fields' and 'aliases'
+                if isinstance(field_info, list):
+                    # Old format - just field names
+                    field_options = field_info
+                    field_aliases = {f: f for f in field_options}
+                else:
+                    # New format - with aliases
+                    field_options = field_info.get("fields", [])
+                    field_aliases = field_info.get("aliases", {})
+
                 # Check if any oneof field is present in flat format
-                present_fields = [f for f in field_options if f in data]
+                present_fields = []
+                field_mapping = {}
+                for key in data:
+                    if data[key] is None:
+                        continue
+                    if key in field_aliases:
+                        actual_field = field_aliases[key]
+                        if actual_field not in field_mapping:
+                            present_fields.append(actual_field)
+                            field_mapping[actual_field] = key
+
                 if len(present_fields) > 1:
                     raise ValueError(
                         f"Multiple fields from oneof '{field_name}' specified: {', '.join(present_fields)}. "
                         f"Only one field allowed."
                     )
                 if present_fields:
-                    field = present_fields[0]
+                    actual_field = present_fields[0]
+                    data_key = field_mapping[actual_field]
                     data[field_name] = {
-                        field: data.pop(field),
-                        f"{field_name}_case": field,
+                        actual_field: data.pop(data_key),
+                        f"{field_name}_case": actual_field,
                     }
 
         return data

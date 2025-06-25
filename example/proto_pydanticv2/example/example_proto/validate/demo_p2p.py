@@ -448,13 +448,6 @@ class MessageIgnoredTest(ProtobufCompatibleBaseModel):
     range_test: int = Field(default=0)
 
 
-class OneOfTestIdY(ProtobufCompatibleBaseModel):
-    """Variant when 'y' is set in id oneof."""
-
-    id_case: Literal["y"] = Field(default="y", exclude=True)
-    y: int
-
-
 class OneOfTestIdX(ProtobufCompatibleBaseModel):
     """Variant when 'x' is set in id oneof."""
 
@@ -462,22 +455,22 @@ class OneOfTestIdX(ProtobufCompatibleBaseModel):
     x: str
 
 
-OneOfTestIdUnion = Annotated[Union[OneOfTestIdY, OneOfTestIdX], Field(discriminator="id_case")]
+class OneOfTestIdY(ProtobufCompatibleBaseModel):
+    """Variant when 'y' is set in id oneof."""
+
+    id_case: Literal["y"] = Field(default="y", exclude=True)
+    y: int
+
+
+OneOfTestIdUnion = Annotated[Union[OneOfTestIdX, OneOfTestIdY], Field(discriminator="id_case")]
 
 
 class OneOfTest(TaggedUnionMixin, ProtobufCompatibleBaseModel):
     id: OneOfTestIdUnion
 
-    _oneof_fields = {"id": ["x", "y"]}
+    _oneof_fields = {"id": {"aliases": {"x": "x", "y": "y"}, "fields": ["x", "y"]}}
 
     header: str = Field(default="")
-
-
-class OneOfNotTestIdY(ProtobufCompatibleBaseModel):
-    """Variant when 'y' is set in id oneof."""
-
-    id_case: Literal["y"] = Field(default="y", exclude=True)
-    y: int
 
 
 class OneOfNotTestIdX(ProtobufCompatibleBaseModel):
@@ -487,6 +480,13 @@ class OneOfNotTestIdX(ProtobufCompatibleBaseModel):
     x: str
 
 
+class OneOfNotTestIdY(ProtobufCompatibleBaseModel):
+    """Variant when 'y' is set in id oneof."""
+
+    id_case: Literal["y"] = Field(default="y", exclude=True)
+    y: int
+
+
 class OneOfNotTestIdNone(ProtobufCompatibleBaseModel):
     """Variant when no field is set in id oneof."""
 
@@ -494,14 +494,14 @@ class OneOfNotTestIdNone(ProtobufCompatibleBaseModel):
 
 
 OneOfNotTestIdUnion = Annotated[
-    Union[OneOfNotTestIdY, OneOfNotTestIdX, OneOfNotTestIdNone], Field(discriminator="id_case")
+    Union[OneOfNotTestIdX, OneOfNotTestIdY, OneOfNotTestIdNone], Field(discriminator="id_case")
 ]
 
 
 class OneOfNotTest(TaggedUnionMixin, ProtobufCompatibleBaseModel):
     id: Optional[OneOfNotTestIdUnion] = Field(default=None)
 
-    _oneof_fields = {"id": ["x", "y"]}
+    _oneof_fields = {"id": {"aliases": {"x": "x", "y": "y"}, "fields": ["x", "y"]}}
 
     header: str = Field(default="")
 

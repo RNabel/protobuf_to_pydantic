@@ -120,13 +120,6 @@ class EmptyMessage(ProtobufCompatibleBaseModel):
     pass
 
 
-class OptionalMessageAX(ProtobufCompatibleBaseModel):
-    """Variant when 'x' is set in a oneof."""
-
-    a_case: Literal["x"] = Field(default="x", exclude=True)
-    x: str
-
-
 class OptionalMessageAY(ProtobufCompatibleBaseModel):
     """Variant when 'y' is set in a oneof."""
 
@@ -134,13 +127,20 @@ class OptionalMessageAY(ProtobufCompatibleBaseModel):
     y: int
 
 
-OptionalMessageAUnion = Annotated[Union[OptionalMessageAX, OptionalMessageAY], Field(discriminator="a_case")]
+class OptionalMessageAX(ProtobufCompatibleBaseModel):
+    """Variant when 'x' is set in a oneof."""
+
+    a_case: Literal["x"] = Field(default="x", exclude=True)
+    x: str
+
+
+OptionalMessageAUnion = Annotated[Union[OptionalMessageAY, OptionalMessageAX], Field(discriminator="a_case")]
 
 
 class OptionalMessage(TaggedUnionMixin, ProtobufCompatibleBaseModel):
     a: OptionalMessageAUnion
 
-    _oneof_fields = {"a": ["x", "y"]}
+    _oneof_fields = {"a": {"aliases": {"x": "x", "y": "y"}, "fields": ["x", "y"]}}
 
     name: typing.Optional[str] = Field(default="")
     age: typing.Optional[int] = Field(default=0)

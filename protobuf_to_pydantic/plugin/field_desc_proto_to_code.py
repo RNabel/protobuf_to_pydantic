@@ -1240,9 +1240,24 @@ class FileDescriptorProtoToCode(BaseP2C):
                         union_fields = {}
                         for oneof_full_name, oneof_config in one_of_dict.items():
                             oneof_name = oneof_full_name.split(".")[-1]
-                            union_fields[oneof_name] = sorted(
-                                list(oneof_config["fields"])
-                            )
+                            fields = sorted(list(oneof_config["fields"]))
+                            
+                            # Create alias mapping for camelCase support
+                            aliases = {}
+                            for field in fields:
+                                # Always map snake_case to itself
+                                aliases[field] = field
+                                # Convert to camelCase and map to snake_case
+                                # Simple conversion: location_value -> locationValue
+                                parts = field.split('_')
+                                if len(parts) > 1:
+                                    camel_case = parts[0] + ''.join(word.capitalize() for word in parts[1:])
+                                    aliases[camel_case] = field
+                            
+                            union_fields[oneof_name] = {
+                                "fields": fields,
+                                "aliases": aliases
+                            }
 
                         config_content = f"\n{' ' * (indent + self.code_indent)}_oneof_fields = {self._get_value_code(union_fields)}\n"
 

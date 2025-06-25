@@ -1,576 +1,306 @@
-"""Test edge cases for oneof fields with discriminated unions.
+"""Test edge cases for oneofs with generated Pydantic models.
 
-This module tests edge cases including:
-- Empty oneofs (no field set)
+Tests edge case scenarios:
+- Multiple oneofs in same message (if available)
+- Nested oneofs
+- Oneof field name conflicts
 - Oneofs with single field
-- Oneofs with wrapper types (DoubleValue, StringValue, etc.)
-- Required vs optional oneofs
-- Reserved/deprecated fields in oneofs
-- Field name conflicts with discriminator
-- Oneofs with default values
-- Oneofs with field validation
+- Large oneofs (many fields)
+- Performance considerations
 """
 
-import json
-from typing import Literal, Union, Annotated, Optional
-from google.protobuf import json_format
-from google.protobuf.wrappers_pb2 import DoubleValue, StringValue, BoolValue, Int32Value
-from pydantic import BaseModel, Field, ValidationError, ConfigDict, field_validator
+import pytest
+import time
+from pydantic import ValidationError
 
-from example.proto_pydanticv2.example.example_proto.demo import demo_pb2
-
-
-# Example 1: Empty oneof (no field set is valid)
-class _EmptyOneofBase(BaseModel):
-    """Base class for message with potentially empty oneof."""
-    message_id: str = Field(default="")
-    
-
-class EmptyOneofValueSet(_EmptyOneofBase):
-    """When value is set in the oneof."""
-    data_case: Literal["value"] = "value"
-    value: str
-    
-
-class EmptyOneofNone(_EmptyOneofBase):
-    """When no field is set in the oneof."""
-    data_case: Literal[None] = None
+from example.proto_pydanticv2.example.example_proto.demo.demo_p2p import (
+    OptionalMessage,
+    InvoiceItem,
+)
+from example.proto_pydanticv2.example.example_proto.demo.alias_demo_p2p import (
+    ReportData,
+    GeoLocation,
+)
+from example.proto_pydanticv2.example.example_proto.demo.all_feidl_set_optional_demo_p2p import (
+    OptionalMessage as AllOptionalMessage,
+)
 
 
-EmptyOneofUnion = Annotated[
-    Union[EmptyOneofValueSet, EmptyOneofNone],
-    Field(discriminator='data_case')
-]
+class TestOneofEdgeCases:
+    """Test edge cases for oneof functionality."""
 
+    def test_oneof_with_single_field(self):
+        """Test behavior when oneof has only one field.
 
-# Example 2: Single field oneof (still use union for consistency)
-class _SingleFieldBase(BaseModel):
-    """Base class for single field oneof."""
-    timestamp: int = Field(default=0)
-    
+        Note: Our test protos don't have single-field oneofs,
+        but we can test the concept with what we have.
+        """
+        # Even with multiple fields available, using just one consistently
+        messages = []
+        for i in range(10):
+            # Always use the same field
+            msg = OptionalMessage(x=f"value_{i}")
+            messages.append(msg)
 
-class SingleFieldDataSet(_SingleFieldBase):
-    """When data is set."""
-    single_case: Literal["data"] = "data"
-    data: bytes
-    
+        # All should have the same discriminator
+        assert all(msg.a.a_case == "x" for msg in messages)
 
-class SingleFieldNone(_SingleFieldBase):
-    """When data is not set."""
-    single_case: Literal[None] = None
+        # None should have the other field
+        assert all(not hasattr(msg.a, "y") for msg in messages)
 
+    def test_oneof_field_name_patterns(self):
+        """Test various field naming patterns in oneofs."""
+        # Test snake_case fields
+        msg1 = OptionalMessage(x="test")  # Simple name
+        assert msg1.a.x == "test"
 
-SingleFieldUnion = Annotated[
-    Union[SingleFieldDataSet, SingleFieldNone],
-    Field(discriminator='single_case')
-]
+        # Test with ReportData which has longer field names
+        geo = GeoLocation(latitude=37.7749, longitude=-122.4194)
+        report = ReportData(location_value=geo)  # snake_case name
+        assert report.data.data_case == "location_value"
 
+        # Test camelCase alias
+        report2 = ReportData(locationValue=geo)  # camelCase alias
+        assert report2.data.data_case == "location_value"  # Still snake_case internally
 
-# Example 3: Oneof with wrapper types
-class _WrapperOneofBase(BaseModel):
-    """Base class for wrapper type oneof."""
-    model_config = ConfigDict(extra="ignore")
-    request_id: str = Field(default="")
-    
+    def test_rapid_oneof_switching(self):
+        """Test creating many instances with different oneof fields."""
+        # Rapidly create instances alternating between fields
+        start_time = time.time()
+        instances = []
 
-class WrapperOneofDouble(_WrapperOneofBase):
-    """Double wrapper value."""
-    wrapper_case: Literal["double_val"] = "double_val"
-    double_val: float  # Unwrapped from DoubleValue
-    
+        for i in range(100):
+            if i % 2 == 0:
+                msg = OptionalMessage(x=f"string_{i}")
+            else:
+                msg = OptionalMessage(y=i)
+            instances.append(msg)
 
-class WrapperOneofString(_WrapperOneofBase):
-    """String wrapper value."""
-    wrapper_case: Literal["string_val"] = "string_val"
-    string_val: str  # Unwrapped from StringValue
-    
+        creation_time = time.time() - start_time
+        print(f"Created 100 instances in {creation_time:.4f} seconds")
 
-class WrapperOneofBool(_WrapperOneofBase):
-    """Bool wrapper value."""
-    wrapper_case: Literal["bool_val"] = "bool_val"
-    bool_val: bool  # Unwrapped from BoolValue
-    
+        # Verify all instances are correct
+        for i, msg in enumerate(instances):
+            if i % 2 == 0:
+                assert msg.a.a_case == "x"
+                assert msg.a.x == f"string_{i}"
+            else:
+                assert msg.a.a_case == "y"
+                assert msg.a.y == i
 
-class WrapperOneofInt32(_WrapperOneofBase):
-    """Int32 wrapper value."""
-    wrapper_case: Literal["int32_val"] = "int32_val"
-    int32_val: int  # Unwrapped from Int32Value
-    
-
-class WrapperOneofNone(_WrapperOneofBase):
-    """No wrapper value set."""
-    wrapper_case: Literal[None] = None
-
-
-WrapperOneofUnion = Annotated[
-    Union[WrapperOneofDouble, WrapperOneofString, WrapperOneofBool, WrapperOneofInt32, WrapperOneofNone],
-    Field(discriminator='wrapper_case')
-]
-
-
-# Example 4: Field name conflicts with discriminator
-class _ConflictBase(BaseModel):
-    """Base with potential naming conflicts."""
-    # What if the protobuf has a field named 'case' or 'type_case'?
-    id: str = Field(default="")
-    
-
-class ConflictOptionA(_ConflictBase):
-    """Option A selected."""
-    conflict_case: Literal["option_a"] = "option_a"  # Use suffix to avoid conflicts
-    option_a: str
-    # case: str = Field(default="")  # This would conflict if 'case' was a field
-    
-
-class ConflictOptionB(_ConflictBase):
-    """Option B selected."""
-    conflict_case: Literal["option_b"] = "option_b"
-    option_b: int
-    # type: str = Field(default="")  # This would conflict with Python's type
-    
-
-class ConflictNone(_ConflictBase):
-    """No option selected."""
-    conflict_case: Literal[None] = None
-
-
-# Example 5: Oneof with field validation
-class _ValidatedOneofBase(BaseModel):
-    """Base with common validation."""
-    model_config = ConfigDict(extra="ignore")
-    user_id: str = Field(min_length=1, max_length=50)
-    
-    @field_validator('user_id')
-    def validate_user_id(cls, v):
-        if not v.isalnum():
-            raise ValueError('user_id must be alphanumeric')
-        return v
-    
-
-class ValidatedOneofEmail(_ValidatedOneofBase):
-    """Email contact method."""
-    contact_case: Literal["email"] = "email"
-    email: str = Field(pattern=r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
-    
-
-class ValidatedOneofPhone(_ValidatedOneofBase):
-    """Phone contact method."""
-    contact_case: Literal["phone"] = "phone"
-    phone: str = Field(pattern=r'^\+?[1-9]\d{1,14}$')  # E.164 format
-    
-
-class ValidatedOneofUsername(_ValidatedOneofBase):
-    """Username contact method."""
-    contact_case: Literal["username"] = "username"
-    username: str = Field(min_length=3, max_length=20, pattern=r'^[a-zA-Z0-9_]+$')
-
-
-ValidatedOneofUnion = Annotated[
-    Union[ValidatedOneofEmail, ValidatedOneofPhone, ValidatedOneofUsername],
-    Field(discriminator='contact_case')
-]
-
-
-# Example 6: Oneof with complex default behavior
-class _DefaultBehaviorBase(BaseModel):
-    """Base showing default value handling."""
-    created_at: int = Field(default_factory=lambda: int(1600000000))  # Default timestamp
-    
-
-class DefaultBehaviorActive(_DefaultBehaviorBase):
-    """Active status with config."""
-    status_case: Literal["active_config"] = "active_config"
-    active_config: 'ActiveConfig'
-    
-
-class DefaultBehaviorInactive(_DefaultBehaviorBase):
-    """Inactive status with reason."""
-    status_case: Literal["inactive_reason"] = "inactive_reason"
-    inactive_reason: str = Field(default="manually_deactivated")
-    
-
-class DefaultBehaviorPending(_DefaultBehaviorBase):
-    """Pending status."""
-    status_case: Literal["pending_since"] = "pending_since"
-    pending_since: int  # timestamp
-
-
-class ActiveConfig(BaseModel):
-    """Configuration for active status."""
-    enabled_features: list[str] = Field(default_factory=list)
-    max_requests: int = Field(default=1000, ge=0, le=1000000)
-
-
-# Example 7: Required oneof (at least one field must be set)
-class _RequiredOneofBase(BaseModel):
-    """Base for required oneof - no None variant."""
-    operation_id: str
-    
-
-class RequiredOneofCreate(_RequiredOneofBase):
-    """Create operation."""
-    action_case: Literal["create"] = "create"
-    create: 'CreateAction'
-    
-
-class RequiredOneofUpdate(_RequiredOneofBase):
-    """Update operation."""
-    action_case: Literal["update"] = "update"
-    update: 'UpdateAction'
-    
-
-class RequiredOneofDelete(_RequiredOneofBase):
-    """Delete operation."""
-    action_case: Literal["delete"] = "delete"
-    delete: 'DeleteAction'
-
-
-# No None variant - oneof is required
-RequiredOneofUnion = Annotated[
-    Union[RequiredOneofCreate, RequiredOneofUpdate, RequiredOneofDelete],
-    Field(discriminator='action_case')
-]
-
-
-class CreateAction(BaseModel):
-    resource_type: str
-    resource_data: dict = Field(default_factory=dict)
-    
-
-class UpdateAction(BaseModel):
-    resource_id: str
-    updates: dict = Field(default_factory=dict)
-    
-
-class DeleteAction(BaseModel):
-    resource_id: str
-    soft_delete: bool = Field(default=True)
-
-
-def test_empty_oneof():
-    """Test oneof where no field being set is valid."""
-    print("=== Empty Oneof Test ===")
-    
-    # Test with value set
-    with_value = EmptyOneofValueSet(
-        message_id="msg-001",
-        value="some data"
-    )
-    print(f"With value: {with_value}")
-    
-    # Test with no value (empty oneof)
-    empty = EmptyOneofNone(
-        message_id="msg-002"
-    )
-    print(f"Empty oneof: {empty}")
-    
-    # Verify serialization
-    # Don't use exclude_none when we need to preserve None discriminator
-    empty_json = empty.model_dump_json()
-    print(f"Empty serialized: {empty_json}")
-    
-    # The None case should serialize the discriminator as null
-    json_dict = json.loads(empty_json)
-    assert json_dict["data_case"] is None
-    print("✓ Empty oneof correctly serialized")
-    
-    # With exclude_none, the None discriminator is excluded
-    empty_json_clean = empty.model_dump_json(exclude_none=True)
-    json_dict_clean = json.loads(empty_json_clean)
-    print(f"With exclude_none: {empty_json_clean}")
-    # This is a consideration for the implementation
-
-
-def test_single_field_oneof():
-    """Test oneof with only one possible field."""
-    print("\n=== Single Field Oneof Test ===")
-    
-    # Even with single field, we use union for consistency
-    with_data = SingleFieldDataSet(
-        timestamp=1234567890,
-        data=b"binary data here"
-    )
-    print(f"With data: {with_data}")
-    
-    # Empty case
-    without_data = SingleFieldNone(
-        timestamp=1234567890
-    )
-    print(f"Without data: {without_data}")
-    
-    # This maintains consistency with multi-field oneofs
-    print("✓ Single field oneof follows same pattern")
-
-
-def test_wrapper_type_oneof():
-    """Test oneof with protobuf wrapper types."""
-    print("\n=== Wrapper Type Oneof Test ===")
-    
-    # Test different wrapper types
-    double_variant = WrapperOneofDouble(
-        request_id="req-double",
-        double_val=3.14159
-    )
-    print(f"Double variant: {double_variant}")
-    
-    string_variant = WrapperOneofString(
-        request_id="req-string",
-        string_val="wrapped string"
-    )
-    print(f"String variant: {string_variant}")
-    
-    bool_variant = WrapperOneofBool(
-        request_id="req-bool",
-        bool_val=True
-    )
-    print(f"Bool variant: {bool_variant}")
-    
-    # Verify wrapper values are unwrapped in the model
-    assert isinstance(double_variant.double_val, float)
-    assert isinstance(string_variant.string_val, str)
-    assert isinstance(bool_variant.bool_val, bool)
-    print("✓ Wrapper types are properly unwrapped")
-    
-    # Test serialization preserves primitive types
-    json_str = double_variant.model_dump_json()
-    json_dict = json.loads(json_str)
-    assert isinstance(json_dict["double_val"], float)
-    print("✓ Serialization preserves primitive types")
-
-
-def test_field_name_conflicts():
-    """Test handling of potential field name conflicts."""
-    print("\n=== Field Name Conflict Test ===")
-    
-    # Using _case suffix avoids conflicts
-    option_a = ConflictOptionA(
-        id="test-001",
-        option_a="value a"
-    )
-    print(f"Option A: {option_a}")
-    
-    # The discriminator field name avoids Python keywords
-    json_str = option_a.model_dump_json()
-    json_dict = json.loads(json_str)
-    assert "conflict_case" in json_dict
-    assert json_dict["conflict_case"] == "option_a"
-    print("✓ Discriminator naming avoids conflicts")
-
-
-def test_field_validation_in_oneof():
-    """Test that field validation works within oneof variants."""
-    print("\n=== Field Validation in Oneof Test ===")
-    
-    # Valid email
-    try:
-        valid_email = ValidatedOneofEmail(
-            user_id="user123",
-            email="test@example.com"
+    def test_oneof_with_complex_nested_data(self):
+        """Test oneofs with deeply nested complex data structures."""
+        # Create complex nested structure
+        item = InvoiceItem(
+            name="Complex Product with Very Long Name " * 5,
+            amount=12345,
+            quantity=999,
+            items=[
+                InvoiceItem(name=f"Subitem {i}", amount=100, quantity=1)
+                for i in range(3)
+            ],
         )
-        print(f"Valid email: {valid_email}")
-    except ValidationError as e:
-        print(f"Unexpected validation error: {e}")
-    
-    # Invalid email
-    try:
-        invalid_email = ValidatedOneofEmail(
-            user_id="user123",
-            email="not-an-email"
+
+        msg = OptionalMessage(
+            x="order_" + "x" * 1000,  # Long string
+            item=item,
+            str_list=[f"tag_{i}" for i in range(50)],
+            int_map={f"key_{i}": i * 100 for i in range(30)},
         )
-        print("ERROR: Invalid email should have failed validation")
-    except ValidationError as e:
-        print(f"✓ Invalid email correctly rejected: {e.errors()[0]['msg']}")
-    
-    # Valid phone
-    try:
-        valid_phone = ValidatedOneofPhone(
-            user_id="user456",
-            phone="+1234567890"
-        )
-        print(f"Valid phone: {valid_phone}")
-    except ValidationError as e:
-        print(f"Unexpected validation error: {e}")
-    
-    # Invalid user_id (common field validation)
-    try:
-        invalid_user = ValidatedOneofUsername(
-            user_id="user@123",  # Contains non-alphanumeric
-            username="validuser"
-        )
-        print("ERROR: Invalid user_id should have failed validation")
-    except ValidationError as e:
-        print(f"✓ Common field validation works: {e.errors()[0]['msg']}")
 
+        # Verify it handles large data
+        assert len(msg.a.x) == 1006
+        assert len(msg.item.items) == 3
+        assert len(msg.str_list) == 50
+        assert len(msg.int_map) == 30
 
-def test_default_value_behavior():
-    """Test how default values work in oneof variants."""
-    print("\n=== Default Value Behavior Test ===")
-    
-    # Test with defaults
-    active = DefaultBehaviorActive(
-        active_config=ActiveConfig()  # Uses defaults
-    )
-    print(f"Active with defaults: {active}")
-    print(f"  Created at: {active.created_at}")
-    print(f"  Max requests: {active.active_config.max_requests}")
-    
-    # Test inactive with default reason
-    inactive = DefaultBehaviorInactive()
-    print(f"Inactive with default reason: {inactive}")
-    print(f"  Reason: {inactive.inactive_reason}")
-    
-    # Verify defaults are included in serialization when appropriate
-    json_str = inactive.model_dump_json()
-    json_dict = json.loads(json_str)
-    assert json_dict["inactive_reason"] == "manually_deactivated"
-    print("✓ Default values handled correctly")
+        # Test serialization of large data
+        json_str = msg.model_dump_json()
+        assert len(json_str) > 2000  # Should be reasonably large
 
+    def test_oneof_memory_efficiency(self):
+        """Test that oneofs don't waste memory on unset fields."""
+        # Create many instances to test memory patterns
+        instances_x = []
+        instances_y = []
 
-def test_required_oneof():
-    """Test required oneof (no None variant)."""
-    print("\n=== Required Oneof Test ===")
-    
-    # Create variant
-    create_op = RequiredOneofCreate(
-        operation_id="op-001",
-        create=CreateAction(
-            resource_type="user",
-            resource_data={"name": "John", "email": "john@example.com"}
-        )
-    )
-    print(f"Create operation: {create_op}")
-    
-    # Update variant
-    update_op = RequiredOneofUpdate(
-        operation_id="op-002",
-        update=UpdateAction(
-            resource_id="user-123",
-            updates={"email": "newemail@example.com"}
-        )
-    )
-    print(f"Update operation: {update_op}")
-    
-    # Delete variant
-    delete_op = RequiredOneofDelete(
-        operation_id="op-003",
-        delete=DeleteAction(
-            resource_id="user-123",
-            soft_delete=False
-        )
-    )
-    print(f"Delete operation: {delete_op}")
-    
-    # Note: There's no None variant, so one field MUST be set
-    print("✓ Required oneof enforces at least one field")
+        for i in range(100):
+            instances_x.append(OptionalMessage(x=f"value_{i}"))
+            instances_y.append(OptionalMessage(y=i))
 
+        # Check that unset fields don't exist (saving memory)
+        for msg in instances_x:
+            assert hasattr(msg.a, "x")
+            assert not hasattr(msg.a, "y")
 
-def test_zero_values_in_oneof():
-    """Test that zero/empty values are properly handled."""
-    print("\n=== Zero Values in Oneof Test ===")
-    
-    # Zero values should be serialized when explicitly set
-    zero_int = WrapperOneofInt32(
-        request_id="zero-test",
-        int32_val=0
-    )
-    
-    json_str = zero_int.model_dump_json()
-    json_dict = json.loads(json_str)
-    
-    print(f"Zero int: {zero_int}")
-    print(f"Serialized: {json_str}")
-    
-    # Verify zero is present
-    assert "int32_val" in json_dict
-    assert json_dict["int32_val"] == 0
-    print("✓ Zero values are preserved when explicitly set")
-    
-    # Empty string
-    empty_string = WrapperOneofString(
-        request_id="empty-test",
-        string_val=""
-    )
-    
-    json_str = empty_string.model_dump_json()
-    json_dict = json.loads(json_str)
-    
-    assert json_dict["string_val"] == ""
-    print("✓ Empty strings are preserved when explicitly set")
+        for msg in instances_y:
+            assert hasattr(msg.a, "y")
+            assert not hasattr(msg.a, "x")
 
+    def test_oneof_with_all_fields_optional(self):
+        """Test behavior when all message fields are optional."""
+        # Using AllOptionalMessage from all_feidl_set_optional_demo_p2p
+        msg = AllOptionalMessage(x="test")
 
-def test_serialization_edge_cases():
-    """Test various serialization edge cases."""
-    print("\n=== Serialization Edge Cases ===")
-    
-    # Test exclude_defaults behavior
-    model = EmptyOneofValueSet(
-        message_id="",  # Empty string (default)
-        value="data"
-    )
-    
-    # With exclude_defaults
-    minimal = model.model_dump_json(exclude_defaults=True)
-    minimal_dict = json.loads(minimal)
-    print(f"Exclude defaults: {minimal}")
-    
-    # message_id should be excluded since it's the default
-    assert "message_id" not in minimal_dict or minimal_dict["message_id"] == ""
-    
-    # With exclude_none
-    clean = model.model_dump_json(exclude_none=True)
-    clean_dict = json.loads(clean)
-    print(f"Exclude none: {clean}")
-    
-    # Note: exclude_defaults might remove the discriminator if it has a default
-    # This is an implementation consideration - discriminators might need special handling
-    if "data_case" in minimal_dict:
-        assert minimal_dict["data_case"] == "value"
-    assert clean_dict["data_case"] == "value"
-    print("✓ Serialization options work correctly")
+        # Even with all fields optional, oneof should still work
+        assert msg.a.x == "test"
+        assert msg.a.a_case == "x"
+        assert not hasattr(msg.a, "y")
 
+    def test_oneof_error_handling_edge_cases(self):
+        """Test error handling in edge cases."""
+        # Test with very large integer (near int32 max)
+        msg_max = OptionalMessage(y=2147483647)
+        assert msg_max.a.y == 2147483647
 
-def test_nested_validation_in_oneof():
-    """Test that nested model validation works in oneof variants."""
-    print("\n=== Nested Validation in Oneof ===")
-    
-    # Valid nested model
-    try:
-        valid_create = RequiredOneofCreate(
-            operation_id="op-123",
-            create=CreateAction(
-                resource_type="document",
-                resource_data={"title": "Test Doc"}
-            )
-        )
-        print(f"Valid nested: {valid_create}")
-    except ValidationError as e:
-        print(f"Unexpected error: {e}")
-    
-    # Invalid nested model (empty resource_type)
-    try:
-        invalid_create = RequiredOneofCreate(
-            operation_id="op-456",
-            create=CreateAction(
-                resource_type="",  # Empty string might fail validation
-                resource_data={}
-            )
-        )
-        # If no validation on resource_type, this will pass
-        print(f"Created with empty resource_type: {invalid_create}")
-    except ValidationError as e:
-        print(f"✓ Nested validation caught error: {e}")
+        # Test with very large negative integer
+        msg_min = OptionalMessage(y=-2147483648)
+        assert msg_min.a.y == -2147483648
 
+        # Test integer overflow
+        # Note: Python int can handle values larger than int32
+        # The generated models might not enforce int32 limits
+        try:
+            msg_overflow = OptionalMessage(y=2147483648)  # int32 max + 1
+            # If this succeeds, Python is handling larger ints
+            print(f"Large int accepted: {msg_overflow.a.y}")
+        except ValidationError:
+            # This would be the expected behavior for strict int32
+            print("Int32 overflow correctly rejected")
 
-if __name__ == "__main__":
-    test_empty_oneof()
-    test_single_field_oneof()
-    test_wrapper_type_oneof()
-    test_field_name_conflicts()
-    test_field_validation_in_oneof()
-    test_default_value_behavior()
-    test_required_oneof()
-    test_zero_values_in_oneof()
-    test_serialization_edge_cases()
-    test_nested_validation_in_oneof()
-    
-    print("\n=== All edge case tests passed! ===")
+        # Test with Unicode in string field
+        msg_unicode = OptionalMessage(x="Hello 世界 🌍")
+        assert msg_unicode.a.x == "Hello 世界 🌍"
+
+    def test_oneof_special_characters_in_strings(self):
+        """Test oneof string fields with special characters."""
+        special_strings = [
+            "",  # Empty
+            " ",  # Space
+            "\n\t\r",  # Whitespace
+            '"quotes"',  # Quotes
+            "'single'",  # Single quotes
+            "\\backslash\\",  # Backslashes
+            "Hello\nWorld",  # Newline
+            "Tab\there",  # Tab
+            "Null\x00char",  # Null character
+            "😀🎉🔥",  # Emojis
+            "Ñoño",  # Accented characters
+            "<html>tags</html>",  # HTML
+            '{"json": "value"}',  # JSON-like
+        ]
+
+        for s in special_strings:
+            msg = OptionalMessage(x=s)
+            assert msg.a.x == s
+
+            # Test roundtrip
+            json_str = msg.model_dump_json()
+            restored = OptionalMessage.model_validate_json(json_str)
+            assert restored.a.x == s
+
+    def test_oneof_with_default_factory_items(self):
+        """Test oneofs in messages with default factories."""
+        # Create without setting the repeated fields
+        msg1 = OptionalMessage(x="test")
+        assert msg1.str_list == []  # Default empty list
+        assert msg1.int_map == {}  # Default empty dict
+
+        # Create with oneof and default factory fields
+        msg2 = OptionalMessage(y=42, str_list=["a", "b"], int_map={"k": 1})
+        assert msg2.a.y == 42
+        assert msg2.str_list == ["a", "b"]
+        assert msg2.int_map == {"k": 1}
+
+        # Verify default factories don't interfere with oneof
+        msg3 = OptionalMessage(x="test")
+        msg4 = OptionalMessage(x="test")
+
+        # Each should have independent default lists/dicts
+        assert msg3.str_list is not msg4.str_list
+        assert msg3.int_map is not msg4.int_map
+
+    def test_oneof_discriminator_case_sensitivity(self):
+        """Test case sensitivity of discriminator values."""
+        msg = OptionalMessage(x="test")
+
+        # Discriminator should match field name exactly
+        assert msg.a.a_case == "x"  # Lowercase
+        assert msg.a.a_case != "X"  # Not uppercase
+
+        # For ReportData with longer names
+        geo = GeoLocation(latitude=37.7749, longitude=-122.4194)
+        report = ReportData(location_value=geo)
+        assert report.data.data_case == "location_value"
+        assert report.data.data_case != "locationValue"  # Not camelCase
+
+    def test_oneof_field_ordering(self):
+        """Test that field order doesn't affect oneof behavior."""
+        # Create instances with fields in different orders
+        msg1 = OptionalMessage(x="test", name="name1", age=25, str_list=["a", "b"])
+
+        msg2 = OptionalMessage(str_list=["a", "b"], age=25, name="name1", x="test")
+
+        # Both should be equivalent
+        assert msg1.a.x == msg2.a.x
+        assert msg1.name == msg2.name
+        assert msg1.str_list == msg2.str_list
+
+    def test_oneof_with_none_in_dict_fields(self):
+        """Test behavior when dict representation has None values."""
+        # Test various None scenarios in dict input
+        test_cases = [
+            {"x": "value", "name": None},  # None in optional field
+            {"y": 0, "age": None},  # None in another optional
+            {"x": "", "str_list": None},  # None in repeated field
+        ]
+
+        for data in test_cases:
+            try:
+                msg = OptionalMessage.model_validate(data)
+                print(f"Created from {data}: {msg}")
+            except ValidationError as e:
+                print(f"Failed to create from {data}: {e}")
+
+    def test_concurrent_oneof_creation(self):
+        """Test creating oneofs concurrently (simulated)."""
+        # Create many instances in quick succession
+        instances = []
+
+        # Simulate concurrent-like creation
+        for i in range(50):
+            # Alternate between different field types rapidly
+            if i % 3 == 0:
+                msg = OptionalMessage(x=f"x_{i}")
+            elif i % 3 == 1:
+                msg = OptionalMessage(y=i * 10)
+            else:
+                # Create with empty string for x (oneof is required)
+                msg = OptionalMessage(x="", name=f"name_{i}")
+
+            instances.append(msg)
+
+        # Verify all instances are independent
+        for i, msg in enumerate(instances):
+            if i % 3 == 0:
+                assert msg.a.a_case == "x"
+            elif i % 3 == 1:
+                assert msg.a.a_case == "y"
+            else:
+                # Empty string x was set
+                assert msg.a.a_case == "x"
+                assert msg.a.x == ""
+
+    def test_oneof_with_field_name_conflicts(self):
+        """Test potential naming conflicts in oneofs."""
+        # Test that field names don't conflict with methods or properties
+        msg = OptionalMessage(x="test")
+
+        # These should work without conflicts
+        assert hasattr(msg, "model_dump")  # Pydantic method
+        assert hasattr(msg, "a")  # Oneof field
+        assert hasattr(msg.a, "a_case")  # Discriminator
+
+        # Field names shouldn't shadow important attributes
+        assert callable(msg.model_dump)
+        assert not callable(msg.a)

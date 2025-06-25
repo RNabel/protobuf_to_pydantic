@@ -141,7 +141,7 @@ class InvoiceItem(ProtobufCompatibleBaseModel):
 class OptionalMessage(TaggedUnionMixin, ProtobufCompatibleBaseModel):
     a: OptionalMessageAUnion
 
-    _oneof_fields = {"a": ["x", "y"]}
+    _oneof_fields = {"a": {"aliases": {"x": "x", "y": "y"}, "fields": ["x", "y"]}}
 
     name: typing.Optional[str] = Field(default="")
     age: typing.Optional[int] = Field(default=0)
