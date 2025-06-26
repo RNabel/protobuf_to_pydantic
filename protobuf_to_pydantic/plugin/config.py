@@ -117,10 +117,6 @@ class ConfigModel(BaseModel):
         default=False,
         description="If true, all fields become optional, see: https://github.com/so1n/protobuf_to_pydantic/issues/60",
     )
-    use_discriminated_unions_for_oneofs: bool = Field(
-        default=True,
-        description="If true, generate discriminated unions for protobuf oneof fields to maintain proper oneof semantics",
-    )
 
     # other config
     file_descriptor_proto_to_code: Type[FileDescriptorProtoToCode] = Field(

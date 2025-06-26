@@ -1047,7 +1047,7 @@ class FileDescriptorProtoToCode(BaseP2C):
         union_types_content = ""
         fields_to_exclude: Set[str] = set()
 
-        if self.config.use_discriminated_unions_for_oneofs and desc.oneof_decl:
+        if desc.oneof_decl:
             # Create field map for easy lookup
             field_map = {field.name: field for field in desc.field}
 
@@ -1115,10 +1115,7 @@ class FileDescriptorProtoToCode(BaseP2C):
                 continue
 
             # Skip oneof fields when using discriminated unions
-            if (
-                self.config.use_discriminated_unions_for_oneofs
-                and field.name in fields_to_exclude
-            ):
+            if field.name in fields_to_exclude:
                 continue
 
             _content_tuple = self._message_field_handle(
@@ -1158,21 +1155,6 @@ class FileDescriptorProtoToCode(BaseP2C):
                 )
             )
 
-        if one_of_dict and not self.config.use_discriminated_unions_for_oneofs:
-            # Only add the validator if not using discriminated unions
-            class_var_str_list.append(
-                f"{' ' * (indent + self.code_indent)}_one_of_dict = {self._get_value_code(one_of_dict)}"
-            )
-
-            self._add_import_code(
-                "protobuf_to_pydantic.customer_validator.v2", "check_one_of"
-            )
-            class_var_str_list.append(
-                f"{' ' * (indent + self.code_indent)}"
-                f'one_of_validator = model_validator(mode="before")(check_one_of)'
-            )
-            self._add_import_code("pydantic", "model_validator")
-
         if pydantic_config_dict:
             # Pydantic V2 output:
             #   model_config = ConfigDict(arbitrary_types_allowed=False)
@@ -1188,7 +1170,7 @@ class FileDescriptorProtoToCode(BaseP2C):
         class_head_content += "\n".join(class_var_str_list)
 
         # Assemble content with union classes if using discriminated unions
-        if self.config.use_discriminated_unions_for_oneofs and union_classes_content:
+        if union_classes_content:
             # Add union classes before the main class
             content = union_classes_content + "\n"
             content += union_types_content + "\n"
