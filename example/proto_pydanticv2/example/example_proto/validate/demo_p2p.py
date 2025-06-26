@@ -6,20 +6,20 @@ import typing
 from datetime import timedelta
 from enum import IntEnum
 from ipaddress import IPv4Address, IPv6Address
+from typing import Annotated, Literal, Optional, Union
 from uuid import UUID
 
 import typing_extensions
 from annotated_types import Ge, Gt, Le, Lt, MaxLen, MinLen
 from google.protobuf.any_pb2 import Any  # type: ignore
 from google.protobuf.message import Message  # type: ignore
-from pydantic import ConfigDict, Field, field_validator, model_validator
+from pydantic import ConfigDict, Field, field_validator
 from pydantic.networks import AnyUrl, EmailStr, IPvAnyAddress
 
 from protobuf_to_pydantic.customer_con_type.v2 import DatetimeType, TimedeltaType, gt_now, t_gt, t_lt
 from protobuf_to_pydantic.customer_validator.v2 import (
     any_in_validator,
     any_not_in_validator,
-    check_one_of,
     contains_validator,
     duration_const_validator,
     duration_ge_validator,
@@ -447,20 +447,62 @@ class MessageIgnoredTest(ProtobufCompatibleBaseModel):
     range_test: int = Field(default=0)
 
 
+class OneOfTestIdX(ProtobufCompatibleBaseModel):
+    """Variant when 'x' is set in id oneof."""
+
+    id_case: Literal["x"] = Field(default="x", exclude=True)
+    x: str
+
+
+class OneOfTestIdY(ProtobufCompatibleBaseModel):
+    """Variant when 'y' is set in id oneof."""
+
+    id_case: Literal["y"] = Field(default="y", exclude=True)
+    y: int
+
+
+OneOfTestIdUnion = Annotated[Union[OneOfTestIdX, OneOfTestIdY], Field(discriminator="id_case")]
+
+
 class OneOfTest(ProtobufCompatibleBaseModel):
-    _one_of_dict = {"OneOfTest.id": {"fields": {"x", "y"}, "required": True}}
-    one_of_validator = model_validator(mode="before")(check_one_of)
+    id: OneOfTestIdUnion
+
+    _oneof_fields = {"id": {"aliases": {"x": "x", "y": "y"}, "fields": ["x", "y"]}}
+
     header: str = Field(default="")
-    x: str = Field(default="")
-    y: int = Field(default=0)
+
+
+class OneOfNotTestIdX(ProtobufCompatibleBaseModel):
+    """Variant when 'x' is set in id oneof."""
+
+    id_case: Literal["x"] = Field(default="x", exclude=True)
+    x: str
+
+
+class OneOfNotTestIdY(ProtobufCompatibleBaseModel):
+    """Variant when 'y' is set in id oneof."""
+
+    id_case: Literal["y"] = Field(default="y", exclude=True)
+    y: int
+
+
+class OneOfNotTestIdNone(ProtobufCompatibleBaseModel):
+    """Variant when no field is set in id oneof."""
+
+    id_case: Literal[None] = None
+
+
+OneOfNotTestIdUnion = Annotated[
+    Union[OneOfNotTestIdX, OneOfNotTestIdY, OneOfNotTestIdNone], Field(discriminator="id_case")
+]
 
 
 class OneOfNotTest(ProtobufCompatibleBaseModel):
-    _one_of_dict = {"OneOfNotTest.id": {"fields": {"x", "y"}}}
-    one_of_validator = model_validator(mode="before")(check_one_of)
+    id: Optional[OneOfNotTestIdUnion] = Field(default=None)
+
+    _oneof_fields = {"id": {"aliases": {"x": "x", "y": "y"}, "fields": ["x", "y"]}}
+
     header: str = Field(default="")
-    x: str = Field(default="")
-    y: int = Field(default=0)
 
 
 class AfterReferMessage(ProtobufCompatibleBaseModel):

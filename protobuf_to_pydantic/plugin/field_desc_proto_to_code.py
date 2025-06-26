@@ -808,6 +808,182 @@ class FileDescriptorProtoToCode(BaseP2C):
                 one_of_dict[desc.name + "." + one_of_item.name] = option_dict
         return one_of_dict, optional_dict
 
+    def _generate_discriminated_union_classes(
+        self,
+        desc: DescriptorProto,
+        root_desc: DescriptorProto,
+        one_of_dict: Dict[str, OneOfTypedDict],
+        optional_dict: Dict[str, OptionTypedDict],
+        indent: int,
+        field_map: Dict[str, FieldDescriptorProto],
+    ) -> Tuple[str, str, Dict[str, Set[str]]]:
+        """Generate discriminated union variant classes for oneofs.
+
+        Returns:
+            - union_classes_content: The generated variant classes code
+            - union_types_content: The union type definitions
+            - fields_to_exclude: Map of field names to exclude from main class
+        """
+        union_classes_content = ""
+        union_types_content = ""
+        fields_to_exclude: Dict[str, Set[str]] = {}
+
+        # Process each oneof
+        for oneof_full_name, oneof_config in one_of_dict.items():
+            oneof_name = oneof_full_name.split(".")[-1]  # Get just the oneof name
+            discriminator_name = f"{oneof_name}_case"
+            fields_to_exclude[oneof_name] = oneof_config["fields"]
+
+            # Identify common fields (fields not in any oneof)
+            all_oneof_fields = set()
+            for config in one_of_dict.values():
+                all_oneof_fields.update(config["fields"])
+
+            # Also exclude the oneof field names themselves (like "id" for the "id" oneof)
+            oneof_field_names = {name.split(".")[-1] for name in one_of_dict.keys()}
+            all_oneof_fields.update(oneof_field_names)
+
+            # Generate variant classes
+            variant_types = []
+            for field_name in sorted(oneof_config["fields"]):
+                if field_name not in field_map:
+                    continue
+
+                field = field_map[field_name]
+                variant_class_name = (
+                    f"{desc.name}{oneof_name.title()}{field_name.title()}"
+                )
+                variant_content = f"\n{' ' * indent}class {variant_class_name}({self.config.base_model_class.__name__}):\n"
+                variant_content += f'{" " * (indent + self.code_indent)}"""Variant when \'{field_name}\' is set in {oneof_name} oneof."""\n'
+                variant_content += f'{" " * (indent + self.code_indent)}{discriminator_name}: Literal["{field_name}"] = Field(default="{field_name}", exclude=True)\n'
+
+                # Add the oneof field
+                # Get proper field type (handle messages, enums, etc.)
+                if field.type == 11:  # TYPE_MESSAGE
+                    # Handle message types properly
+                    message = self._descriptors.messages.get(field.type_name)
+                    if message and message.options.map_entry:
+                        # Map type
+                        key_msg, value_msg = message.field
+                        field_type = (
+                            f"typing.Dict[{self._get_protobuf_type_model(key_msg).py_type_str},"
+                            f" {self._get_protobuf_type_model(value_msg).py_type_str}]"
+                        )
+                        self._add_import_code("typing")
+                    else:
+                        # Regular message type
+                        protobuf_type_model = self._get_protobuf_type_model(field)
+                        field_type = protobuf_type_model.py_type_str
+                        # Add import for the message type
+                        if field.type_name.startswith(".google.protobuf"):
+                            # Handle well-known types
+                            pass  # Import already handled by _get_protobuf_type_model
+                        else:
+                            # Add import for custom message types
+                            message_fd = self._descriptors.message_to_fd[
+                                field.type_name
+                            ]
+                            # Check if it's in the same file - if so, use string annotation to handle forward references
+                            if message_fd.name == self._fd.name:
+                                field_type = f'"{field_type}"'
+                            else:
+                                self._add_other_module_pkg(message_fd, field_type)
+                elif field.type == 14:  # TYPE_ENUM
+                    # Handle enum types
+                    type_str = field.type_name.split(".")[-1]
+                    root_desc_enum_name = {i.name for i in root_desc.enum_type}
+                    if type_str in root_desc_enum_name:
+                        field_type = f'"{root_desc.name}.{type_str}"'
+                    else:
+                        field_type = type_str
+                    message_fd = self._descriptors.message_to_fd[field.type_name]
+                    self._add_other_module_pkg(message_fd, type_str)
+                else:
+                    # Primitive types
+                    field_type = self._get_field_type_str(field)
+
+                variant_content += (
+                    f"{' ' * (indent + self.code_indent)}{field_name}: {field_type}\n"
+                )
+
+                union_classes_content += variant_content
+                variant_types.append(variant_class_name)
+
+            # Generate None variant if oneof is not required
+            if not oneof_config.get("required", False):
+                none_variant_name = f"{desc.name}{oneof_name.title()}None"
+                none_content = f"\n{' ' * indent}class {none_variant_name}({self.config.base_model_class.__name__}):\n"
+                none_content += f'{" " * (indent + self.code_indent)}"""Variant when no field is set in {oneof_name} oneof."""\n'
+                none_content += f"{' ' * (indent + self.code_indent)}{discriminator_name}: Literal[None] = None\n"
+
+                union_classes_content += none_content
+                variant_types.append(none_variant_name)
+
+            # Generate union type
+            union_type_name = f"{desc.name}{oneof_name.title()}Union"
+            union_content = f"\n{' ' * indent}{union_type_name} = Annotated[\n"
+            union_content += f"{' ' * (indent + self.code_indent)}Union[{', '.join(variant_types)}],\n"
+            union_content += f"{' ' * (indent + self.code_indent)}Field(discriminator='{discriminator_name}')\n"
+            union_content += f"{' ' * indent}]\n"
+
+            union_types_content += union_content
+
+            # Add required imports
+            self._add_import_code("typing", "Literal")
+            self._add_import_code("typing", "Union")
+            self._add_import_code("typing", "Annotated")
+            self._add_import_code("pydantic", "Field")
+            self._add_import_code("pydantic", "BaseModel")
+
+        return union_classes_content, union_types_content, fields_to_exclude
+
+    def _get_field_type_str(self, field: FieldDescriptorProto) -> str:
+        """Get the Python type string for a field (simplified version)."""
+        # This is a simplified implementation - the real one would be more complex
+        type_map = {
+            FieldDescriptorProto.TYPE_STRING: "str",
+            FieldDescriptorProto.TYPE_INT32: "int",
+            FieldDescriptorProto.TYPE_INT64: "int",
+            FieldDescriptorProto.TYPE_UINT32: "int",
+            FieldDescriptorProto.TYPE_UINT64: "int",
+            FieldDescriptorProto.TYPE_SINT32: "int",
+            FieldDescriptorProto.TYPE_SINT64: "int",
+            FieldDescriptorProto.TYPE_FIXED32: "int",
+            FieldDescriptorProto.TYPE_FIXED64: "int",
+            FieldDescriptorProto.TYPE_SFIXED32: "int",
+            FieldDescriptorProto.TYPE_SFIXED64: "int",
+            FieldDescriptorProto.TYPE_BOOL: "bool",
+            FieldDescriptorProto.TYPE_FLOAT: "float",
+            FieldDescriptorProto.TYPE_DOUBLE: "float",
+            FieldDescriptorProto.TYPE_BYTES: "bytes",
+        }
+        result = type_map.get(field.type, "Any")
+        if result == "Any":
+            # Add Any import when needed
+            self._add_import_code("typing", "Any")
+        return result
+
+    def _get_default_value(self, field: FieldDescriptorProto) -> str:
+        """Get the default value for a field (simplified version)."""
+        default_map = {
+            FieldDescriptorProto.TYPE_STRING: '""',
+            FieldDescriptorProto.TYPE_INT32: "0",
+            FieldDescriptorProto.TYPE_INT64: "0",
+            FieldDescriptorProto.TYPE_UINT32: "0",
+            FieldDescriptorProto.TYPE_UINT64: "0",
+            FieldDescriptorProto.TYPE_SINT32: "0",
+            FieldDescriptorProto.TYPE_SINT64: "0",
+            FieldDescriptorProto.TYPE_FIXED32: "0",
+            FieldDescriptorProto.TYPE_FIXED64: "0",
+            FieldDescriptorProto.TYPE_SFIXED32: "0",
+            FieldDescriptorProto.TYPE_SFIXED64: "0",
+            FieldDescriptorProto.TYPE_BOOL: "False",
+            FieldDescriptorProto.TYPE_FLOAT: "0.0",
+            FieldDescriptorProto.TYPE_DOUBLE: "0.0",
+            FieldDescriptorProto.TYPE_BYTES: 'b""',
+        }
+        return default_map.get(field.type, "None")
+
     def _message(
         self,
         *,
@@ -840,12 +1016,10 @@ class FileDescriptorProtoToCode(BaseP2C):
         comment_info_dict, desc_content, comment_content = self.add_class_desc(
             scl_prefix, indent
         )
-        class_name_content = (
-            " " * indent
-            + f"class {class_name}({self.config.base_model_class.__name__}):"
-        )
-        if comment_content:
-            class_name_content += comment_content
+
+        # We'll determine base classes after one_of_dict is defined
+        class_name_content = None  # Will be set later
+        comment_content_to_add = comment_content  # Store for later
         class_var_str_list = []
         class_sub_c_str_list = []
         class_validate_handler_content = ""
@@ -868,8 +1042,80 @@ class FileDescriptorProtoToCode(BaseP2C):
                 skip_validate_rule=skip_validate_rule,
             )
 
+        # Generate discriminated union classes if enabled
+        union_classes_content = ""
+        union_types_content = ""
+        fields_to_exclude: Set[str] = set()
+
+        if desc.oneof_decl:
+            # Create field map for easy lookup
+            field_map = {field.name: field for field in desc.field}
+
+            # If one_of_dict is empty but we have oneofs, create a basic dict
+            if not one_of_dict:
+                one_of_dict = {}
+                for idx, oneof_desc in enumerate(desc.oneof_decl):
+                    oneof_key = f"{desc.name}.{oneof_desc.name}"
+                    oneof_fields = set()
+                    for field in desc.field:
+                        if field.HasField("oneof_index") and field.oneof_index == idx:
+                            oneof_fields.add(field.name)
+
+                    # Skip proto3 optional synthetic oneofs - these should not be discriminated unions
+                    # Proto3 optional fields create synthetic oneofs with a single field that is marked as proto3_optional
+                    if len(oneof_fields) == 1:
+                        field_name = next(iter(oneof_fields))
+                        if optional_dict.get(field_name, {}).get(
+                            "is_proto3_optional", False
+                        ):
+                            continue  # Skip this oneof - it's a proto3 optional synthetic oneof
+
+                    one_of_dict[oneof_key] = {"required": False, "fields": oneof_fields}
+
+            # Also filter out proto3 optional oneofs from existing one_of_dict
+            # This handles cases where one_of_dict was populated from protobuf options/comments
+            filtered_one_of_dict = {}
+            for oneof_key, oneof_config in one_of_dict.items():
+                oneof_fields = oneof_config.get("fields", set())
+                # Skip proto3 optional synthetic oneofs
+                if len(oneof_fields) == 1:
+                    field_name = next(iter(oneof_fields))
+                    if optional_dict.get(field_name, {}).get(
+                        "is_proto3_optional", False
+                    ):
+                        continue  # Skip this oneof - it's a proto3 optional synthetic oneof
+                filtered_one_of_dict[oneof_key] = oneof_config
+
+            union_classes_content, union_types_content, exclude_map = (
+                self._generate_discriminated_union_classes(
+                    desc,
+                    root_desc,
+                    filtered_one_of_dict,
+                    optional_dict,
+                    indent,
+                    field_map,
+                )
+            )
+
+            # Collect all fields to exclude from main class
+            for field_set in exclude_map.values():
+                fields_to_exclude.update(field_set)
+
+        # Now we can set the class name content with proper base classes
+        base_classes = [self.config.base_model_class.__name__]
+
+        class_name_content = (
+            " " * indent + f"class {class_name}({', '.join(base_classes)}):"
+        )
+        if comment_content_to_add:
+            class_name_content += comment_content_to_add
+
         for idx, field in enumerate(desc.field):
             if field.name in PYTHON_RESERVED:
+                continue
+
+            # Skip oneof fields when using discriminated unions
+            if field.name in fields_to_exclude:
                 continue
 
             _content_tuple = self._message_field_handle(
@@ -909,20 +1155,6 @@ class FileDescriptorProtoToCode(BaseP2C):
                 )
             )
 
-        if one_of_dict:
-            class_var_str_list.append(
-                f"{' ' * (indent + self.code_indent)}_one_of_dict = {self._get_value_code(one_of_dict)}"
-            )
-
-            self._add_import_code(
-                "protobuf_to_pydantic.customer_validator.v2", "check_one_of"
-            )
-            class_var_str_list.append(
-                f"{' ' * (indent + self.code_indent)}"
-                f'one_of_validator = model_validator(mode="before")(check_one_of)'
-            )
-            self._add_import_code("pydantic", "model_validator")
-
         if pydantic_config_dict:
             # Pydantic V2 output:
             #   model_config = ConfigDict(arbitrary_types_allowed=False)
@@ -936,18 +1168,164 @@ class FileDescriptorProtoToCode(BaseP2C):
         if class_head_content and class_var_str_list:
             class_head_content += "\n"
         class_head_content += "\n".join(class_var_str_list)
-        content = "\n".join(
-            [
-                i
-                for i in [
-                    class_name_content,
-                    class_head_content,
-                    class_field_content,
-                    class_validate_handler_content,
+
+        # Assemble content with union classes if using discriminated unions
+        if union_classes_content:
+            # Add union classes before the main class
+            content = union_classes_content + "\n"
+            content += union_types_content + "\n"
+            content += "\n".join(
+                [
+                    i
+                    for i in [
+                        class_name_content,
+                        class_head_content,
+                        class_field_content,
+                        class_validate_handler_content,
+                    ]
+                    if i
                 ]
-                if i
-            ]
-        )
+            )
+
+            # Add fields for union types in the main class
+            if one_of_dict:
+                union_fields_content = ""
+                for oneof_full_name, oneof_config in one_of_dict.items():
+                    oneof_name = oneof_full_name.split(".")[-1]
+                    union_type_name = f"{desc.name}{oneof_name.title()}Union"
+                    # Make the field optional if the oneof is not required
+                    if not oneof_config.get("required", False):
+                        # Add Optional import
+                        self._add_import_code("typing", "Optional")
+                        union_fields_content += f"{' ' * (indent + self.code_indent)}{oneof_name}: Optional[{union_type_name}] = Field(default=None)\n"
+                    else:
+                        union_fields_content += f"{' ' * (indent + self.code_indent)}{oneof_name}: {union_type_name}\n"
+
+                # Insert union fields into the MAIN class only (not base classes)
+                if union_fields_content:
+                    # Find where to insert the union fields (in the main class only)
+                    content_lines = content.split("\n")
+                    insertion_point = -1
+
+                    # Find the main class specifically (not base classes which start with "_")
+                    main_class_line = f"class {desc.name}("
+                    for i, line in enumerate(content_lines):
+                        if line.strip().startswith(main_class_line):
+                            # Found the main class, now find where to insert union fields
+                            j = i + 1
+                            while j < len(content_lines):
+                                if content_lines[j].strip().startswith(
+                                    '"""'
+                                ) or content_lines[j].strip().startswith("'''"):
+                                    # Skip docstring
+                                    quote = (
+                                        '"""'
+                                        if content_lines[j].strip().startswith('"""')
+                                        else "'''"
+                                    )
+                                    if (
+                                        content_lines[j].strip().endswith(quote)
+                                        and len(content_lines[j].strip()) > 3
+                                    ):
+                                        # Single line docstring
+                                        j += 1
+                                        break
+                                    else:
+                                        # Multi-line docstring
+                                        j += 1
+                                        while j < len(
+                                            content_lines
+                                        ) and not content_lines[j].strip().endswith(
+                                            quote
+                                        ):
+                                            j += 1
+                                        j += 1
+                                        break
+                                elif content_lines[j].strip() and content_lines[
+                                    j
+                                ].startswith(" " * (indent + self.code_indent)):
+                                    # Found a class member, insert before it
+                                    break
+                                elif content_lines[j].strip() and not content_lines[
+                                    j
+                                ].startswith(" " * (indent + self.code_indent)):
+                                    # Hit something that's not properly indented for class content (next class)
+                                    break
+                                j += 1
+                            insertion_point = j
+                            break
+
+                    if insertion_point >= 0:
+                        content_lines.insert(
+                            insertion_point, union_fields_content.rstrip()
+                        )
+
+                        # Add discriminated union field configuration
+                        union_fields = {}
+                        for oneof_full_name, oneof_config in one_of_dict.items():
+                            oneof_name = oneof_full_name.split(".")[-1]
+                            fields = sorted(list(oneof_config["fields"]))
+
+                            # Create alias mapping for camelCase support
+                            aliases = {}
+                            for field in fields:
+                                # Always map snake_case to itself
+                                aliases[field] = field
+                                # Convert to camelCase and map to snake_case
+                                # Simple conversion: location_value -> locationValue
+                                parts = field.split("_")
+                                if len(parts) > 1:
+                                    camel_case = parts[0] + "".join(
+                                        word.capitalize() for word in parts[1:]
+                                    )
+                                    aliases[camel_case] = field
+
+                            union_fields[oneof_name] = {
+                                "fields": fields,
+                                "aliases": aliases,
+                            }
+
+                        config_content = f"\n{' ' * (indent + self.code_indent)}_oneof_fields = {self._get_value_code(union_fields)}\n"
+
+                        # No need for validator_content - it's added automatically by __init_subclass__
+                        validator_content = ""
+
+                        if config_content or validator_content:
+                            # Find the end of the class to add the configuration
+                            end_of_class = len(content_lines)
+                            for i in range(insertion_point + 1, len(content_lines)):
+                                if content_lines[i].strip() and not content_lines[
+                                    i
+                                ].startswith(" " * indent):
+                                    # Found the next class or top-level code
+                                    end_of_class = i
+                                    break
+
+                            # Insert configuration after union fields
+                            if end_of_class > insertion_point:
+                                # Insert config first, then validator
+                                content_lines.insert(
+                                    insertion_point + 1, config_content
+                                )
+                                content_lines.insert(
+                                    insertion_point + 2, validator_content
+                                )
+
+                        content = "\n".join(content_lines)
+        else:
+            content = "\n".join(
+                [
+                    i
+                    for i in [
+                        class_name_content,
+                        class_head_content,
+                        class_field_content,
+                        class_validate_handler_content,
+                    ]
+                    if i
+                ]
+            )
+
         if not any([class_head_content, class_field_content]):
             content += "\n" + " " * (indent + self.code_indent) + "pass\n"
         use_model_cache[class_name] = content

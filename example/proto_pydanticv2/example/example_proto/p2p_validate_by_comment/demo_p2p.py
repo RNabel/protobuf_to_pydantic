@@ -6,13 +6,14 @@ import typing
 from datetime import datetime, timedelta
 from enum import IntEnum
 from ipaddress import IPv4Address, IPv6Address
+from typing import Annotated, Literal, Optional, Union
 from uuid import UUID, uuid4
 
 import typing_extensions
 from annotated_types import Ge, Gt, Interval, Le, Lt, MaxLen, MinLen
 from google.protobuf.any_pb2 import Any  # type: ignore
 from google.protobuf.message import Message  # type: ignore
-from pydantic import ConfigDict, Field, field_validator, model_validator
+from pydantic import ConfigDict, Field, field_validator
 from pydantic.networks import AnyUrl, EmailStr, IPvAnyAddress
 from pydantic.types import StringConstraints
 
@@ -21,7 +22,6 @@ from protobuf_to_pydantic.customer_con_type.v2 import DatetimeType, TimedeltaTyp
 from protobuf_to_pydantic.customer_validator.v2 import (
     any_in_validator,
     any_not_in_validator,
-    check_one_of,
     contains_validator,
     duration_const_validator,
     duration_ge_validator,
@@ -689,20 +689,88 @@ class MessageIgnoredTest(ProtobufCompatibleBaseModel):
     range_test: int = Field(default=0)
 
 
+class OneOfTestIdX(ProtobufCompatibleBaseModel):
+    """Variant when 'x' is set in id oneof."""
+
+    id_case: Literal["x"] = Field(default="x", exclude=True)
+    x: str
+
+
+class OneOfTestIdY(ProtobufCompatibleBaseModel):
+    """Variant when 'y' is set in id oneof."""
+
+    id_case: Literal["y"] = Field(default="y", exclude=True)
+    y: int
+
+
+OneOfTestIdUnion = Annotated[Union[OneOfTestIdX, OneOfTestIdY], Field(discriminator="id_case")]
+
+
 class OneOfTest(ProtobufCompatibleBaseModel):
-    _one_of_dict = {"OneOfTest.id": {"fields": {"x", "y"}, "required": True}}
-    one_of_validator = model_validator(mode="before")(check_one_of)
+    id: OneOfTestIdUnion
+
+    _oneof_fields = {"id": {"aliases": {"x": "x", "y": "y"}, "fields": ["x", "y"]}}
+
     header: str = Field(default="")
-    x: str = Field(default="")
-    y: int = Field(default=0)
+
+
+class OneOfNotTestIdX(ProtobufCompatibleBaseModel):
+    """Variant when 'x' is set in id oneof."""
+
+    id_case: Literal["x"] = Field(default="x", exclude=True)
+    x: str
+
+
+class OneOfNotTestIdY(ProtobufCompatibleBaseModel):
+    """Variant when 'y' is set in id oneof."""
+
+    id_case: Literal["y"] = Field(default="y", exclude=True)
+    y: int
+
+
+class OneOfNotTestIdNone(ProtobufCompatibleBaseModel):
+    """Variant when no field is set in id oneof."""
+
+    id_case: Literal[None] = None
+
+
+OneOfNotTestIdUnion = Annotated[
+    Union[OneOfNotTestIdX, OneOfNotTestIdY, OneOfNotTestIdNone], Field(discriminator="id_case")
+]
 
 
 class OneOfNotTest(ProtobufCompatibleBaseModel):
-    _one_of_dict = {"OneOfNotTest.id": {"fields": {"x", "y"}}}
-    one_of_validator = model_validator(mode="before")(check_one_of)
+    id: Optional[OneOfNotTestIdUnion] = Field(default=None)
+
+    _oneof_fields = {"id": {"aliases": {"x": "x", "y": "y"}, "fields": ["x", "y"]}}
+
     header: str = Field(default="")
-    x: str = Field(default="")
-    y: int = Field(default=0)
+
+
+class OneOfOptionalTestIdX(ProtobufCompatibleBaseModel):
+    """Variant when 'x' is set in id oneof."""
+
+    id_case: Literal["x"] = Field(default="x", exclude=True)
+    x: str
+
+
+class OneOfOptionalTestIdY(ProtobufCompatibleBaseModel):
+    """Variant when 'y' is set in id oneof."""
+
+    id_case: Literal["y"] = Field(default="y", exclude=True)
+    y: int
+
+
+class OneOfOptionalTestIdZ(ProtobufCompatibleBaseModel):
+    """Variant when 'z' is set in id oneof."""
+
+    id_case: Literal["z"] = Field(default="z", exclude=True)
+    z: bool
+
+
+OneOfOptionalTestIdUnion = Annotated[
+    Union[OneOfOptionalTestIdX, OneOfOptionalTestIdY, OneOfOptionalTestIdZ], Field(discriminator="id_case")
+]
 
 
 class OneOfOptionalTest(ProtobufCompatibleBaseModel):
@@ -710,12 +778,11 @@ class OneOfOptionalTest(ProtobufCompatibleBaseModel):
     Annotations are used in runtime mode
     """
 
-    _one_of_dict = {"OneOfOptionalTest.id": {"fields": {"x", "y", "z"}, "required": True}}
-    one_of_validator = model_validator(mode="before")(check_one_of)
+    id: OneOfOptionalTestIdUnion
+
+    _oneof_fields = {"id": {"aliases": {"x": "x", "y": "y", "z": "z"}, "fields": ["x", "y", "z"]}}
+
     header: str = Field(default="")
-    x: typing.Optional[str] = Field(default="")
-    y: typing.Optional[int] = Field(default=0)
-    z: bool = Field(default=False)
     name: typing.Optional[str] = Field(default="")
     age: typing.Optional[int] = Field(default=0)
     str_list: typing.List[str] = Field(default_factory=list)

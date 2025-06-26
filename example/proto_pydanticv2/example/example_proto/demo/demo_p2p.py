@@ -4,16 +4,16 @@
 # Pydantic Version: 2.11.7
 import typing
 from enum import IntEnum
+from typing import Annotated, Literal, Optional, Union
 from uuid import uuid4
 
 from google.protobuf.field_mask_pb2 import FieldMask  # type: ignore
 from google.protobuf.message import Message  # type: ignore
 from google.protobuf.wrappers_pb2 import DoubleValue  # type: ignore
-from pydantic import ConfigDict, Field, model_validator
+from pydantic import ConfigDict, Field
 from pydantic.types import PaymentCardNumber
 
 from example.plugin_config import exp_time
-from protobuf_to_pydantic.customer_validator.v2 import check_one_of
 from protobuf_to_pydantic.default_base_model import ProtobufCompatibleBaseModel
 from protobuf_to_pydantic.flexible_enum_mixin import FlexibleEnumMixin
 from protobuf_to_pydantic.util import TimestampType
@@ -119,11 +119,28 @@ class EmptyMessage(ProtobufCompatibleBaseModel):
     pass
 
 
+class OptionalMessageAX(ProtobufCompatibleBaseModel):
+    """Variant when 'x' is set in a oneof."""
+
+    a_case: Literal["x"] = Field(default="x", exclude=True)
+    x: str
+
+
+class OptionalMessageAY(ProtobufCompatibleBaseModel):
+    """Variant when 'y' is set in a oneof."""
+
+    a_case: Literal["y"] = Field(default="y", exclude=True)
+    y: int
+
+
+OptionalMessageAUnion = Annotated[Union[OptionalMessageAX, OptionalMessageAY], Field(discriminator="a_case")]
+
+
 class OptionalMessage(ProtobufCompatibleBaseModel):
-    _one_of_dict = {"OptionalMessage.a": {"fields": {"x", "y", "yy"}, "required": True}}
-    one_of_validator = model_validator(mode="before")(check_one_of)
-    x: str = Field(default="")
-    y: int = Field(default=0, alias="yy", title="use age", ge=0, example=18)
+    a: OptionalMessageAUnion
+
+    _oneof_fields = {"a": {"aliases": {"x": "x", "y": "y"}, "fields": ["x", "y"]}}
+
     name: typing.Optional[str] = Field(default="")
     age: typing.Optional[int] = Field(default=0)
     item: typing.Optional[InvoiceItem] = Field(default_factory=InvoiceItem)
@@ -215,3 +232,39 @@ class WithOptionalEnumMsgEntry(ProtobufCompatibleBaseModel):
 
     model_config = ConfigDict(validate_default=True)
     enum: typing.Optional[OptionalEnum] = Field(default=0)
+
+
+class WithOptionalOneofMsgEntryAX(ProtobufCompatibleBaseModel):
+    """Variant when 'x' is set in a oneof."""
+
+    a_case: Literal["x"] = Field(default="x", exclude=True)
+    x: str
+
+
+class WithOptionalOneofMsgEntryAY(ProtobufCompatibleBaseModel):
+    """Variant when 'y' is set in a oneof."""
+
+    a_case: Literal["y"] = Field(default="y", exclude=True)
+    y: int
+
+
+class WithOptionalOneofMsgEntryANone(ProtobufCompatibleBaseModel):
+    """Variant when no field is set in a oneof."""
+
+    a_case: Literal[None] = None
+
+
+WithOptionalOneofMsgEntryAUnion = Annotated[
+    Union[WithOptionalOneofMsgEntryAX, WithOptionalOneofMsgEntryAY, WithOptionalOneofMsgEntryANone],
+    Field(discriminator="a_case"),
+]
+
+
+class WithOptionalOneofMsgEntry(ProtobufCompatibleBaseModel):
+    a: Optional[WithOptionalOneofMsgEntryAUnion] = Field(default=None)
+
+    _oneof_fields = {"a": {"aliases": {"x": "x", "y": "y"}, "fields": ["x", "y"]}}
+
+
+class NestedWithOptOneOfEntry(ProtobufCompatibleBaseModel):
+    x: WithOptionalOneofMsgEntry = Field(default_factory=WithOptionalOneofMsgEntry)

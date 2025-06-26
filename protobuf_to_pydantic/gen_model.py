@@ -148,6 +148,7 @@ class M2P(object):
         message_type_dict_by_type_name: Optional[Dict[str, Any]] = None,
         message_default_factory_dict_by_type_name: Optional[Dict[str, Any]] = None,
         all_field_set_optional: bool = False,
+        use_discriminated_unions_for_oneofs: bool = False,
         create_model_cache: Optional[CREATE_MODEL_CACHE_T] = None,
     ):
         proto_file_name = msg.DESCRIPTOR.file.name  # type: ignore
@@ -193,6 +194,7 @@ class M2P(object):
             )  # type: ignore
 
         self._all_field_set_optional: bool = all_field_set_optional
+        self._use_discriminated_unions_for_oneofs: bool = use_discriminated_unions_for_oneofs
         self._parse_msg_desc_method = parse_msg_desc_method
         self._message_option_dict = global_message_option_dict
         self._default_field = default_field
@@ -857,6 +859,7 @@ def msg_to_pydantic_model(
     message_type_dict_by_type_name: Optional[Dict[str, Any]] = None,
     message_default_factory_dict_by_type_name: Optional[Dict[str, Any]] = None,
     all_field_set_optional: bool = False,
+    use_discriminated_unions_for_oneofs: bool = False,
     create_model_cache: Optional[CREATE_MODEL_CACHE_T] = None,
 ) -> Type[BaseModel]:
     """
@@ -884,6 +887,7 @@ def msg_to_pydantic_model(
     :param create_model_cache: Cache the generated model
     :param all_field_set_optional: If true, all fields become optional,
         see: https://github.com/so1n/protobuf_to_pydantic/issues/60
+    :param use_discriminated_unions_for_oneofs: If true, generate discriminated unions for protobuf oneof fields
     """
     return M2P(
         msg=msg,
@@ -898,4 +902,5 @@ def msg_to_pydantic_model(
         message_default_factory_dict_by_type_name=message_default_factory_dict_by_type_name,
         create_model_cache=create_model_cache,
         all_field_set_optional=all_field_set_optional,
+        use_discriminated_unions_for_oneofs=use_discriminated_unions_for_oneofs,
     ).model

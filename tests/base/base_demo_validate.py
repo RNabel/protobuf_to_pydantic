@@ -3,22 +3,24 @@ from typing import Callable, Type
 import pytest
 from pydantic import ValidationError
 
+
 class BaseTestAliasDemoValidator:
-    replace_message_fn: Callable = staticmethod(lambda x:x)  # type: ignore[assignment]
+    replace_message_fn: Callable = staticmethod(lambda x: x)  # type: ignore[assignment]
 
     def _test_alias_demo(self, model_class: Type) -> None:
         model_class = self.replace_message_fn(model_class)
         model_class(
             **{
-            "sourceId": "123",
-            "data": {
-                "locationValue": {
-                    "latitude": 10.01,
-                    "longitude": -10.01,
-                    "altitudeMeters":10.01
-                }
+                "sourceId": "123",
+                "data": {
+                    "locationValue": {
+                        "latitude": 10.01,
+                        "longitude": -10.01,
+                        "altitudeMeters": 10.01,
+                    }
+                },
             }
-        })
+        )
         model_class(
             **{
                 "source_id": "123",
@@ -26,18 +28,18 @@ class BaseTestAliasDemoValidator:
                     "location_value": {
                         "latitude": 10.01,
                         "longitude": -10.01,
-                        "altitudeMeters": 10.01
+                        "altitudeMeters": 10.01,
                     }
-                }
-            })
+                },
+            }
+        )
         model_class(
-            **{
-                "source_id": "123",
-                "data": {"time_value": "2000-01-01 10:00:00"}
-            })
+            **{"source_id": "123", "data": {"time_value": "2000-01-01 10:00:00"}}
+        )
+
 
 class BaseTestAllFieldSetOptionalDemoValidator:
-    replace_message_fn: Callable = staticmethod(lambda x:x)  # type: ignore[assignment]
+    replace_message_fn: Callable = staticmethod(lambda x: x)  # type: ignore[assignment]
 
     def _test_user_message(self, model_class: Type) -> None:
         model_class = self.replace_message_fn(model_class)
@@ -84,11 +86,13 @@ class BaseTestAllFieldSetOptionalDemoValidator:
         model_class = self.replace_message_fn(model_class)
         model_class()
 
+
 class BaseTestDemoValidator:
     pass
 
+
 class BaseTestSingleConfigValidator:
-    replace_message_fn: Callable = staticmethod(lambda x:x)  # type: ignore[assignment]
+    replace_message_fn: Callable = staticmethod(lambda x: x)  # type: ignore[assignment]
 
     def _test_user_message(self, model_class: Type) -> None:
         model_class = self.replace_message_fn(model_class)
@@ -102,9 +106,10 @@ class BaseTestSingleConfigValidator:
 
         with pytest.raises(ValidationError):
             model_class(**{"uid": "10086", "age": 1, "height": 1, "user_name": ""})
+
 
 class BaseTestCustomCommentHandler:
-    replace_message_fn: Callable = staticmethod(lambda x:x)  # type: ignore[assignment]
+    replace_message_fn: Callable = staticmethod(lambda x: x)  # type: ignore[assignment]
 
     def _test_user_message(self, model_class: Type) -> None:
         model_class = self.replace_message_fn(model_class)
@@ -119,4 +124,7 @@ class BaseTestCustomCommentHandler:
         with pytest.raises(ValidationError):
             model_class(**{"uid": "10086", "age": 1, "height": 1, "user_name": ""})
 
-        assert model_class.schema()["properties"]["height"]["description"] == "user_height"
+        assert (
+            model_class.model_json_schema()["properties"]["height"]["description"]
+            == "user_height"
+        )

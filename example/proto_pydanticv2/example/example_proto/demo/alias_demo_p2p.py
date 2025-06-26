@@ -3,19 +3,32 @@
 # Protobuf Version: 6.31.1
 # Pydantic Version: 2.11.7
 import typing
+from typing import Annotated, Literal, Union
 
 from google.protobuf.message import Message  # type: ignore
-from pydantic import Field, model_validator
+from pydantic import Field
 
-from protobuf_to_pydantic.customer_validator.v2 import check_one_of
 from protobuf_to_pydantic.default_base_model import ProtobufCompatibleBaseModel
-from protobuf_to_pydantic.util import TimestampType, datetime_utc_now
+from protobuf_to_pydantic.util import TimestampType
 
 
-class GeoLocation(ProtobufCompatibleBaseModel):
-    latitude: float = Field(default=0.0)
-    longitude: float = Field(default=0.0)
-    altitude_meters: typing.Optional[float] = Field(default=0.0)
+class ReportDataDataLocation_Value(ProtobufCompatibleBaseModel):
+    """Variant when 'location_value' is set in data oneof."""
+
+    data_case: Literal["location_value"] = Field(default="location_value", exclude=True)
+    location_value: "GeoLocation"
+
+
+class ReportDataDataTime_Value(ProtobufCompatibleBaseModel):
+    """Variant when 'time_value' is set in data oneof."""
+
+    data_case: Literal["time_value"] = Field(default="time_value", exclude=True)
+    time_value: TimestampType
+
+
+ReportDataDataUnion = Annotated[
+    Union[ReportDataDataLocation_Value, ReportDataDataTime_Value], Field(discriminator="data_case")
+]
 
 
 class ReportData(ProtobufCompatibleBaseModel):
@@ -23,12 +36,25 @@ class ReportData(ProtobufCompatibleBaseModel):
     Annotations are used in runtime mode
     """
 
-    _one_of_dict = {
-        "ReportData.data": {"fields": {"locationValue", "location_value", "timeValue", "time_value"}, "required": True}
+    data: ReportDataDataUnion
+
+    _oneof_fields = {
+        "data": {
+            "aliases": {
+                "locationValue": "location_value",
+                "location_value": "location_value",
+                "timeValue": "time_value",
+                "time_value": "time_value",
+            },
+            "fields": ["location_value", "time_value"],
+        }
     }
-    one_of_validator = model_validator(mode="before")(check_one_of)
-    location_value: typing.Optional[GeoLocation] = Field(default_factory=GeoLocation)
-    time_value: TimestampType = Field(default_factory=datetime_utc_now)
+
+
+class GeoLocation(ProtobufCompatibleBaseModel):
+    latitude: float = Field(default=0.0)
+    longitude: float = Field(default=0.0)
+    altitude_meters: typing.Optional[float] = Field(default=0.0)
 
 
 class Report(ProtobufCompatibleBaseModel):
