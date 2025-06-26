@@ -1,11 +1,15 @@
 """Default base model for protobuf_to_pydantic generated models."""
 
+from enum import Enum
 from typing import Any, Dict, Optional
 
 from pydantic import (
     AliasGenerator,
     BaseModel,
     ConfigDict,
+    FieldSerializationInfo,
+    SerializerFunctionWrapHandler,
+    field_serializer,
     model_serializer,
     model_validator,
 )
@@ -40,6 +44,17 @@ class ProtobufCompatibleBaseModel(BaseModel):
             output.pop(field_name)
             output.update(field_value)
         return output
+
+    @field_serializer("*", when_used="json", mode="wrap")
+    def _serialize_enums(
+        self,
+        value: Any,
+        nxt: SerializerFunctionWrapHandler,
+        info: FieldSerializationInfo,
+    ) -> Any:
+        if isinstance(value, Enum):
+            return value.name
+        return nxt(value)
 
     @model_validator(mode="before")
     @classmethod

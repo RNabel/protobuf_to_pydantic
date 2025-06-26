@@ -197,16 +197,15 @@ class TestFlexibleEnumParsing:
         # Serialize to dict
         data = model.model_dump()
 
-        # All should serialize as integers
-        assert data["status"] == 1  # ACTIVE
-        assert data["priority"] == 2  # HIGH
-        assert data["error_code"] == 200  # ERROR_TIMEOUT
+        assert data["status"] == enum_types_roundtrip_p2p.Status.ACTIVE
+        assert data["priority"] == enum_types_roundtrip_p2p.Priority.HIGH
+        assert data["error_code"] == enum_types_roundtrip_p2p.ErrorCode.ERROR_TIMEOUT
 
         # JSON serialization should also use integers
         import json
 
         json_str = model.model_dump_json(by_alias=True)
         json_data = json.loads(json_str)
-        assert json_data["status"] == 1
-        assert json_data["priority"] == 2
-        assert json_data["errorCode"] == 200  # Note: camelCase due to alias
+        assert json_data["status"] == "ACTIVE"
+        assert json_data["priority"] == "HIGH"
+        assert json_data["errorCode"] == "ERROR_TIMEOUT"  # Note: camelCase due to alias
