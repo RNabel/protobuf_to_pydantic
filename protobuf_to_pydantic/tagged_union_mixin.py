@@ -8,10 +8,6 @@ from pydantic_core import to_json
 class TaggedUnionMixin:
     """Mixin that provides centralized handling for protobuf oneof fields as tagged unions."""
 
-    # Class attribute to store oneof configuration
-    # Format: {"field_name": ["field1", "field2", ...]}
-    # This should be set by subclasses, not defined here with a default
-
     def model_dump(self, **kwargs) -> dict[str, Any]:
         """Override to handle oneof fields specially for protobuf compatibility."""
         # Call parent's model_dump
@@ -64,15 +60,7 @@ class TaggedUnionMixin:
         # Process each discriminated union field
         for field_name, field_info in union_fields.items():
             if field_name not in data:
-                # field_info can be either a list (old format) or dict with 'fields' and 'aliases'
-                if isinstance(field_info, list):
-                    # Old format - just field names
-                    field_options = field_info
-                    field_aliases = {f: f for f in field_options}
-                else:
-                    # New format - with aliases
-                    field_options = field_info.get("fields", [])
-                    field_aliases = field_info.get("aliases", {})
+                field_aliases = field_info.get("aliases", {})
 
                 # Check if any oneof field is present in flat format
                 present_fields = []
@@ -89,9 +77,9 @@ class TaggedUnionMixin:
                                 f"using different aliases: '{field_mapping[actual_field]}' and '{key}'. "
                                 f"Only one field allowed."
                             )
-                        else:
-                            present_fields.append(actual_field)
-                            field_mapping[actual_field] = key
+
+                        present_fields.append(actual_field)
+                        field_mapping[actual_field] = key
 
                 if len(present_fields) > 1:
                     raise ValueError(

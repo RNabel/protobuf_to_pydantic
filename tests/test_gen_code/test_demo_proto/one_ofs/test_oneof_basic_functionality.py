@@ -2,7 +2,6 @@
 
 Tests the fundamental behavior of oneofs:
 - Only one field can be set at a time (mutex behavior)
-- Setting a new field clears the previous one
 - Empty oneof state
 - Field access when not set
 """
@@ -12,13 +11,11 @@ import pytest
 from pydantic import ValidationError
 from example.proto_pydanticv2.example.example_proto.demo.demo_p2p import (
     OptionalMessage,
-    InvoiceItem,
 )
 from example.proto_pydanticv2.example.example_proto.demo.alias_demo_p2p import (
     ReportData,
     GeoLocation,
 )
-from google.protobuf.timestamp_pb2 import Timestamp
 
 
 class TestOneofBasicFunctionality:

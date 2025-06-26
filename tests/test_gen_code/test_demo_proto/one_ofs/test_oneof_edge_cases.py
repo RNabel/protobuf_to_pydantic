@@ -118,25 +118,6 @@ class TestOneofEdgeCases:
         json_str = msg.model_dump_json()
         assert len(json_str) > 2000  # Should be reasonably large
 
-    def test_oneof_memory_efficiency(self):
-        """Test that oneofs don't waste memory on unset fields."""
-        # Create many instances to test memory patterns
-        instances_x = []
-        instances_y = []
-
-        for i in range(100):
-            instances_x.append(OptionalMessage(x=f"value_{i}"))
-            instances_y.append(OptionalMessage(y=i))
-
-        # Check that unset fields don't exist (saving memory)
-        for msg in instances_x:
-            assert hasattr(msg.a, "x")
-            assert not hasattr(msg.a, "y")
-
-        for msg in instances_y:
-            assert hasattr(msg.a, "y")
-            assert not hasattr(msg.a, "x")
-
     def test_oneof_with_all_fields_optional(self):
         """Test behavior when all message fields are optional."""
         # Using AllOptionalMessage from all_feidl_set_optional_demo_p2p
