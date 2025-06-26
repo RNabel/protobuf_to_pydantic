@@ -9,7 +9,6 @@ from google.protobuf.message import Message  # type: ignore
 from pydantic import Field
 
 from protobuf_to_pydantic.default_base_model import ProtobufCompatibleBaseModel
-from protobuf_to_pydantic.tagged_union_mixin import TaggedUnionMixin
 from protobuf_to_pydantic.util import TimestampType
 
 
@@ -32,7 +31,7 @@ ReportDataDataUnion = Annotated[
 ]
 
 
-class ReportData(TaggedUnionMixin, ProtobufCompatibleBaseModel):
+class ReportData(ProtobufCompatibleBaseModel):
     """
     Annotations are used in runtime mode
     """

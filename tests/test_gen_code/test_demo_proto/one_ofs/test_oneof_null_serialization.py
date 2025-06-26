@@ -15,11 +15,7 @@ class TestOneofNullSerialization:
     """Test that oneof fields don't serialize as null when unset."""
 
     def test_oneof_wrapper_field_not_in_output(self):
-        """Test that the oneof wrapper field 'a' doesn't appear in JSON output.
-
-        The TaggedUnionMixin should flatten the oneof structure so that only
-        the actual variant fields (x or y) appear in the output, not the wrapper.
-        """
+        """Test that the oneof wrapper field 'a' doesn't appear in JSON output."""
         # Create message with x variant
         msg = OptionalMessage(x="test_value", name="test_name", age=25)
 

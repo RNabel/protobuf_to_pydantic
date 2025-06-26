@@ -880,7 +880,9 @@ class FileDescriptorProtoToCode(BaseP2C):
                             pass  # Import already handled by _get_protobuf_type_model
                         else:
                             # Add import for custom message types
-                            message_fd = self._descriptors.message_to_fd[field.type_name]
+                            message_fd = self._descriptors.message_to_fd[
+                                field.type_name
+                            ]
                             # Check if it's in the same file - if so, use string annotation to handle forward references
                             if message_fd.name == self._fd.name:
                                 field_type = f'"{field_type}"'
@@ -899,7 +901,7 @@ class FileDescriptorProtoToCode(BaseP2C):
                 else:
                     # Primitive types
                     field_type = self._get_field_type_str(field)
-                
+
                 variant_content += (
                     f"{' ' * (indent + self.code_indent)}{field_name}: {field_type}\n"
                 )
@@ -1086,7 +1088,12 @@ class FileDescriptorProtoToCode(BaseP2C):
 
             union_classes_content, union_types_content, exclude_map = (
                 self._generate_discriminated_union_classes(
-                    desc, root_desc, filtered_one_of_dict, optional_dict, indent, field_map
+                    desc,
+                    root_desc,
+                    filtered_one_of_dict,
+                    optional_dict,
+                    indent,
+                    field_map,
                 )
             )
 
@@ -1096,13 +1103,6 @@ class FileDescriptorProtoToCode(BaseP2C):
 
         # Now we can set the class name content with proper base classes
         base_classes = [self.config.base_model_class.__name__]
-        if self.config.use_discriminated_unions_for_oneofs and one_of_dict:
-            # Add mixin for centralized oneof handling
-            base_classes.insert(0, "TaggedUnionMixin")
-            self._add_import_code(
-                "protobuf_to_pydantic.tagged_union_mixin",
-                "TaggedUnionMixin",
-            )
 
         class_name_content = (
             " " * indent + f"class {class_name}({', '.join(base_classes)}):"
@@ -1283,7 +1283,7 @@ class FileDescriptorProtoToCode(BaseP2C):
                         for oneof_full_name, oneof_config in one_of_dict.items():
                             oneof_name = oneof_full_name.split(".")[-1]
                             fields = sorted(list(oneof_config["fields"]))
-                            
+
                             # Create alias mapping for camelCase support
                             aliases = {}
                             for field in fields:
@@ -1291,14 +1291,16 @@ class FileDescriptorProtoToCode(BaseP2C):
                                 aliases[field] = field
                                 # Convert to camelCase and map to snake_case
                                 # Simple conversion: location_value -> locationValue
-                                parts = field.split('_')
+                                parts = field.split("_")
                                 if len(parts) > 1:
-                                    camel_case = parts[0] + ''.join(word.capitalize() for word in parts[1:])
+                                    camel_case = parts[0] + "".join(
+                                        word.capitalize() for word in parts[1:]
+                                    )
                                     aliases[camel_case] = field
-                            
+
                             union_fields[oneof_name] = {
                                 "fields": fields,
-                                "aliases": aliases
+                                "aliases": aliases,
                             }
 
                         config_content = f"\n{' ' * (indent + self.code_indent)}_oneof_fields = {self._get_value_code(union_fields)}\n"

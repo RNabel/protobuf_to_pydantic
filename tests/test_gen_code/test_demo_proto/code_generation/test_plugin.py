@@ -138,7 +138,7 @@ class InvoiceItem(ProtobufCompatibleBaseModel):
         assert_expected_inline(
             output,
             """\
-class OptionalMessage(TaggedUnionMixin, ProtobufCompatibleBaseModel):
+class OptionalMessage(ProtobufCompatibleBaseModel):
     a: OptionalMessageAUnion
 
     _oneof_fields = {"a": {"aliases": {"x": "x", "y": "y"}, "fields": ["x", "y"]}}

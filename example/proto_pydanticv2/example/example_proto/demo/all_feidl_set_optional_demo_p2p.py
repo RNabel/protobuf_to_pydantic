@@ -16,7 +16,6 @@ from pydantic.types import PaymentCardNumber
 from example.plugin_config import exp_time
 from protobuf_to_pydantic.default_base_model import ProtobufCompatibleBaseModel
 from protobuf_to_pydantic.flexible_enum_mixin import FlexibleEnumMixin
-from protobuf_to_pydantic.tagged_union_mixin import TaggedUnionMixin
 from protobuf_to_pydantic.util import TimestampType
 
 from ..common.single_p2p import DemoEnum, DemoMessage
@@ -137,7 +136,7 @@ class OptionalMessageAY(ProtobufCompatibleBaseModel):
 OptionalMessageAUnion = Annotated[Union[OptionalMessageAX, OptionalMessageAY], Field(discriminator="a_case")]
 
 
-class OptionalMessage(TaggedUnionMixin, ProtobufCompatibleBaseModel):
+class OptionalMessage(ProtobufCompatibleBaseModel):
     a: OptionalMessageAUnion
 
     _oneof_fields = {"a": {"aliases": {"x": "x", "y": "y"}, "fields": ["x", "y"]}}
