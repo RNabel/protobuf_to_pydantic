@@ -192,3 +192,7 @@ message WithOptionalOneofMsgEntry {
     int32 y = 2;
   }
 }
+
+message NestedWithOptOneOfEntry {
+  WithOptionalOneofMsgEntry x = 1;
+}

@@ -781,3 +781,20 @@ class WithOptionalOneofMsgEntry(google.protobuf.message.Message):
     def WhichOneof(self, oneof_group: typing.Literal["a", b"a"]) -> typing.Literal["x", "y"] | None: ...
 
 global___WithOptionalOneofMsgEntry = WithOptionalOneofMsgEntry
+
+@typing.final
+class NestedWithOptOneOfEntry(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+    X_FIELD_NUMBER: builtins.int
+    @property
+    def x(self) -> global___WithOptionalOneofMsgEntry: ...
+    def __init__(
+        self,
+        *,
+        x: global___WithOptionalOneofMsgEntry | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing.Literal["x", b"x"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing.Literal["x", b"x"]) -> None: ...
+
+global___NestedWithOptOneOfEntry = NestedWithOptOneOfEntry

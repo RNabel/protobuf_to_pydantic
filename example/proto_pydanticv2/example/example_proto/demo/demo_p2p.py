@@ -265,3 +265,7 @@ class WithOptionalOneofMsgEntry(TaggedUnionMixin, ProtobufCompatibleBaseModel):
     a: Optional[WithOptionalOneofMsgEntryAUnion] = Field(default=None)
 
     _oneof_fields = {"a": {"aliases": {"x": "x", "y": "y"}, "fields": ["x", "y"]}}
+
+
+class NestedWithOptOneOfEntry(ProtobufCompatibleBaseModel):
+    x: WithOptionalOneofMsgEntry = Field(default_factory=WithOptionalOneofMsgEntry)

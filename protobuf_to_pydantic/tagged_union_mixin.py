@@ -1,46 +1,10 @@
 """Mixin for handling discriminated union (oneof) fields in protobuf-generated models."""
 
-from typing import Any
 from pydantic import model_validator
-from pydantic_core import to_json
 
 
 class TaggedUnionMixin:
     """Mixin that provides centralized handling for protobuf oneof fields as tagged unions."""
-
-    def model_dump(self, **kwargs) -> dict[str, Any]:
-        """Override to handle oneof fields specially for protobuf compatibility."""
-        # Call parent's model_dump
-        data = super().model_dump(**kwargs)  # type: ignore
-
-        if not hasattr(self.__class__, "_oneof_fields"):
-            return data
-
-        # Get the actual value from ModelPrivateAttr if needed
-        union_fields = self.__class__._oneof_fields  # type: ignore
-        if hasattr(union_fields, "default"):
-            union_fields = union_fields.default
-
-        result = {}
-
-        for field_name, field_value in data.items():
-            if field_name in union_fields:
-                # This is a oneof field - flatten it
-                if isinstance(field_value, dict):
-                    for k, v in field_value.items():
-                        if not (k.endswith("_case") or k.startswith("__")):
-                            result[k] = v
-            else:
-                result[field_name] = field_value
-
-        return result
-
-    def model_dump_json(self, **kwargs) -> str:
-        """Override to use custom model_dump for JSON serialization."""
-        # Extract indent before passing to model_dump
-        indent = kwargs.pop("indent", None)
-        data = self.model_dump(**kwargs)
-        return to_json(data, indent=indent).decode()
 
     @model_validator(mode="before")
     @classmethod

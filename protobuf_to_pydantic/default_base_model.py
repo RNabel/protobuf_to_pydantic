@@ -2,7 +2,7 @@
 
 from typing import Any, Dict, Optional
 
-from pydantic import AliasGenerator, BaseModel, ConfigDict
+from pydantic import AliasGenerator, BaseModel, ConfigDict, model_serializer
 from pydantic.alias_generators import to_camel
 
 
@@ -20,6 +20,20 @@ class ProtobufCompatibleBaseModel(BaseModel):
         ),
         populate_by_name=True,
     )
+
+    @model_serializer(mode="wrap")
+    def serialize_model(self, nxt):
+        output = nxt(self)
+        if not hasattr(self, "_oneof_fields"):
+            return output
+        union_fields: dict[str, dict[str, dict[str, str]]] = self._oneof_fields  # type: ignore
+        for field_name in union_fields.keys():
+            if field_name not in output:
+                continue
+            field_value = output[field_name]
+            output.pop(field_name)
+            output.update(field_value)
+        return output
 
     def model_dump(
         self,
