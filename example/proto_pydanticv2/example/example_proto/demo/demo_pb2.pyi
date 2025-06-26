@@ -761,3 +761,23 @@ class WithOptionalEnumMsgEntry(google.protobuf.message.Message):
     def WhichOneof(self, oneof_group: typing.Literal["_enum", b"_enum"]) -> typing.Literal["enum"] | None: ...
 
 global___WithOptionalEnumMsgEntry = WithOptionalEnumMsgEntry
+
+@typing.final
+class WithOptionalOneofMsgEntry(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+    X_FIELD_NUMBER: builtins.int
+    Y_FIELD_NUMBER: builtins.int
+    x: builtins.str
+    y: builtins.int
+    def __init__(
+        self,
+        *,
+        x: builtins.str = ...,
+        y: builtins.int = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing.Literal["a", b"a", "x", b"x", "y", b"y"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing.Literal["a", b"a", "x", b"x", "y", b"y"]) -> None: ...
+    def WhichOneof(self, oneof_group: typing.Literal["a", b"a"]) -> typing.Literal["x", "y"] | None: ...
+
+global___WithOptionalOneofMsgEntry = WithOptionalOneofMsgEntry

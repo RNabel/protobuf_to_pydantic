@@ -125,5 +125,6 @@ class BaseTestCustomCommentHandler:
             model_class(**{"uid": "10086", "age": 1, "height": 1, "user_name": ""})
 
         assert (
-            model_class.schema()["properties"]["height"]["description"] == "user_height"
+            model_class.model_json_schema()["properties"]["height"]["description"]
+            == "user_height"
         )

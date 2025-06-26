@@ -4,7 +4,7 @@
 # Pydantic Version: 2.11.7
 import typing
 from enum import IntEnum
-from typing import Annotated, Literal, Union
+from typing import Annotated, Literal, Optional, Union
 from uuid import uuid4
 
 from google.protobuf.field_mask_pb2 import FieldMask  # type: ignore
@@ -233,3 +233,35 @@ class WithOptionalEnumMsgEntry(ProtobufCompatibleBaseModel):
 
     model_config = ConfigDict(validate_default=True)
     enum: typing.Optional[OptionalEnum] = Field(default=0)
+
+
+class WithOptionalOneofMsgEntryAX(ProtobufCompatibleBaseModel):
+    """Variant when 'x' is set in a oneof."""
+
+    a_case: Literal["x"] = Field(default="x", exclude=True)
+    x: str
+
+
+class WithOptionalOneofMsgEntryAY(ProtobufCompatibleBaseModel):
+    """Variant when 'y' is set in a oneof."""
+
+    a_case: Literal["y"] = Field(default="y", exclude=True)
+    y: int
+
+
+class WithOptionalOneofMsgEntryANone(ProtobufCompatibleBaseModel):
+    """Variant when no field is set in a oneof."""
+
+    a_case: Literal[None] = None
+
+
+WithOptionalOneofMsgEntryAUnion = Annotated[
+    Union[WithOptionalOneofMsgEntryAX, WithOptionalOneofMsgEntryAY, WithOptionalOneofMsgEntryANone],
+    Field(discriminator="a_case"),
+]
+
+
+class WithOptionalOneofMsgEntry(TaggedUnionMixin, ProtobufCompatibleBaseModel):
+    a: Optional[WithOptionalOneofMsgEntryAUnion] = Field(default=None)
+
+    _oneof_fields = {"a": {"aliases": {"x": "x", "y": "y"}, "fields": ["x", "y"]}}

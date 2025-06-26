@@ -185,3 +185,10 @@ enum OptionalEnum {
     BAR = 1;
     BAZ = 2;
 }
+
+message WithOptionalOneofMsgEntry {
+  oneof a {
+    string x = 1;
+    int32 y = 2;
+  }
+}

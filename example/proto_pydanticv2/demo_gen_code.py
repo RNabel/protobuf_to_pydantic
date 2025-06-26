@@ -472,6 +472,24 @@ class WithOptionalEnumMsgEntry(ProtobufCompatibleBaseModel):
     )
 
 
+class WithOptionalOneofMsgEntry(ProtobufCompatibleBaseModel):
+    model_config = ConfigDict(
+        ser_json_inf_nan="strings",
+        alias_generator=AliasGenerator(validation_alias=to_camel, serialization_alias=to_camel),
+        populate_by_name=True,
+        validate_by_alias=True,
+        validate_by_name=True,
+        serialize_by_alias=True,
+    )
+
+    _one_of_dict = {"user.WithOptionalOneofMsgEntry.a": {"fields": {"x", "y"}, "required": False}}
+
+    x: str = Field(default="", alias_priority=1, validation_alias="x", serialization_alias="x")
+    y: int = Field(default=0, alias_priority=1, validation_alias="y", serialization_alias="y")
+
+    one_of_validator = model_validator(mode="before")(check_one_of)
+
+
 class Demo1(ProtobufCompatibleBaseModel):
     model_config = ConfigDict(
         ser_json_inf_nan="strings",
