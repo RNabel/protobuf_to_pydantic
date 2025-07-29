@@ -113,10 +113,6 @@ class ConfigModel(BaseModel):
     base_model_class: Type[BaseModel] = Field(
         default=ProtobufCompatibleBaseModel, description="Inherited base pydantic model"
     )
-    all_field_set_optional: bool = Field(
-        default=False,
-        description="If true, all fields become optional, see: https://github.com/so1n/protobuf_to_pydantic/issues/60",
-    )
 
     # other config
     file_descriptor_proto_to_code: Type[FileDescriptorProtoToCode] = Field(

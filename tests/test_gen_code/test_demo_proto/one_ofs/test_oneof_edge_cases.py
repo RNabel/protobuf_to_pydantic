@@ -9,7 +9,6 @@ Tests edge case scenarios:
 - Performance considerations
 """
 
-import pytest
 import time
 from pydantic import ValidationError
 
@@ -20,9 +19,6 @@ from example.proto_pydanticv2.example.example_proto.demo.demo_p2p import (
 from example.proto_pydanticv2.example.example_proto.demo.alias_demo_p2p import (
     ReportData,
     GeoLocation,
-)
-from example.proto_pydanticv2.example.example_proto.demo.all_feidl_set_optional_demo_p2p import (
-    OptionalMessage as AllOptionalMessage,
 )
 
 
@@ -117,16 +113,6 @@ class TestOneofEdgeCases:
         # Test serialization of large data
         json_str = msg.model_dump_json()
         assert len(json_str) > 2000  # Should be reasonably large
-
-    def test_oneof_with_all_fields_optional(self):
-        """Test behavior when all message fields are optional."""
-        # Using AllOptionalMessage from all_feidl_set_optional_demo_p2p
-        msg = AllOptionalMessage(x="test")
-
-        # Even with all fields optional, oneof should still work
-        assert msg.a.x == "test"
-        assert msg.a.a_case == "x"
-        assert not hasattr(msg.a, "y")
 
     def test_oneof_error_handling_edge_cases(self):
         """Test error handling in edge cases."""

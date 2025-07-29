@@ -14,7 +14,7 @@ class TestProto3Presence:
     """Test that proto3 presence semantics are correctly implemented."""
 
     @staticmethod
-    def _model_output(msg: Any, all_field_set_optional: bool = False) -> str:
+    def _model_output(msg: Any) -> str:
         """Generate Pydantic model code from protobuf message."""
         # Clear cache to ensure clean generation
         clear_create_model_cache()
@@ -23,7 +23,6 @@ class TestProto3Presence:
             msg_to_pydantic_model(
                 msg,
                 parse_msg_desc_method="ignore",
-                all_field_set_optional=all_field_set_optional,
             ),
             p2c_class=P2CNoHeader,
         )
@@ -234,31 +233,6 @@ class TestOneofMessage(ProtobufCompatibleBaseModel):
     one_of_validator = model_validator(mode="before")(check_one_of)
 """,
         )
-
-    @pytest.mark.skip(
-        reason="Fails due to proto3 presence handling - default_factory creates unwanted values"
-    )
-    @pytest.mark.proto3_presence
-    def test_backwards_compatibility_all_optional(self) -> None:
-        """Test that all_field_set_optional=True makes all fields optional for backwards compatibility."""
-        from example.proto_pydanticv2.example.example_proto.demo import (
-            test_proto3_presence_pb2,
-        )
-
-        output = self._model_output(
-            test_proto3_presence_pb2.TestPresenceMessage, all_field_set_optional=True
-        )
-
-        # With all_field_set_optional=True, ALL fields should be Optional
-        # Check just a few key fields to verify
-        assert "regular_string: typing.Optional[str]" in output
-        assert "regular_int32: typing.Optional[int]" in output
-        assert "optional_string: typing.Optional[str]" in output
-        assert "optional_int32: typing.Optional[int]" in output
-
-        # When using msg_to_pydantic_model directly (not through protoc plugin),
-        # it doesn't have access to proto3_optional info, so defaults might be different.
-        # The important thing is that all fields are Optional when all_field_set_optional=True
 
     @pytest.mark.skip(
         reason="Fails due to proto3 presence handling - default_factory creates unwanted values"
