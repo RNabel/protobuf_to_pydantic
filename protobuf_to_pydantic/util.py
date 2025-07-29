@@ -246,8 +246,6 @@ def get_dict_from_comment(comment_prefix: str, comment: str) -> dict:
                         raise TypeError(
                             f"A key:{key} that does not support merging has been detected"
                         )
-        if "miss_default" in _dict:
-            _dict["required"] = _dict.pop("miss_default")
     except Exception as e:
         logging.warning(f"Can not gen dict by desc:{comment}, error: {e}")
     return _dict  # type: ignore

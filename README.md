@@ -484,7 +484,6 @@ message FloatTest {
   float default_test = 6[(p2p_validate.rules).float.default = 1.0];
   float not_enable_test = 7[(p2p_validate.rules).float.enable = false];
   float default_factory_test = 8[(p2p_validate.rules).float.default_factory = "p2p@builtin|float"];
-  float miss_default_test = 9[(p2p_validate.rules).float.miss_default = true];
   float alias_test = 10 [(p2p_validate.rules).float.alias = "alias"];
   float desc_test = 11 [(p2p_validate.rules).float.description = "test desc"];
   float multiple_of_test = 12 [(p2p_validate.rules).float.multiple_of = 3.0];

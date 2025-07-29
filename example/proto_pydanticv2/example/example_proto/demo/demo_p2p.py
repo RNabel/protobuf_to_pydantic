@@ -75,7 +75,7 @@ class RepeatedMessage(ProtobufCompatibleBaseModel):
 
 
 class AfterReferMessage(ProtobufCompatibleBaseModel):
-    uid: str = Field(title="UID", description="user union id", example="10086")
+    uid: str = Field(default="", title="UID", description="user union id", example="10086")
     age: int = Field(default=0, title="use age", ge=0, example=18)
 
 

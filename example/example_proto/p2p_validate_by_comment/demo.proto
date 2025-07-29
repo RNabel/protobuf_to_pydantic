@@ -27,8 +27,6 @@ message FloatTest {
   float not_enable_test = 7;
   // p2p: {"default_factory": "p2p@builtin|float"}
   float default_factory_test = 8;
-  // p2p: {"miss_default": true}
-  float miss_default_test = 9;
   // p2p: {"required": true}
   float required_test = 19;
   // p2p: {"alias": "alias"}
@@ -70,8 +68,6 @@ message DoubleTest {
   double not_enable_test = 7;
   // p2p: {"default_factory": "p2p@builtin|float"}
   double default_factory_test = 8;
-  // p2p: {"miss_default": true}
-  double miss_default_test = 9;
   // p2p: {"required": true}
   double required_test = 19;
   // p2p: {"alias": "alias"}
@@ -113,8 +109,6 @@ message Int32Test {
   int32 not_enable_test = 7;
   // p2p: {"default_factory": "p2p@builtin|int"}
   int32 default_factory_test = 8;
-  // p2p: {"miss_default": true}
-  int32 miss_default_test = 9;
   // p2p: {"required": true}
   int32 required_test = 19;
   // p2p: {"alias": "alias"}
@@ -156,8 +150,6 @@ message Int64Test {
   int64 not_enable_test = 7;
   // p2p: {"default_factory": "p2p@builtin|int"}
   int64 default_factory_test = 8;
-  // p2p: {"miss_default": true}
-  int64 miss_default_test = 9;
   // p2p: {"required": true}
   int64 required_test = 19;
   // p2p: {"alias": "alias"}
@@ -199,8 +191,6 @@ message Uint32Test {
   uint32 not_enable_test = 7;
   // p2p: {"default_factory": "p2p@builtin|int"}
   uint32 default_factory_test = 8;
-  // p2p: {"miss_default": true}
-  uint32 miss_default_test = 9;
   // p2p: {"required": true}
   uint32 required_test = 19;
   // p2p: {"alias": "alias"}
@@ -233,7 +223,6 @@ message Sint32Test {
   sint32 default_template_test = 20; // p2p: {"default_template": "p2p@timestamp|10"}
   sint32 not_enable_test = 7; // p2p: {"enable": false}
   sint32 default_factory_test = 8; // p2p: {"default_factory": "p2p@builtin|int"}
-  sint32 miss_default_test = 9; // p2p: {"miss_default": true}
   sint32 required_test = 19; // p2p: {"required": true}
   sint32 alias_test = 10 ; // p2p: {"alias": "alias"}
   sint32 desc_test = 11 ; // p2p: {"description": "test desc"}
@@ -256,7 +245,6 @@ message Uint64Test {
   uint64 default_template_test = 20; // p2p: {"default_template": "p2p@timestamp|10"}
   uint64 not_enable_test = 7; // p2p: {"enable": false}
   uint64 default_factory_test = 8; // p2p: {"default_factory": "p2p@builtin|int"}
-  uint64 miss_default_test = 9; // p2p: {"miss_default": true}
   uint64 required_test = 19; // p2p: {"required": true}
   uint64 alias_test = 10 ; // p2p: {"alias": "alias"}
   uint64 desc_test = 11 ; // p2p: {"description": "test desc"}
@@ -279,7 +267,6 @@ message Sint64Test {
   sint64 default_template_test = 20; // p2p: {"default_template": "p2p@timestamp|10"}
   sint64 not_enable_test = 7; // p2p: {"enable": false}
   sint64 default_factory_test = 8; // p2p: {"default_factory": "p2p@builtin|int"}
-  sint64 miss_default_test = 9; // p2p: {"miss_default": true}
   sint64 required_test = 19; // p2p: {"required": true}
   sint64 alias_test = 10 ; // p2p: {"alias": "alias"}
   sint64 desc_test = 11 ; // p2p: {"description": "test desc"}
@@ -302,7 +289,6 @@ message Fixed32Test {
   fixed32 default_template_test = 20; // p2p: {"default_template": "p2p@timestamp|10"}
   fixed32 not_enable_test = 7; // p2p: {"enable": false}
   fixed32 default_factory_test = 8; // p2p: {"default_factory": "p2p@builtin|float"}
-  fixed32 miss_default_test = 9; // p2p: {"miss_default": true}
   fixed32 required_test = 19; // p2p: {"required": true}
   fixed32 alias_test = 10 ; // p2p: {"alias": "alias"}
   fixed32 desc_test = 11 ; // p2p: {"description": "test desc"}
@@ -326,7 +312,6 @@ message Fixed64Test {
   fixed64 default_template_test = 20; // p2p: {"default_template": "p2p@timestamp|10"}
   fixed64 not_enable_test = 7; // p2p: {"enable": false}
   fixed64 default_factory_test = 8; // p2p: {"default_factory": "p2p@builtin|float"}
-  fixed64 miss_default_test = 9; // p2p: {"miss_default": true}
   fixed64 required_test = 19; // p2p: {"required": true}
   fixed64 alias_test = 10 ; // p2p: {"alias": "alias"}
   fixed64 desc_test = 11 ; // p2p: {"description": "test desc"}
@@ -350,7 +335,6 @@ message Sfixed32Test {
   sfixed32 default_template_test = 20; // p2p: {"default_template": "p2p@timestamp|10"}
   sfixed32 not_enable_test = 7; // p2p: {"enable": false}
   sfixed32 default_factory_test = 8; // p2p: {"default_factory": "p2p@builtin|float"}
-  sfixed32 miss_default_test = 9; // p2p: {"miss_default": true}
   sfixed32 required_test = 19; // p2p: {"required": true}
   sfixed32 alias_test = 10 ; // p2p: {"alias": "alias"}
   sfixed32 desc_test = 11 ; // p2p: {"description": "test desc"}
@@ -373,7 +357,6 @@ message Sfixed64Test {
   sfixed64 default_template_test = 20; // p2p: {"default_template": "p2p@timestamp|10"}
   sfixed64 not_enable_test = 7; // p2p: {"enable": false}
   sfixed64 default_factory_test = 8; // p2p: {"default_factory": "p2p@builtin|float"}
-  sfixed64 miss_default_test = 9; // p2p: {"miss_default": true}
   sfixed64 required_test = 19; // p2p: {"required": true}
   sfixed64 alias_test = 10 ; // p2p: {"alias": "alias"}
   sfixed64 desc_test = 11 ; // p2p: {"description": "test desc"}
@@ -392,7 +375,6 @@ message BoolTest {
   bool bool_2_test = 2; // p2p: {"const": false}
   bool enable_test = 3; // p2p: {"enable": false}
   bool default_test = 4; // p2p: {"default": true}
-  bool miss_default_test = 5; // p2p: {"miss_default": true}
   bool required_test = 19; // p2p: {"required": true}
   bool alias_test = 10 ; // p2p: {"alias": "alias"}
   bool desc_test = 11 ; // p2p: {"description": "test desc"}
@@ -426,7 +408,6 @@ message StringTest {
   string enable_test = 22; // p2p: {"enable": false}
   string default_test = 23; // p2p: {"default": "default"}
   string default_factory_test = 24; // p2p: {"default_factory": "p2p@import|uuid|uuid4"}
-  string miss_default_test=25; // p2p: {"miss_default": true}
   string required_test = 34; // p2p: {"required": true}
   string alias_test = 26 ; // p2p: {"alias": "alias"}
   string desc_test = 27 ; // p2p: {"description": "test desc"}
@@ -449,7 +430,6 @@ message BytesTest {
   bytes enable_test = 22; // p2p: {"enable": false}
   bytes default_test = 23; // p2p: {"default": "default"}
   bytes default_factory_test = 24; // p2p: {"default_factory": "p2p@builtin|bytes"}
-  bytes miss_default_test=25; // p2p: {"miss_default": true}
   bytes required_test = 34; // p2p: {"required": true}
   bytes alias_test = 26 ; // p2p: {"alias": "alias"}
   bytes desc_test = 27 ; // p2p: {"description": "test desc"}
@@ -473,7 +453,6 @@ message EnumTest {
   State not_in_test = 4; // p2p: {"not_in": [0, 2]}
   State enable_test = 22; // p2p: {"enable": false}
   State default_test = 23; // p2p: {"default": 1}
-  State miss_default_test=25; // p2p: {"miss_default": true}
   State required_test=34; // p2p: {"required": true}
   State alias_test = 26 ; // p2p: {"alias": "alias"}
   State desc_test = 27 ; // p2p: {"description": "test desc"}
@@ -491,7 +470,6 @@ message MapTest {
   map<string, google.protobuf.Timestamp> keys_values_test = 5;
   map<string, int32> enable_test = 6; // p2p: {"enable": false}
   map<string, int32> default_factory_test = 24; // p2p: {"default_factory": "p2p@builtin|dict"}
-  map<string, int32> miss_default_test=25; // p2p: {"miss_default": true}
   map<string, int32> required_test=34; // p2p: {"required": true}
   map<string, int32> alias_test = 26 ; // p2p: {"alias": "alias"}
   map<string, int32> desc_test = 27 ; // p2p: {"description": "test desc"}
@@ -523,7 +501,6 @@ message RepeatedTest {
   repeated bytes items_bytes_test = 8; // p2p: {"min_items": 1, "max_items": 5, "items": {"bytes": {"min_length": 1, "max_length": 5}}}
   repeated string enable_test = 9; // p2p: {"enable": false}
   repeated string default_factory_test = 24; // p2p: {"default_factory": "p2p@builtin|list"}
-  repeated string miss_default_test=25; // p2p: {"miss_default": true}
   repeated string required_test=34; // p2p: {"required": true}
   repeated string alias_test = 26 ; // p2p: {"alias": "alias"}
   repeated string desc_test = 27 ; // p2p: {"description": "test desc"}
@@ -542,7 +519,6 @@ message AnyTest {
   // p2p: {"default": "p2p@import_instance|google.protobuf.any_pb2|Any|{\"type_url\": \"type.googleapis.com/google.protobuf.Duration\"}"}
   google.protobuf.Any default_test = 23;
   google.protobuf.Any default_factory_test = 24; // p2p: {"default_factory": "p2p@local|customer_any"}
-  google.protobuf.Any miss_default_test=25; // p2p: {"miss_default": true}
   google.protobuf.Any alias_test = 26 ; // p2p: {"alias": "alias"}
   google.protobuf.Any desc_test = 27 ; // p2p: {"description": "test desc"}
   google.protobuf.Any example_test = 28 ; // p2p: {"example": "type.googleapis.com/google.protobuf.Duration"}
@@ -561,7 +537,6 @@ message DurationTest {
   google.protobuf.Duration enable_test = 22; // p2p: {"enable": false}
   google.protobuf.Duration default_test = 23; // p2p: {"default": {"seconds": 1, "nanos":500000000}}
   google.protobuf.Duration default_factory_test = 24; // p2p: {"default_factory": "p2p@import|datetime|timedelta"}
-  google.protobuf.Duration miss_default_test=25; // p2p: {"miss_default": true}
   google.protobuf.Duration required_test=34; // p2p: {"required": true}
   google.protobuf.Duration alias_test = 26 ; // p2p: {"alias": "alias"}
   google.protobuf.Duration desc_test = 27 ; // p2p: {"description": "test desc"}
@@ -584,7 +559,6 @@ message TimestampTest {
   google.protobuf.Timestamp enable_test = 22; // p2p: {"enable": false}
   google.protobuf.Timestamp default_test = 23; // p2p: {"default": {"seconds": 1, "nanos":500000000}}
   google.protobuf.Timestamp default_factory_test = 24; // p2p: {"default_factory": "p2p@import|datetime|datetime.now"}
-  google.protobuf.Timestamp miss_default_test=25; // p2p: {"miss_default": true}
   google.protobuf.Timestamp required_test=34; // p2p: {"required": true}
   google.protobuf.Timestamp alias_test = 26 ; // p2p: {"alias": "alias"}
   google.protobuf.Timestamp desc_test = 27 ; // p2p: {"description": "test desc"}
@@ -664,7 +638,7 @@ message NestedMessage{
   AfterReferMessage after_refer=7;
 }
 message AfterReferMessage {
-  // p2p: {"example": "10086", "title": "UID", "description": "user union id", "miss_default": true}
+  // p2p: {"example": "10086", "title": "UID", "description": "user union id"}
   string uid=1 ;
   // p2p: {"example": 18, "title": "use age", "ge": 0}
   int32 age=2;

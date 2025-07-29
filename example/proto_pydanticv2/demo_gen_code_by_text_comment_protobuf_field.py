@@ -32,6 +32,7 @@ class AfterReferMessage(ProtobufCompatibleBaseModel):
     )
 
     uid: str = Field(
+        default="",
         alias_priority=1,
         validation_alias="uid",
         serialization_alias="uid",

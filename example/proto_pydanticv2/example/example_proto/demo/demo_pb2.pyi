@@ -344,7 +344,7 @@ class AfterReferMessage(google.protobuf.message.Message):
     UID_FIELD_NUMBER: builtins.int
     AGE_FIELD_NUMBER: builtins.int
     uid: builtins.str
-    """p2p: {"miss_default": true, "example": "10086", "title": "UID", "description": "user union id"}"""
+    """p2p: {"example": "10086", "title": "UID", "description": "user union id"}"""
     age: builtins.int
     """p2p: {"example": 18, "title": "use age", "ge": 0}"""
     def __init__(
