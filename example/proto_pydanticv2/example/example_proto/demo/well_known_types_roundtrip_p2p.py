@@ -26,8 +26,8 @@ class WellKnownTypesMessage(ProtobufCompatibleBaseModel):
     processing_time: DurationType = Field(default_factory=timedelta)
     ttl: DurationType = Field(default_factory=timedelta)
     # Optional well-known types
-    optional_timestamp: typing.Optional[TimestampType] = Field(default_factory=datetime_utc_now)
-    optional_duration: typing.Optional[DurationType] = Field(default_factory=timedelta)
+    optional_timestamp: typing.Optional[TimestampType] = Field(default=None)
+    optional_duration: typing.Optional[DurationType] = Field(default=None)
     # Repeated well-known types
     event_timestamps: typing.List[TimestampType] = Field(default_factory=list)
     intervals: typing.List[DurationType] = Field(default_factory=list)

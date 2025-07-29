@@ -121,8 +121,8 @@ class TestOneofFieldTypes:
         # Create without optional fields
         msg2 = OptionalMessage(y=100)
         assert msg2.a.y == 100
-        assert msg2.name == ""  # default value
-        assert msg2.age == 0  # default value
+        assert msg2.name is None  # default value
+        assert msg2.age is None  # default value
 
     def test_oneof_with_default_values(self):
         """Test oneof fields with various default values."""

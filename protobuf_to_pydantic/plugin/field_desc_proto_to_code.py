@@ -507,6 +507,21 @@ class FileDescriptorProtoToCode(BaseP2C):
         #             if enable_const:
         #                 field_info_dict["const"] = field_info_default_value
 
+        # For optional fields, only use None as default if no explicit default was provided
+        if optional_dict.get(field.name, {}).get("is_proto3_optional", False):
+            # Check if user provided an explicit default value in field_info_dict
+            # Note: we specifically check for 'default' and 'default_factory' keys,
+            # not just any content in field_info_dict (which may include alias settings)
+            has_explicit_default = (
+                "default" in field_info_dict 
+                or "default_factory" in field_info_dict
+                or "default_template" in field_info_dict
+            )
+            if not has_explicit_default:
+                # No user-provided default, so use None for optional fields
+                field_info_default_value = None
+                field_info_default_factory_value = None
+                    
         if (
             field_info_dict
             or field_info_default_value is not _pydantic_adapter.PydanticUndefined
@@ -591,13 +606,6 @@ class FileDescriptorProtoToCode(BaseP2C):
         if optional_dict.get(field.name, {}).get("is_proto3_optional", False):
             self._add_import_code("typing")
             type_str = f"typing.Optional[{type_str}]"
-            if (
-                is_required is not True
-                and field_info_dict.get("default", _pydantic_adapter.PydanticUndefined)
-                is _pydantic_adapter.PydanticUndefined
-                and not field_info_dict.get("default_factory", None)
-            ):
-                field_info_dict["default"] = None
 
         # arranging  field info parameters
         for key in FieldInfo.__slots__:
@@ -624,12 +632,13 @@ class FileDescriptorProtoToCode(BaseP2C):
                         field.name, alias, sub_one_of_dict["fields"], model_config_dict
                     )
 
+            
         field_info_str: str = (
             ", ".join(
                 [
                     f"{k}={self._get_value_code(v)}"
                     for k, v in field_info_dict.items()
-                    if v is not None or k == "default"
+                    if v is not None or k in ("default", "default_factory")
                 ]
             )
             or ""

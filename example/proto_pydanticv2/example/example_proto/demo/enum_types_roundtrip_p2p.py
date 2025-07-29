@@ -53,7 +53,7 @@ class EnumMessage(ProtobufCompatibleBaseModel):
     priority: Priority = Field(default=0)
     error_code: ErrorCode = Field(default=0)
     # Optional enum field
-    optional_status: typing.Optional[Status] = Field(default=0)
+    optional_status: typing.Optional[Status] = Field(default=None)
     # Repeated enum field
     priority_list: typing.List[Priority] = Field(default_factory=list)
     # Map with enum values
@@ -78,6 +78,6 @@ class ComplexEnumMessage(ProtobufCompatibleBaseModel):
     primary_status: Status = Field(default=0)
     status_history: typing.List[Status] = Field(default_factory=list)
     task_priorities: "typing.Dict[str, Priority]" = Field(default_factory=dict)
-    last_error: typing.Optional[ErrorCode] = Field(default=0)
+    last_error: typing.Optional[ErrorCode] = Field(default=None)
     nested: "ComplexEnumMessage.NestedEnum" = Field(default_factory=lambda: ComplexEnumMessage.NestedEnum())
     nested_list: typing.List["ComplexEnumMessage.NestedEnum"] = Field(default_factory=list)
