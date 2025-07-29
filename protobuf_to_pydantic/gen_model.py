@@ -757,11 +757,17 @@ class M2P(object):
             )
             if is_proto3_optional:
                 field_dataclass.field_type = Optional[field_dataclass.field_type]
+                default_is_unset = (
+                    field_info.default is _pydantic_adapter.PydanticUndefined
+                )
+                is_optional = not field_dataclass.is_required
+                # For optional fields, only use None as default if no explicit default was provided
                 if (
-                    field_dataclass.is_required is not True
-                    and field_info.default is _pydantic_adapter.PydanticUndefined
+                    is_optional
+                    and default_is_unset
                     and field_info.default_factory is None
                 ):
+                    # No user-provided default, so use None for optional fields
                     field_info.default = None
             annotation_dict[field_dataclass.field_name] = (
                 field_dataclass.field_type,

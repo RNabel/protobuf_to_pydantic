@@ -51,9 +51,9 @@ class BasicTypesMessage(ProtobufCompatibleBaseModel):
     repeated_string: typing.List[str] = Field(default_factory=list)
     repeated_bytes: typing.List[bytes] = Field(default_factory=list)
     # Optional fields for testing null handling
-    optional_int32: typing.Optional[int] = Field(default=0)
-    optional_string: typing.Optional[str] = Field(default="")
-    optional_bool: typing.Optional[bool] = Field(default=False)
+    optional_int32: typing.Optional[int] = Field(default=None)
+    optional_string: typing.Optional[str] = Field(default=None)
+    optional_bool: typing.Optional[bool] = Field(default=None)
 
 
 class EdgeCasesMessage(ProtobufCompatibleBaseModel):

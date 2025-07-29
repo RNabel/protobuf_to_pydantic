@@ -762,8 +762,8 @@ class OneOfOptionalTest(ProtobufCompatibleBaseModel):
     _oneof_fields = {"id": {"aliases": {"x": "x", "y": "y", "z": "z"}, "fields": ["x", "y", "z"]}}
 
     header: str = Field(default="")
-    name: typing.Optional[str] = Field(default="")
-    age: typing.Optional[int] = Field(default=0)
+    name: typing.Optional[str] = Field(default=None)
+    age: typing.Optional[int] = Field(default=None)
     str_list: typing.List[str] = Field(default_factory=list)
     int_map: "typing.Dict[str, int]" = Field(default_factory=dict)
 
@@ -806,7 +806,7 @@ class OptionalMessage(ProtobufCompatibleBaseModel):
     # fix https://github.com/so1n/protobuf_to_pydantic/issues/82
     my_message1: typing.Optional[MessageIgnoredTest] = Field()
     # fix https://github.com/so1n/protobuf_to_pydantic/issues/85
-    my_message2: typing.Optional[MessageIgnoredTest] = Field(default_factory=MessageIgnoredTest)
+    my_message2: typing.Optional[MessageIgnoredTest] = Field(default=None)
     my_message3: MessageIgnoredTest = Field()
     my_message4: MessageIgnoredTest = Field(default_factory=MessageIgnoredTest)
     my_message_5: typing.Optional[MessageIgnoredTest] = Field(default=None)

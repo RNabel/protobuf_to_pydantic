@@ -54,9 +54,9 @@ class ReportData(ProtobufCompatibleBaseModel):
 class GeoLocation(ProtobufCompatibleBaseModel):
     latitude: float = Field(default=0.0)
     longitude: float = Field(default=0.0)
-    altitude_meters: typing.Optional[float] = Field(default=0.0)
+    altitude_meters: typing.Optional[float] = Field(default=None)
 
 
 class Report(ProtobufCompatibleBaseModel):
-    source_id: typing.Optional[str] = Field(default="")
+    source_id: typing.Optional[str] = Field(default=None)
     data: ReportData = Field(default_factory=ReportData)
