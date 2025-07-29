@@ -147,7 +147,6 @@ class M2P(object):
         template: Optional[Type[Template]] = None,
         message_type_dict_by_type_name: Optional[Dict[str, Any]] = None,
         message_default_factory_dict_by_type_name: Optional[Dict[str, Any]] = None,
-        all_field_set_optional: bool = False,
         use_discriminated_unions_for_oneofs: bool = False,
         create_model_cache: Optional[CREATE_MODEL_CACHE_T] = None,
     ):
@@ -193,8 +192,9 @@ class M2P(object):
                 message=msg
             )  # type: ignore
 
-        self._all_field_set_optional: bool = all_field_set_optional
-        self._use_discriminated_unions_for_oneofs: bool = use_discriminated_unions_for_oneofs
+        self._use_discriminated_unions_for_oneofs: bool = (
+            use_discriminated_unions_for_oneofs
+        )
         self._parse_msg_desc_method = parse_msg_desc_method
         self._message_option_dict = global_message_option_dict
         self._default_field = default_field
@@ -755,7 +755,7 @@ class M2P(object):
             is_proto3_optional = optional_dict.get(protobuf_field.full_name, {}).get(
                 "is_proto3_optional", False
             )
-            if is_proto3_optional or self._all_field_set_optional:
+            if is_proto3_optional:
                 field_dataclass.field_type = Optional[field_dataclass.field_type]
                 if (
                     field_dataclass.is_required is not True
@@ -858,7 +858,6 @@ def msg_to_pydantic_model(
     template: Optional[Type[Template]] = None,
     message_type_dict_by_type_name: Optional[Dict[str, Any]] = None,
     message_default_factory_dict_by_type_name: Optional[Dict[str, Any]] = None,
-    all_field_set_optional: bool = False,
     use_discriminated_unions_for_oneofs: bool = False,
     create_model_cache: Optional[CREATE_MODEL_CACHE_T] = None,
 ) -> Type[BaseModel]:
@@ -885,8 +884,6 @@ def msg_to_pydantic_model(
     :param message_type_dict_by_type_name: Define the Python type mapping corresponding to each Protobuf Type
     :param message_default_factory_dict_by_type_name: Define the default_factory corresponding to each Protobuf Type
     :param create_model_cache: Cache the generated model
-    :param all_field_set_optional: If true, all fields become optional,
-        see: https://github.com/so1n/protobuf_to_pydantic/issues/60
     :param use_discriminated_unions_for_oneofs: If true, generate discriminated unions for protobuf oneof fields
     """
     return M2P(
@@ -901,6 +898,5 @@ def msg_to_pydantic_model(
         message_type_dict_by_type_name=message_type_dict_by_type_name,
         message_default_factory_dict_by_type_name=message_default_factory_dict_by_type_name,
         create_model_cache=create_model_cache,
-        all_field_set_optional=all_field_set_optional,
         use_discriminated_unions_for_oneofs=use_discriminated_unions_for_oneofs,
     ).model

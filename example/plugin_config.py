@@ -11,9 +11,7 @@ from protobuf_to_pydantic.plugin.config import SubConfigModel
 from protobuf_to_pydantic.template import Template
 
 from . import (
-    all_field_set_option_config,
     custom_comment_handler_pkg_plugin_config,
-    populate_by_name_plugin_config,
     single_config_pkg_plugin_config,
 )
 
@@ -59,9 +57,6 @@ comment_prefix = "p2p"
 template: Type[Template] = CustomCommentTemplate
 ignore_pkg_list: List[str] = ["validate", "p2p_validate"]
 pkg_config: Dict[str, SubConfigModel] = {
-    "all_field_set_optional": SubConfigModel(
-        module=all_field_set_option_config, use_root_config=True
-    ),
     "single_config": SubConfigModel(module=single_config_pkg_plugin_config),
     "custom_comment_handler": SubConfigModel(
         module=custom_comment_handler_pkg_plugin_config, use_root_config=True
