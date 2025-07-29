@@ -65,6 +65,7 @@ class AfterReferMessage(ProtobufCompatibleBaseModel):
     )
 
     uid: str = Field(
+        default="",
         alias_priority=1,
         validation_alias="uid",
         serialization_alias="uid",
@@ -123,9 +124,6 @@ class AnyTest(ProtobufCompatibleBaseModel):
         alias_priority=1,
         validation_alias="defaultFactoryTest",
         serialization_alias="defaultFactoryTest",
-    )
-    miss_default_test: Any = Field(
-        alias_priority=1, validation_alias="missDefaultTest", serialization_alias="missDefaultTest"
     )
     alias_test: Any = Field(
         default_factory=Any,
@@ -198,9 +196,6 @@ class BoolTest(ProtobufCompatibleBaseModel):
     )
     default_test: bool = Field(
         default=True, alias_priority=1, validation_alias="defaultTest", serialization_alias="defaultTest"
-    )
-    miss_default_test: bool = Field(
-        alias_priority=1, validation_alias="missDefaultTest", serialization_alias="missDefaultTest"
     )
     required_test: bool = Field(alias_priority=1, validation_alias="requiredTest", serialization_alias="requiredTest")
     alias_test: bool = Field(
@@ -288,9 +283,6 @@ class BytesTest(ProtobufCompatibleBaseModel):
         alias_priority=1,
         validation_alias="defaultFactoryTest",
         serialization_alias="defaultFactoryTest",
-    )
-    miss_default_test: bytes = Field(
-        alias_priority=1, validation_alias="missDefaultTest", serialization_alias="missDefaultTest"
     )
     required_test: bytes = Field(alias_priority=1, validation_alias="requiredTest", serialization_alias="requiredTest")
     alias_test: bytes = Field(
@@ -385,9 +377,6 @@ class DoubleTest(ProtobufCompatibleBaseModel):
         alias_priority=1,
         validation_alias="defaultFactoryTest",
         serialization_alias="defaultFactoryTest",
-    )
-    miss_default_test: float = Field(
-        alias_priority=1, validation_alias="missDefaultTest", serialization_alias="missDefaultTest"
     )
     required_test: float = Field(alias_priority=1, validation_alias="requiredTest", serialization_alias="requiredTest")
     alias_test: float = Field(
@@ -524,11 +513,6 @@ class DurationTest(ProtobufCompatibleBaseModel):
         validation_alias="defaultFactoryTest",
         serialization_alias="defaultFactoryTest",
     )
-    miss_default_test: typing_extensions.Annotated[
-        timedelta,
-        BeforeValidator(func=Timedelta.validate),
-        PlainSerializer(func=duration_serializer, return_type=str, when_used="json"),
-    ] = Field(alias_priority=1, validation_alias="missDefaultTest", serialization_alias="missDefaultTest")
     required_test: typing_extensions.Annotated[
         timedelta,
         BeforeValidator(func=Timedelta.validate),
@@ -662,9 +646,6 @@ class EnumTest(ProtobufCompatibleBaseModel):
     default_test: State = Field(
         default=1, alias_priority=1, validation_alias="defaultTest", serialization_alias="defaultTest"
     )
-    miss_default_test: State = Field(
-        alias_priority=1, validation_alias="missDefaultTest", serialization_alias="missDefaultTest"
-    )
     required_test: State = Field(alias_priority=1, validation_alias="requiredTest", serialization_alias="requiredTest")
     alias_test: State = Field(
         default=0, alias="alias", alias_priority=2, validation_alias="aliasTest", serialization_alias="aliasTest"
@@ -737,9 +718,6 @@ class Fixed32Test(ProtobufCompatibleBaseModel):
         alias_priority=1,
         validation_alias="defaultFactoryTest",
         serialization_alias="defaultFactoryTest",
-    )
-    miss_default_test: int = Field(
-        alias_priority=1, validation_alias="missDefaultTest", serialization_alias="missDefaultTest"
     )
     required_test: int = Field(alias_priority=1, validation_alias="requiredTest", serialization_alias="requiredTest")
     alias_test: int = Field(
@@ -828,9 +806,6 @@ class Fixed64Test(ProtobufCompatibleBaseModel):
         alias_priority=1,
         validation_alias="defaultFactoryTest",
         serialization_alias="defaultFactoryTest",
-    )
-    miss_default_test: int = Field(
-        alias_priority=1, validation_alias="missDefaultTest", serialization_alias="missDefaultTest"
     )
     required_test: int = Field(alias_priority=1, validation_alias="requiredTest", serialization_alias="requiredTest")
     alias_test: int = Field(
@@ -924,9 +899,6 @@ class FloatTest(ProtobufCompatibleBaseModel):
         validation_alias="defaultFactoryTest",
         serialization_alias="defaultFactoryTest",
     )
-    miss_default_test: float = Field(
-        alias_priority=1, validation_alias="missDefaultTest", serialization_alias="missDefaultTest"
-    )
     required_test: float = Field(alias_priority=1, validation_alias="requiredTest", serialization_alias="requiredTest")
     alias_test: float = Field(
         default=0.0, alias="alias", alias_priority=2, validation_alias="aliasTest", serialization_alias="aliasTest"
@@ -1014,9 +986,6 @@ class Int32Test(ProtobufCompatibleBaseModel):
         alias_priority=1,
         validation_alias="defaultFactoryTest",
         serialization_alias="defaultFactoryTest",
-    )
-    miss_default_test: int = Field(
-        alias_priority=1, validation_alias="missDefaultTest", serialization_alias="missDefaultTest"
     )
     required_test: int = Field(alias_priority=1, validation_alias="requiredTest", serialization_alias="requiredTest")
     alias_test: int = Field(
@@ -1106,9 +1075,6 @@ class Int64Test(ProtobufCompatibleBaseModel):
         validation_alias="defaultFactoryTest",
         serialization_alias="defaultFactoryTest",
     )
-    miss_default_test: int = Field(
-        alias_priority=1, validation_alias="missDefaultTest", serialization_alias="missDefaultTest"
-    )
     required_test: int = Field(alias_priority=1, validation_alias="requiredTest", serialization_alias="requiredTest")
     alias_test: int = Field(
         default=0, alias="alias", alias_priority=2, validation_alias="aliasTest", serialization_alias="aliasTest"
@@ -1192,9 +1158,6 @@ class MapTest(ProtobufCompatibleBaseModel):
         alias_priority=1,
         validation_alias="defaultFactoryTest",
         serialization_alias="defaultFactoryTest",
-    )
-    miss_default_test: typing.Dict[str, int] = Field(
-        alias_priority=1, validation_alias="missDefaultTest", serialization_alias="missDefaultTest"
     )
     required_test: typing.Dict[str, int] = Field(
         alias_priority=1, validation_alias="requiredTest", serialization_alias="requiredTest"
@@ -1384,9 +1347,6 @@ class StringTest(ProtobufCompatibleBaseModel):
         alias_priority=1,
         validation_alias="defaultFactoryTest",
         serialization_alias="defaultFactoryTest",
-    )
-    miss_default_test: str = Field(
-        alias_priority=1, validation_alias="missDefaultTest", serialization_alias="missDefaultTest"
     )
     required_test: str = Field(alias_priority=1, validation_alias="requiredTest", serialization_alias="requiredTest")
     alias_test: str = Field(
@@ -1714,9 +1674,6 @@ class RepeatedTest(ProtobufCompatibleBaseModel):
         validation_alias="defaultFactoryTest",
         serialization_alias="defaultFactoryTest",
     )
-    miss_default_test: typing.List[str] = Field(
-        alias_priority=1, validation_alias="missDefaultTest", serialization_alias="missDefaultTest"
-    )
     required_test: typing.List[str] = Field(
         alias_priority=1, validation_alias="requiredTest", serialization_alias="requiredTest"
     )
@@ -1803,9 +1760,6 @@ class Sfixed32Test(ProtobufCompatibleBaseModel):
         alias_priority=1,
         validation_alias="defaultFactoryTest",
         serialization_alias="defaultFactoryTest",
-    )
-    miss_default_test: int = Field(
-        alias_priority=1, validation_alias="missDefaultTest", serialization_alias="missDefaultTest"
     )
     required_test: int = Field(alias_priority=1, validation_alias="requiredTest", serialization_alias="requiredTest")
     alias_test: int = Field(
@@ -1895,9 +1849,6 @@ class Sfixed64Test(ProtobufCompatibleBaseModel):
         validation_alias="defaultFactoryTest",
         serialization_alias="defaultFactoryTest",
     )
-    miss_default_test: int = Field(
-        alias_priority=1, validation_alias="missDefaultTest", serialization_alias="missDefaultTest"
-    )
     required_test: int = Field(alias_priority=1, validation_alias="requiredTest", serialization_alias="requiredTest")
     alias_test: int = Field(
         default=0, alias="alias", alias_priority=2, validation_alias="aliasTest", serialization_alias="aliasTest"
@@ -1986,9 +1937,6 @@ class Sint32Test(ProtobufCompatibleBaseModel):
         validation_alias="defaultFactoryTest",
         serialization_alias="defaultFactoryTest",
     )
-    miss_default_test: int = Field(
-        alias_priority=1, validation_alias="missDefaultTest", serialization_alias="missDefaultTest"
-    )
     required_test: int = Field(alias_priority=1, validation_alias="requiredTest", serialization_alias="requiredTest")
     alias_test: int = Field(
         default=0, alias="alias", alias_priority=2, validation_alias="aliasTest", serialization_alias="aliasTest"
@@ -2076,9 +2024,6 @@ class Sint64Test(ProtobufCompatibleBaseModel):
         alias_priority=1,
         validation_alias="defaultFactoryTest",
         serialization_alias="defaultFactoryTest",
-    )
-    miss_default_test: int = Field(
-        alias_priority=1, validation_alias="missDefaultTest", serialization_alias="missDefaultTest"
     )
     required_test: int = Field(alias_priority=1, validation_alias="requiredTest", serialization_alias="requiredTest")
     alias_test: int = Field(
@@ -2215,9 +2160,6 @@ class TimestampTest(ProtobufCompatibleBaseModel):
         validation_alias="defaultFactoryTest",
         serialization_alias="defaultFactoryTest",
     )
-    miss_default_test: typing_extensions.Annotated[
-        datetime, PlainSerializer(func=timestamp_serializer, return_type=str, when_used="json")
-    ] = Field(alias_priority=1, validation_alias="missDefaultTest", serialization_alias="missDefaultTest")
     required_test: typing_extensions.Annotated[
         datetime, PlainSerializer(func=timestamp_serializer, return_type=str, when_used="json")
     ] = Field(alias_priority=1, validation_alias="requiredTest", serialization_alias="requiredTest")
@@ -2360,9 +2302,6 @@ class Uint32Test(ProtobufCompatibleBaseModel):
         validation_alias="defaultFactoryTest",
         serialization_alias="defaultFactoryTest",
     )
-    miss_default_test: int = Field(
-        alias_priority=1, validation_alias="missDefaultTest", serialization_alias="missDefaultTest"
-    )
     required_test: int = Field(alias_priority=1, validation_alias="requiredTest", serialization_alias="requiredTest")
     alias_test: int = Field(
         default=0, alias="alias", alias_priority=2, validation_alias="aliasTest", serialization_alias="aliasTest"
@@ -2450,9 +2389,6 @@ class Uint64Test(ProtobufCompatibleBaseModel):
         alias_priority=1,
         validation_alias="defaultFactoryTest",
         serialization_alias="defaultFactoryTest",
-    )
-    miss_default_test: int = Field(
-        alias_priority=1, validation_alias="missDefaultTest", serialization_alias="missDefaultTest"
     )
     required_test: int = Field(alias_priority=1, validation_alias="requiredTest", serialization_alias="requiredTest")
     alias_test: int = Field(

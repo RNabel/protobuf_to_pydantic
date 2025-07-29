@@ -33,7 +33,6 @@ pgv_column_to_pydantic_dict: Dict[str, str] = {
     "gte": "ge",
     "lte": "le",
     "len_bytes": "len",
-    "miss_default": "required",
 }
 
 special_type_rule_name_set = {

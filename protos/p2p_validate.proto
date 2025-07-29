@@ -107,8 +107,6 @@ message FloatRules {
         // The default value factory function corresponding to the field, supports template variables,
         // such as `p2p@import|uuid|uuid4`
         string  default_factory = 10;
-        // Set field required[Will be deprecated after version 1.0.0]
-        bool miss_default = 11;
         // Set field required
         bool required = 21;
         // Similar meaning to `default`, but using template variables, such as `p2p@import|uuid|uuid4`
@@ -177,8 +175,6 @@ message DoubleRules {
         // The default value factory function corresponding to the field, supports template variables,
         // such as `p2p@import|uuid|uuid4`
         string  default_factory = 10;
-        // Set field required[Will be deprecated after version 1.0.0]
-        bool miss_default = 11;
         // Set field required
         bool required = 21;
         // Similar meaning to `default`, but using template variables, such as `p2p@import|uuid|uuid4`
@@ -247,8 +243,6 @@ message Int32Rules {
         // The default value factory function corresponding to the field, supports template variables,
         // such as `p2p@import|uuid|uuid4`
         string  default_factory = 10;
-        // Set field required[Will be deprecated after version 1.0.0]
-        bool miss_default = 11;
         // Set field required
         bool required = 21;
         // Similar meaning to `default`, but using template variables, such as `p2p@import|uuid|uuid4`
@@ -317,8 +311,6 @@ message Int64Rules {
         // The default value factory function corresponding to the field, supports template variables,
         // such as `p2p@import|uuid|uuid4`
         string  default_factory = 10;
-        // Set field required[Will be deprecated after version 1.0.0]
-        bool miss_default = 11;
         // Set field required
         bool required = 21;
         // Similar meaning to `default`, but using template variables, such as `p2p@import|uuid|uuid4`
@@ -387,8 +379,6 @@ message UInt32Rules {
         // The default value factory function corresponding to the field, supports template variables,
         // such as `p2p@import|uuid|uuid4`
         string  default_factory = 10;
-        // Set field required[Will be deprecated after version 1.0.0]
-        bool miss_default = 11;
         // Set field required
         bool required = 21;
         // Similar meaning to `default`, but using template variables, such as `p2p@import|uuid|uuid4`
@@ -457,8 +447,6 @@ message UInt64Rules {
         // The default value factory function corresponding to the field, supports template variables,
         // such as `p2p@import|uuid|uuid4`
         string  default_factory = 10;
-        // Set field required[Will be deprecated after version 1.0.0]
-        bool miss_default = 11;
         // Set field required
         bool required = 21;
         // Similar meaning to `default`, but using template variables, such as `p2p@import|uuid|uuid4`
@@ -527,8 +515,6 @@ message SInt32Rules {
         // The default value factory function corresponding to the field, supports template variables,
         // such as `p2p@import|uuid|uuid4`
         string  default_factory = 10;
-        // Set field required[Will be deprecated after version 1.0.0]
-        bool miss_default = 11;
         // Set field required
         bool required = 21;
         // Similar meaning to `default`, but using template variables, such as `p2p@import|uuid|uuid4`
@@ -597,8 +583,6 @@ message SInt64Rules {
         // The default value factory function corresponding to the field, supports template variables,
         // such as `p2p@import|uuid|uuid4`
         string  default_factory = 10;
-        // Set field required[Will be deprecated after version 1.0.0]
-        bool miss_default = 11;
         // Set field required
         bool required = 21;
         // Similar meaning to `default`, but using template variables, such as `p2p@import|uuid|uuid4`
@@ -667,8 +651,6 @@ message Fixed32Rules {
         // The default value factory function corresponding to the field, supports template variables,
         // such as `p2p@import|uuid|uuid4`
         string  default_factory = 10;
-        // Set field required[Will be deprecated after version 1.0.0]
-        bool miss_default = 11;
         // Set field required
         bool required = 21;
         // Similar meaning to `default`, but using template variables, such as `p2p@import|uuid|uuid4`
@@ -737,8 +719,6 @@ message Fixed64Rules {
         // The default value factory function corresponding to the field, supports template variables,
         // such as `p2p@import|uuid|uuid4`
         string  default_factory = 10;
-        // Set field required[Will be deprecated after version 1.0.0]
-        bool miss_default = 11;
         // Set field required
         bool required = 21;
         // Similar meaning to `default`, but using template variables, such as `p2p@import|uuid|uuid4`
@@ -807,8 +787,6 @@ message SFixed32Rules {
         // The default value factory function corresponding to the field, supports template variables,
         // such as `p2p@import|uuid|uuid4`
         string  default_factory = 10;
-        // Set field required[Will be deprecated after version 1.0.0]
-        bool miss_default = 11;
         // Set field required
         bool required = 21;
         // Similar meaning to `default`, but using template variables, such as `p2p@import|uuid|uuid4`
@@ -877,8 +855,6 @@ message SFixed64Rules {
         // The default value factory function corresponding to the field, supports template variables,
         // such as `p2p@import|uuid|uuid4`
         string  default_factory = 10;
-        // Set field required[Will be deprecated after version 1.0.0]
-        bool miss_default = 11;
         // Set field required
         bool required = 21;
         // Similar meaning to `default`, but using template variables, such as `p2p@import|uuid|uuid4`
@@ -917,8 +893,6 @@ message BoolRules {
         // The default value corresponding to the field, if not set,
         // the default value is the default value of the corresponding type of the field
         bool default = 3;
-        // Set field required[Will be deprecated after version 1.0.0]
-        bool miss_default = 11;
         // Set field required
         bool required = 21;
         // Similar meaning to `default`, but using template variables, such as `p2p@import|uuid|uuid4`
@@ -1044,8 +1018,6 @@ message StringRules {
         // The default value factory function corresponding to the field, supports template variables,
         // such as `p2p@import|uuid|uuid4`
         string  default_factory = 25;
-        // Set field required[Will be deprecated after version 1.0.0]
-        bool miss_default = 26;
         // Set field required
         bool required = 35;
         // Similar meaning to `default`, but using template variables, such as `p2p@import|uuid|uuid4`
@@ -1115,8 +1087,6 @@ message BytesRules {
         // The default value factory function corresponding to the field, supports template variables,
         // such as `p2p@import|uuid|uuid4`
         string  default_factory = 12;
-        // Set field required[Will be deprecated after version 1.0.0]
-        bool miss_default = 13;
         // Set field required
         bool required = 26;
         // Similar meaning to `default`, but using template variables, such as `p2p@import|uuid|uuid4`
@@ -1182,8 +1152,6 @@ message EnumRules {
         // The default value factory function corresponding to the field, supports template variables,
         // such as `p2p@import|uuid|uuid4`
         string  default_factory = 10;
-        // Set field required[Will be deprecated after version 1.0.0]
-        bool miss_default = 11;
         // Set field required
         bool required = 21;
         // Similar meaning to `default`, but using template variables, such as `p2p@import|uuid|uuid4`
@@ -1225,8 +1193,6 @@ message MessageRules {
         // The default value factory function corresponding to the field, supports template variables,
         // such as `p2p@import|uuid|uuid4`
         string  default_factory = 10;
-        // Set field required[Will be deprecated after version 1.0.0]
-        bool miss_default = 11;
         // Set field required
         bool required = 2;
         // Similar meaning to `default`, but using template variables, such as `p2p@import|uuid|uuid4`
@@ -1279,8 +1245,6 @@ message RepeatedRules {
         // The default value factory function corresponding to the field, supports template variables,
         // such as `p2p@import|uuid|uuid4`
         string  default_factory = 10;
-        // Set field required[Will be deprecated after version 1.0.0]
-        bool miss_default = 11;
         // Set field required
         bool required = 21;
         // Similar meaning to `default`, but using template variables, such as `p2p@import|uuid|uuid4`
@@ -1329,8 +1293,6 @@ message MapRules {
         // The default value factory function corresponding to the field, supports template variables,
         // such as `p2p@import|uuid|uuid4`
         string  default_factory = 10;
-        // Set field required[Will be deprecated after version 1.0.0]
-        bool miss_default = 11;
         // Set field required
         bool required = 21;
         // Similar meaning to `default`, but using template variables, such as `p2p@import|uuid|uuid4`
@@ -1374,8 +1336,6 @@ message AnyRules {
         // The default value factory function corresponding to the field, supports template variables,
         // such as `p2p@import|uuid|uuid4`
         string  default_factory = 10;
-        // Set field required[Will be deprecated after version 1.0.0]
-        bool miss_default = 11;
         // Set field required
         bool required = 1;
         // Similar meaning to `default`, but using template variables, such as `p2p@import|uuid|uuid4`
@@ -1438,8 +1398,6 @@ message DurationRules {
         // The default value factory function corresponding to the field, supports template variables,
         // such as `p2p@import|uuid|uuid4`
         string  default_factory = 10;
-        // Set field required[Will be deprecated after version 1.0.0]
-        bool miss_default = 11;
         // Set field required
         bool required = 1;
         // Similar meaning to `default`, but using template variables, such as `p2p@import|uuid|uuid4`
@@ -1510,8 +1468,6 @@ message TimestampRules {
         // The default value factory function corresponding to the field, supports template variables,
         // such as `p2p@import|uuid|uuid4`
         string  default_factory = 12;
-        // Set field required[Will be deprecated after version 1.0.0]
-        bool miss_default = 13;
         // Set field required
         bool required = 1;
         // Similar meaning to `default`, but using template variables, such as `p2p@import|uuid|uuid4`

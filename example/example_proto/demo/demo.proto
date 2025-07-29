@@ -75,7 +75,7 @@ message NestedMessage{
 }
 
 message AfterReferMessage {
- // p2p: {"miss_default": true, "example": "10086", "title": "UID", "description": "user union id"}
+ // p2p: {"example": "10086", "title": "UID", "description": "user union id"}
   string uid=1;
   // p2p: {"example": 18, "title": "use age", "ge": 0}
   int32 age=2;

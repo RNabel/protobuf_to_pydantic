@@ -6,12 +6,17 @@ from protobuf_to_pydantic.util import get_dict_from_comment
 from .utils import rule_dict_handler
 
 if TYPE_CHECKING:
-    from protobuf_to_pydantic.field_info_rule.types import FieldInfoTypedDict, MessageOptionTypedDict
+    from protobuf_to_pydantic.field_info_rule.types import (
+        FieldInfoTypedDict,
+        MessageOptionTypedDict,
+    )
 
 _filename_message_option_dict: Dict[str, Dict[str, "MessageOptionTypedDict"]] = {}
 
 
-def get_message_option_dict_from_pyi_file(filename: str, comment_prefix: str) -> Dict[str, "MessageOptionTypedDict"]:
+def get_message_option_dict_from_pyi_file(
+    filename: str, comment_prefix: str
+) -> Dict[str, "MessageOptionTypedDict"]:
     """
     For a Protobuf message as follows:
         ```protobuf
@@ -41,7 +46,7 @@ def get_message_option_dict_from_pyi_file(filename: str, comment_prefix: str) ->
             IS_ADULT_FIELD_NUMBER: builtins.int
             USER_NAME_FIELD_NUMBER: builtins.int
             uid: typing.Text
-            ```p2p: {"miss_default": true, "example": "10086", "title": "UID", "description": "user union id"}```
+            ```p2p: {"required": true, "example": "10086", "title": "UID", "description": "user union id"}```
 
             age: builtins.int
             ```p2p: {"example": 18, "title": "use age", "ge": 0}```
@@ -61,7 +66,7 @@ def get_message_option_dict_from_pyi_file(filename: str, comment_prefix: str) ->
         "path/demo.pyi": {
             "UserMessage": {
                 # field info like `protobuf_to_pydantic.gen_model.FieldParamModel`,
-                "uid": {"miss_default": True, "example": "10086", "title": "UID", "description": "user union id"},
+                "uid": {"required": True, "example": "10086", "title": "UID", "description": "user union id"},
                 "age": {"example": 18, "title": "use age", "ge": 0},
                 "height": {"ge": 0, "le": 2.5},
                 "sex": {},
@@ -93,12 +98,18 @@ def get_message_option_dict_from_pyi_file(filename: str, comment_prefix: str) ->
         if "class" in line:
             if not line.endswith("google.protobuf.message.Message):"):
                 continue
-            message_name_match_list = re.findall(r"class (.+)\(google.protobuf.message.Message", line)
+            message_name_match_list = re.findall(
+                r"class (.+)\(google.protobuf.message.Message", line
+            )
             if not message_name_match_list:
                 continue
             message_name_str: str = message_name_match_list[0]
             new_indent: int = line.index("class")
-            if message_str_stack and message_name_str != message_str_stack[-1][0] and new_indent <= indent:
+            if (
+                message_str_stack
+                and message_name_str != message_str_stack[-1][0]
+                and new_indent <= indent
+            ):
                 # When you encounter the same indentation of different classes,
                 # need to pop off the previous one and insert the current one
                 message_str_stack.pop()
@@ -111,10 +122,14 @@ def get_message_option_dict_from_pyi_file(filename: str, comment_prefix: str) ->
             }
             if message_str_stack:
                 parent_message_field_dict = message_str_stack[-1][2]
-                parent_message_field_dict["nested"][message_name_str] = global_message_option_dict[message_name_str]
+                parent_message_field_dict["nested"][message_name_str] = (
+                    global_message_option_dict[message_name_str]
+                )
 
             indent = new_indent
-            message_str_stack.append((message_name_str, indent, global_message_option_dict[message_name_str]))
+            message_str_stack.append(
+                (message_name_str, indent, global_message_option_dict[message_name_str])
+            )
         elif indent:
             if line and message_str_stack and line[indent] != " ":
                 # The current class has been scanned, go back to the previous class
@@ -129,7 +144,9 @@ def get_message_option_dict_from_pyi_file(filename: str, comment_prefix: str) ->
             if not _comment_mode and line.startswith('"""'):
                 # start add doc
                 if "def " in line_list[index - 1]:
-                    _field_name = line_list[index - 1].split("(")[0].replace("def ", "").strip()
+                    _field_name = (
+                        line_list[index - 1].split("(")[0].replace("def ", "").strip()
+                    )
                 else:
                     _field_name = line_list[index - 1].split(":")[0].strip()
                 if line_list[index - 1].startswith("class"):
@@ -140,11 +157,15 @@ def get_message_option_dict_from_pyi_file(filename: str, comment_prefix: str) ->
             if (line.endswith('"""') or line == '"""') and _comment_mode:
                 # end add doc
                 _comment_mode = False
-                field_rule_dict = get_dict_from_comment(comment_prefix, _doc.replace('"""', ""))
+                field_rule_dict = get_dict_from_comment(
+                    comment_prefix, _doc.replace('"""', "")
+                )
                 if _field_name:
                     message_option_dict["message"][_field_name] = field_rule_dict  # type: ignore[assignment]
                 else:
-                    rule_dict_handler(field_rule_dict, message_option_dict, f"{message_name_str}")
+                    rule_dict_handler(
+                        field_rule_dict, message_option_dict, f"{message_name_str}"
+                    )
 
     _filename_message_option_dict[filename] = global_message_option_dict
     return global_message_option_dict
